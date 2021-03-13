@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@worker-tools/kv-storage": [
+        "./node_modules/@worker-tools/cloudflare-kv-storage"
+      ],
+    },
+    "outDir": "./dist",
+    "module": "ESNext",
+    "target": "ES2020",
+    "lib": [
+      "ES2020",
+      "WebWorker",
+      "ESNext.AsyncIterable"
+    ],
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "allowJs": true,
+    "checkJs": true,
+    "types": [
+      "@types/node",
+      "@cloudflare/workers-types",
+    ],
+  },
+  "include": [
+    "./typings/*.d.ts",
+    "./src/*.[jt]s",
+    "./src/**/*.[jt]s",
+  ],
+  "exclude": [
+    "node_modules/",
+    "dist/",
+    "**/dist/",
+    "**/node_modules/",
+    "**/worker/",
+    "_*",
+    "**/_*"
+  ]
+}
