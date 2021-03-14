@@ -2,7 +2,6 @@
   "private": true,
   "name": "edge-hn",
   "version": "0.0.0",
-  "description": "",
   "main": "dist/worker.js",
   "scripts": {
     "clean": "rm -rf dist",
@@ -44,5 +43,14 @@
     "typeson": "^5.18.2",
     "typeson-registry": "^1.0.0-alpha.39",
     "uuid-class": "^0.12.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/worker-tools/edge-hn.git"
+  },
+  "bugs": {
+    "url": "https://github.com/worker-tools/edge-hn/issues"
+  },
+  "homepage": "https://github.com/worker-tools/edge-hn#readme",
+  "description": ""
 }
