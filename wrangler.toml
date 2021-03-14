@@ -17,5 +17,5 @@ workers_dev = true
   # ]
 
   [env.staging.vars]
-    WORKER_LOCATION = 'https://edge-hn-stage.workers.dev'
+    WORKER_LOCATION = 'https://edge-hn-stage.qwtel.workers.dev'
     # CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_NAMESPACE'
