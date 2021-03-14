@@ -1,14 +1,14 @@
-import { html, unsafeHTML, HTMLResponse } from "@worker-tools/html";
+import { html, unsafeHTML, HTMLResponse, HTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 
-import { router } from "../router";
+import { RouteArgs, router } from "../router";
 
 import { page } from './components';
 
 import './css';
 
-const tryURL = (url?: string): URL | null => {
+const tryURL = (url: string): URL | null => {
   try {
     return new URL(url);
   } catch {
@@ -18,7 +18,7 @@ const tryURL = (url?: string): URL | null => {
 
 const API = 'https://hacker-news.firebaseio.com';
 
-const aThing = ({ id, type, title, time, score, url, by, descendants, index }) => {
+const aThing = ({ id, type, title, time, score, url, by, descendants, index }: any) => {
   return html`
     <tr class="athing" id="${id}">
       <td align="right" valign="top" class="title"><span class="rank">${index != null ? `${index + 1}.` : ''}</span></td>
@@ -35,7 +35,7 @@ const aThing = ({ id, type, title, time, score, url, by, descendants, index }) =
     </tr>`;
 }
 
-const colSpan2 = ({ id, type, title, time, score, url, by, descendants, index }) => {
+const colSpan2 = ({ id, type, title, time, score, url, by, descendants, index }: any) => {
   const date = new Date(time * 1000);
   return html`
     <tr>
@@ -51,20 +51,75 @@ const colSpan2 = ({ id, type, title, time, score, url, by, descendants, index })
   `;
 }
 
-const rowEl = (arg) => {
+const rowEl = (arg: any) => {
   // FIXME: support other types
-  if (arg.type !== 'story') return '';
+  if (arg.type !== 'story') return html``;
   return html`
     ${aThing(arg)}
     ${colSpan2(arg)}
     <tr class="spacer" style="height:5px"></tr>`;
 }
 
+const commentEl = ({ id, by, time, text }: any, level: number) => {
+  const date = new Date(time * 1000);
+  return html`<tr class="athing comtr " id="${id}">
+    <td>
+      <table border="0">
+        <tbody>
+          <tr>
+            <td class="ind"><img src="https://news.ycombinator.com/s.gif" height="1" width="${level * 40}"></td>
+            <td valign="top" class="votelinks">
+              <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
+                  href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D26443768#26444290">
+                  <div class="votearrow" title="upvote"></div>
+                </a></center>
+            </td>
+            <td class="default">
+              <div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
+                  <a href="user?id=${by}" class="hnuser">${by}</a> <span class="age"><a
+                      href="item?id=${id}">${formatDistanceToNowStrict(date, { addSuffix: true })}</a></span> <span id="unv_${id}"></span><span
+                    class="par"></span> <a class="togg" n="1" href="javascript:void(0)"
+                    onclick="return toggle(event, ${id})"></a> <span class="storyon"></span>
+                </span></div><br>
+              <div class="comment">
+                <span class="commtext c00">
+                  ${unsafeHTML(text)}
+                  <div class="reply">
+                    <p>
+                      <font size="1">
+                        <u><a href="reply?id=26444290&amp;goto=item%3Fid%3D26443768%2326444290">reply</a></u>
+                      </font>
+                    </p>
+                  </div>
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </td>
+  </tr>`;
+}
+
+async function* commentTree(kids?: number[], level = 0): AsyncGenerator<HTML> {
+  for (const id of kids ?? []) {
+    const comment = await fetch(new URL(`/v0/item/${id}.json`, API).href).then(x => x.json());
+    yield commentEl(comment, level);
+    yield* commentTree(comment.kids, level + 1);
+  }
+}
+
+// async function slurp<X>(g: AsyncGenerator<X>): Promise<X[]> {
+//   let res: X[] = [];
+//   for await (const x of g) res.push(x);
+//   return res;
+// }
+
 router.get('/item', item);
 router.get('/news', news);
 router.get('/', news);
 
-function item({ searchParams })  {
+function item({ searchParams }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
 
@@ -107,12 +162,18 @@ function item({ searchParams })  {
               </tr>
             </tbody>
           </table><br><br>
+          <table border="0" class="comment-tree">
+            <tbody>
+              ${commentTree(item.kids) as any}
+            </tbody>
+          </table>
+          <br><br>
         </td>
       </tr>`;
   }));
 }
 
-function news({ searchParams }) {
+function news({ searchParams }: RouteArgs) {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Edge HN');
 
@@ -131,7 +192,7 @@ function news({ searchParams }) {
                   ...item, 
                   index: (p - 1) * 30 + index,
                 })
-              }) as any; // FIXME
+              });
             }}
             <tr class="morespace" style="height:10px"></tr>
             <tr>

@@ -10,7 +10,7 @@ router.get('/news.css', () => {
       --black: #000000;
       --dark-grey: #222;
       --light-grey: #828282;
-      --lightest-grey: #eee;
+      --lightest-grey: #c8c8c8;
       --white: #ffffff;
       --orange: #ff6600;
       --beige: #f6f6ef;

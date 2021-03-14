@@ -6,7 +6,7 @@ export const headerEl = () => html`
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
         <tbody>
           <tr>
-            <td style="width:18px;padding-right:4px"><a href="https://news.ycombinator.com"><img
+            <td style="width:18px;padding-right:4px"><a href="/"><img
                   src="https://news.ycombinator.com/y18.gif" width="18" height="18"
                   style="border:1px white solid;"></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a
@@ -34,7 +34,7 @@ export const headerEl = () => html`
 
 export const footerEl = () => html`
   <tr>
-    <td><img src="http://www.ycombinator.com/s.gif" height="10" width="0">
+    <td><img src="https://news.ycombinator.com/s.gif" height="10" width="0">
       <table width="100%" cellspacing="0" cellpadding="1">
         <tbody>
           <tr>
@@ -50,8 +50,8 @@ export const footerEl = () => html`
           | <a href="lists">Lists</a>
           | <a href="https://github.com/HackerNews/API">API</a>
           | <a href="security.html">Security</a>
-          | <a href="http://www.ycombinator.com/legal/">Legal</a>
-          | <a href="http://www.ycombinator.com/apply/">Apply to YC</a>
+          | <a href="https://www.ycombinator.com/legal/">Legal</a>
+          | <a href="https://www.ycombinator.com/apply/">Apply to YC</a>
           | <a href="mailto:hn@ycombinator.com">Contact</a></span><br><br>
         <form method="get" action="//hn.algolia.com/">Search:
           <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off"
@@ -81,6 +81,6 @@ export const page = ({ title, op }: { title?: string, op: string }) => (content:
         </tbody>
       </table>
     </center>
-    <script type="text/javascript" src="http://www.ycombinator.com/hn.js"></script>
+    <script type="text/javascript" src="https://news.ycombinator.com/hn.js"></script>
   </body>
   </html>`;
