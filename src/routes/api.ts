@@ -31,6 +31,10 @@ async function memoryItem(id: number) {
 
 export const API = 'https://hacker-news.firebaseio.com';
 export const api = async (path: string): Promise<any> => {
-  return fetch(new URL(path, API).href).then(x => x.json());
-  // return cache.get(path) ?? (await storage.get(path)) ?? fetch(new URL(path, API).href).then(x => x.json())
+  // return fetch(new URL(path, API).href).then(x => x.json());
+  return cache.get(path) ?? (await storage.get(path)) ?? (async () => {
+    const ret = await fetch(new URL(path, API).href).then(x => x.json());
+    await storage.set(path, ret);
+    return ret;
+  })();
 }

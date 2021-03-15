@@ -14,6 +14,10 @@ async function handleRequest(event: FetchEvent) {
   const url = new URL(request.url)
   const { pathname, searchParams } = url;
 
+  // Browser fix
+  // TODO: Reliably remove form other non-browser builds
+  if (typeof ServiceWorker !== 'undefined' && url.origin !== location.origin) return fetch(request);
+
   const match = router.match(method, pathname);
   if (match) {
     const args = {

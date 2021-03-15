@@ -3,12 +3,12 @@
     "baseUrl": ".",
     "paths": {
       "@worker-tools/kv-storage": [
-        "./node_modules/@worker-tools/deno-kv-storage/sqlite.ts"
+        "./node_modules/kv-storage-polyfill/dist/kv-storage-polyfill.mjs"
       ],
     },
     "outDir": "./dist",
     "module": "ESNext",
-    "target": "ES2020",
+    "target": "ES2018",
     "lib": [
       "ES2020",
       "WebWorker",

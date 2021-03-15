@@ -1,0 +1,14 @@
+<html>
+
+<head>
+
+</head>
+
+<body>
+  <script type="module">
+    const registration = await navigator.serviceWorker.register('sw.js',);
+    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+  </script>
+</body>
+
+</html>

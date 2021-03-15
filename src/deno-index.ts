@@ -1,2 +1,2 @@
-import './vendor/deno-fetch-patch';
+import '@worker-tools/deno-fetch-event-adapter/mod';
 import './index';
