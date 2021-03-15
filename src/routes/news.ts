@@ -49,7 +49,7 @@ const colSpan2 = ({ id, type, title, time, score, url, by, descendants, index }:
 
 const rowEl = (arg: any) => {
   // FIXME: support other types
-  if (arg.type !== 'story') return html``;
+  if (arg.type !== 'story') return;
   return html`
     ${aThing(arg)}
     ${colSpan2(arg)}

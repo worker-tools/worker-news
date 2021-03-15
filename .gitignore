@@ -11,3 +11,4 @@ node_modules/
 .cargo-ok
 cert.pem
 *.sqlite
+KV_STORAGE.json

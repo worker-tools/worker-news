@@ -8,8 +8,9 @@
     "postinstall": "npm run build",
     "build": "esbuild src/index.ts --bundle --target=es2020 --outfile=dist/worker.js --define:global=self --define:DEBUG=false",
     "watch": "esbuild src/index.ts --bundle --target=es2020 --outfile=dist/worker.js --define:global=self --define:DEBUG=true --sourcemap --watch",
-    "build-deno": "esbuild src/index.ts --bundle --target=es2020 --outfile=dist/deno.js --define:global=self --define:DEBUG=false --tsconfig=tsconfig.deno.json --inject:deno-env.js",
-    "watch-deno": "esbuild src/index.ts --bundle --target=es2020 --outfile=dist/deno.js --define:global=self --define:DEBUG=true --tsconfig=tsconfig.deno.json --inject:deno-env.js --sourcemap --watch",
+    "build-deno": "esbuild src/deno-index.ts --bundle --format=esm --target=es2020 --outfile=dist/deno.js --define:global=self --tsconfig=tsconfig.deno.json --inject:deno-env.js --define:DEBUG=false ",
+    "watch-deno": "esbuild src/deno-index.ts --bundle --format=esm --target=es2020 --outfile=dist/deno.js --define:global=self --tsconfig=tsconfig.deno.json --inject:deno-env.js --define:DEBUG=true --sourcemap --watch",
+    "watch-cloudworker": "cloudworker --debug --kv-file KV_STORAGE=KV_STORAGE.json --watch ./dist/worker.js",
     "serve": "wrangler dev",
     "dev": "npm run watch & npm run serve",
     "test": "echo \"Error: no test specified\" && exit 0"
@@ -28,7 +29,7 @@
     "@worker-tools/encrypted-cookie-store": "^0.1.5",
     "@worker-tools/html": "file:../worker-tools/html",
     "@worker-tools/json-fetch": "^2.0.6",
-    "@worker-tools/location-polyfill": "^0.1.0",
+    "@worker-tools/location-polyfill": "file:../worker-tools/location-polyfill",
     "@worker-tools/request-cookie-store": "^0.4.2",
     "@worker-tools/response-creators": "^1.0.8",
     "@worker-tools/signed-cookie-store": "^0.1.5",
@@ -42,7 +43,8 @@
     "typed-array-utils": "^0.2.2",
     "typeson": "^5.18.2",
     "typeson-registry": "^1.0.0-alpha.39",
-    "uuid-class": "^0.12.3"
+    "uuid-class": "^0.12.3",
+    "whatwg-stream-to-async-iter": "file:../whatwg-stream-to-async-iter"
   },
   "repository": {
     "type": "git",

@@ -2,13 +2,13 @@ name = "egde-hn-dev"
 type = "javascript"
 account_id = "efb289061241436254219b424fcea4cf"
 workers_dev = true
-# kv_namespaces = [ 
-#   { binding = "KV_NAMESPACE", id = "13cc39b5283e4b3f9910ba08cc87d2c3", preview_id = "b3234d693fde418c8b56e3bc30bf5839" }
-# ]
+kv_namespaces = [ 
+  { binding = "KV_STORAGE", id = "a713f738814e4de6939b8f9906e01de5", preview_id = "41a0e5dd97134debac212ea90d2d9061" }
+]
 
 [vars]
   WORKER_LOCATION = 'http://localhost:8787'
-  # CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_NAMESPACE'
+  CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
 
 [env.staging]
   name = "edge-hn-stage"
