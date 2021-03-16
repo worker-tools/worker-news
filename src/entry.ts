@@ -1,5 +1,3 @@
-import '@worker-tools/location-polyfill';
-
 import * as re from '@worker-tools/response-creators';
 import { Method } from 'tiny-request-router'
 
@@ -28,6 +26,7 @@ async function handleRequest(event: FetchEvent) {
     try {
       return match.handler(args);
     } catch (err) {
+      if (DEBUG) console.error(err);
       return re.internalServerError(err.message);
     }
   }
@@ -35,5 +34,6 @@ async function handleRequest(event: FetchEvent) {
 }
 
 self.addEventListener('fetch', (event) => {
+  event.passThroughOnException?.();
   event.respondWith(handleRequest(event));
 });
