@@ -1,4 +1,4 @@
-import './index';
+import './entry';
 
 self.addEventListener('install', () => {
   (<any>self).skipWaiting();
