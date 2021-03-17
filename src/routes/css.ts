@@ -20,14 +20,14 @@ router.get('/news.css', () => {
       --blue:hsl(var(--blue-h), var(--blue-s), 20%);
       --light-blue:hsl(var(--blue-h), var(--blue-s), 51%);
 
-    --page-background: var(--white);
-    --accent: var(--orange);
-    --text: var(--light-grey);
-    --text-strong: var(--black);
-    --border: var(--dark-grey);
-    --background: var(--beige);
-    --input-background: var(--white);
-    --input-border: var(--lightest-grey);
+      --page-background: var(--white);
+      --accent: var(--orange);
+      --text: var(--light-grey);
+      --text-strong: var(--black);
+      --border: var(--dark-grey);
+      --background: var(--beige);
+      --input-background: var(--white);
+      --input-border: var(--lightest-grey);
 
       --c5a: #5a5a5a;
       --c73: #737373;
@@ -79,6 +79,7 @@ router.get('/news.css', () => {
     input    { font-family:monospace; font-size:10pt; }
     input[type="submit"] { font-family:Verdana, Geneva, sans-serif; }
     textarea { font-family:monospace; font-size:10pt; }
+    blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--c5a); padding-left: 10px; }
 
     a:link    { color:var(--text-strong); text-decoration:none; }
     a:visited { color:var(--text); text-decoration:none; }
@@ -124,7 +125,8 @@ router.get('/news.css', () => {
     .hnmore a:link, a:visited { color:var(--text); }
     .hnmore { text-decoration:underline; }
 
-    .default p { margin-top: 8px; margin-bottom: 0px; }
+    .default p, .default blockquote { margin-top: 8px; margin-bottom: 0px; }
+    .commtext > :first-child { margin-top: 0 };
 
     .pagebreak {page-break-before:always}
 

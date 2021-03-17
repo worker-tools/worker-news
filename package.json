@@ -27,6 +27,7 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@types/jsdom": "^16.2.7",
     "@worker-tools/cloudflare-kv-storage": "^0.7.3",
     "@worker-tools/deno-fetch-event-adapter": "^0.1.4",
     "@worker-tools/deno-kv-storage": "^0.3.6",
@@ -42,11 +43,14 @@
     "base64-encoding": "^0.14.3",
     "date-fns": "^2.19.0",
     "event-target-polyfill": "file:../event-target-polyfill",
+    "jsdom": "^16.5.1",
     "kv-storage-polyfill": "^2.0.0",
+    "linkedom": "^0.5.5",
     "msgpackr": "^1.2.7",
     "negotiated": "^1.0.2",
     "p-queue-browser": "file:../p-queue",
     "tiny-request-router": "^1.2.2",
+    "type-fest": "^0.21.3",
     "typed-array-utils": "^0.2.2",
     "typeson": "^5.18.2",
     "typeson-registry": "^1.0.0-alpha.39",

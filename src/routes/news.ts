@@ -14,6 +14,11 @@ const tryURL = (url: string): URL | null => {
   }
 }
 
+const stripWWW = (url?: string) => {
+  if (url?.startsWith('www')) return url.substr(4);
+  else return url;
+}
+
 export const aThing = ({ id, type, title, time, score, url, by, descendants, index }: any) => {
   return html`
     <tr class="athing" id="${id}">
@@ -27,7 +32,7 @@ export const aThing = ({ id, type, title, time, score, url, by, descendants, ind
       <td class="title"><a href="${url}"
           class="storylink">${title}</a><span
           class="sitebit comhead"> (<a href="from?site=${tryURL(url)?.hostname}"><span
-              class="sitestr">${tryURL(url)?.hostname}</span></a>)</span></td>
+              class="sitestr">${stripWWW(tryURL(url)?.hostname)}</span></a>)</span></td>
     </tr>`;
 }
 

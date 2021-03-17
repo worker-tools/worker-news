@@ -1,9 +1,11 @@
+import { JSONResponse } from '@worker-tools/json-fetch';
 import { StorageArea } from '@worker-tools/kv-storage';
 import { ok } from '@worker-tools/response-creators';
 import { default as PQueue } from 'p-queue-browser';
 
 import { router } from "../router";
 import { API, api } from './api';
+import { comments, stories } from './apidom';
 
 const storage = new StorageArea('hn-cache');
 
@@ -106,23 +108,35 @@ async function crawlItem(id: number) {
 router.get('/__crawl-pqueue', async ({ event, searchParams }) => {
   try {
     if (DEBUG) i = 0;
-    const queue = new PQueue({ concurrency: Number(searchParams.get('concurrency') || 100) });
+    const concurrency = Number(searchParams.get('concurrency') || 100);
+    console.log(concurrency);
+    const queue = new PQueue({ concurrency });
     const ids = await api('/v0/topstories.json', false) as number[];
     await storage.set('/v0/topstories.json', ids);
-    // queue.addAll(ids.map(crawlItem4(queue)));
-    const task = crawlItem4(queue);
-    ids.forEach(id => queue.add(task(id), { priority: 0 }))
+    // ids.forEach(id => queue.add(() => crawlItem4(queue, id), { priority: 1 }))
+    queue.addAll(ids.map(id => crawlItem4(queue, id)))
     await queue.onIdle();
+    console.log('y done?')
     return ok('done');
   } catch (e) { console.error(e.message); throw e }
 })
 
-function crawlItem4(queue: PQueue) {
-  return (id: number) => async () => {
+function crawlItem4(queue: PQueue, id: number) {
+  return async () => {
     const key = `/v0/item/${id}.json`;
     const item = await api(key, false) as { kids?: number[] } | undefined;
-    if (DEBUG && ++i % 100 === 0) console.log(i, key);
-    queue.addAll(item?.kids?.map(crawlItem4(queue)) ?? []);
+    if (DEBUG && ++i % 9 === 0) console.log(i, key);
+    // item?.kids?.forEach(id => queue.add(() => crawlItem4(queue, id), { priority: 1 }))
+    queue.addAll(item?.kids?.map(id => crawlItem4(queue, id)) ?? [])
     await storage.set(key, item);
   };
 }
+
+router.get('/__foobar', async ({ event, searchParams }) => {
+  try {
+    return new JSONResponse(comments(await fetch('https://news.ycombinator.com/item?id=26474331').then(x => x.text())))
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+})

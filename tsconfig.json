@@ -12,6 +12,7 @@
     "lib": [
       "ES2020",
       "WebWorker",
+      "DOM",
       "ESNext.AsyncIterable"
     ],
     "moduleResolution": "node",
