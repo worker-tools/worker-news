@@ -1,5 +1,5 @@
-import * as DOM from './DOM'
-import * as REST from './REST'
+import * as DOM from './dom-api'
+import * as REST from './rest-api'
 
 export const stories = 'Deno' in self
     ? REST.stories

@@ -1,4 +1,6 @@
 import { ParamsURL } from '@worker-tools/json-fetch';
+import { addISOWeekYears } from 'date-fns';
+import { asynciterify } from 'src/vendor/asynciterify';
 import { Post, Comment, Quality } from './interface';
 // import { parseHTML, DOMParser } from 'linkedom';
 
@@ -12,6 +14,13 @@ const tryURL = (url: string): URL | null => {
   }
 }
 
+class DataEvent<T = any> extends Event {
+  data: T;
+  constructor(data: T) {
+    super('data')
+    this.data = data;
+  }
+}
 
 async function consume(r: Response) {
   const reader = r.body!.getReader()
@@ -54,45 +63,46 @@ function parseAttrs(el: Element) {
   return [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
 }
 
-async function stories(response: Response) {
-  const posts = new AsyncIterableArray<Partial<Post>>();
+async function* stories(response: Response) {
+  let post!: Partial<Post>;
 
-  // const et = new EventTarget();
+  const et = new EventTarget();
+  const it = asynciterify<DataEvent<Post>>(et, 'data')
 
-  await consume(new HTMLRewriter()
+  consume(new HTMLRewriter()
     .on('.athing[id]', {
       element(el) {
         const id = Number(el.getAttribute('id'))
-        // et.dispatchEvent(new CustomEvent('post++', { detail: posts[0] }))
-        posts.unshift({ id, title: '', score: 0, by: '', timeAgo: '', descendants: 0 });
+        if (post) et.dispatchEvent(new DataEvent(post as Post))
+        post = { id, title: '', score: 0, by: '', timeAgo: '', descendants: 0 }
       }
     })
     .on('.athing[id] .title a.storylink', {
       element(link) {
-        const url = posts[0].url = link?.getAttribute('href') || undefined;
-        posts[0].domain = url && tryURL(url)?.hostname;
+        const url = post.url = link?.getAttribute('href') || undefined;
+        post.domain = url && tryURL(url)?.hostname;
       },
-      text({ text }) { posts[0].title += text },
+      text({ text }) { post.title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
-    .on('.subtext > .score', { text({ text }) { if (text?.match(/^\d/)) posts[0].score = parseInt(text, 10) } })
-    .on('.subtext > .hnuser', { text({ text }) { posts[0].by += text } })
-    .on('.subtext > .age', { text({ text }) { posts[0].timeAgo += text } })
-    .on('.subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) posts[0].descendants = parseInt(text, 10) } })
-    .transform(response));
+    .on('.subtext > .score', { text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) } })
+    .on('.subtext > .hnuser', { text({ text }) { post.by += text } })
+    .on('.subtext > .age', { text({ text }) { post.timeAgo += text } })
+    .on('.subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) } })
+    .transform(response)).then(() => {
+      // Dispatch last post
+      et.dispatchEvent(new DataEvent(post as Post))
+      // Tell async iterable to stop
+      it.return();
+    });
 
-  const postsX = posts.reverse().map(post => {
+  for await (const { data: post } of it) {
     post.type = 'story';
-    // if (post.url?.match(/^item/i)) post.type = 'ask';
     if (!post.by) { // No users post this = job ads
       post.type = 'job';
     }
-    return post as Post;
-  }) as AsyncIterableArray<Post>
-
-  // et.addEventListener('post++')
-
-  return postsX;
+    yield post as Post;
+  }
 }
 
 async function getComments(id: number): Promise<Post> {
@@ -112,7 +122,9 @@ type _Stack = { _stack?: string[] };
 
 async function comments(response: Response) {
   const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0 }
-  const comments = new AsyncIterableArray<Partial<Comment> & _Stack>();
+
+  const et = new EventTarget();
+  const it = asynciterify<DataEvent<Post>>(et, 'data')
 
   await consume(new HTMLRewriter()
     .on('.fatitem .athing[id]', {
@@ -132,59 +144,71 @@ async function comments(response: Response) {
     .on('.fatitem .subtext > .hnuser', { text({ text }) { post.by += text } })
     .on('.fatitem .subtext > .age', { text({ text }) { post.timeAgo += text } })
     .on('.fatitem .subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) } })
-    // Comment tree
+    .transform(response.clone())
+  );
+
+  // Comment tree
+  let comment!: Partial<Comment> & _Stack;
+  consume(new HTMLRewriter()
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
+        delete comment?._stack;
+        if (comment) et.dispatchEvent(new DataEvent(comment as Comment))
         const id = Number(thing.getAttribute('id'))
-        delete comments[0]?._stack;
-        comments.unshift({ 
-          type: 'comment', 
-          id, 
-          by: '', 
-          timeAgo: '', 
-          text: '<p>', 
-          _stack: ['p'], 
-          kids: new AsyncIterableArray(),
-        });
+        comment = {
+          type: 'comment',
+          id,
+          by: '',
+          timeAgo: '',
+          text: '<p>',
+          _stack: ['p'],
+        };
       },
     })
     .on('.comment-tree .athing.comtr[id] img[src*="s.gif"][width]', {
-      element(el) { comments[0].level = Number(el.getAttribute('width')) / 40 }
+      element(el) { comment.level = Number(el.getAttribute('width')) / 40 }
     })
     .on('.comment-tree .athing.comtr[id] .hnuser', {
-      text({ text }) { comments[0].by += text }
+      text({ text }) { comment.by += text }
     })
     .on('.comment-tree .athing.comtr[id] .age', {
-      text({ text }) { comments[0].timeAgo += text }
+      text({ text }) { comment.timeAgo += text }
     })
     .on('.comment-tree .athing.comtr[id] .commtext *', {
       element(el: Element) {
         const attrs = parseAttrs(el)
-        comments[0].text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
-        comments[0]._stack?.unshift(el.tagName)
+        comment.text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
+        comment._stack?.unshift(el.tagName)
       },
       text({ lastInTextNode }) {
-        let pop: string | undefined; if (lastInTextNode && (pop = comments[0]._stack?.shift())) {
-          comments[0].text += `</${pop}>`;
+        let pop: string | undefined; if (lastInTextNode && (pop = comment._stack?.shift())) {
+          comment.text += `</${pop}>`;
         }
       }
     })
     .on('.comment-tree .athing.comtr[id] .commtext', {
       text({ text }) {
-        comments[0].text += text;
+        comment.text += text;
       },
       element(el) {
-        comments[0].quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality;
+        comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality;
       },
     })
-    .transform(response));
+    .transform(response)).then(() => {
+      delete comment._stack;
+      et.dispatchEvent(new DataEvent(comment as Comment))
+      it.return();
+    });
 
-  delete comments[0]?._stack;
 
-  post.kids = stackComments(comments.reverse() as AsyncIterableArray<Comment>)
+  post.kids = aMap(asynciterify<DataEvent<Comment>>(et, 'data'), e => e.data);
 
   return post as Post;
 };
+
+async function* aMap<A, B>(as: AsyncIterable<A>, f: (a: A) => B) {
+  for await (const a of as) yield f(a)
+}
 
 export function stackComments(comments: AsyncIterableArray<Comment>): AsyncIterableArray<Comment> {
   for (const [i, comment] of comments.entries()) {
