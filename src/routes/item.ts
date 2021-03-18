@@ -1,6 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
+import { DOMParser } from 'linkedom';
 
 import { RouteArgs, router } from "../router";
 
@@ -8,6 +9,25 @@ import { comments as apiComments, Comment } from "./api/provider";
 
 import { page } from './components';
 import { aThing } from './news';
+
+// Primitive support for 
+const blockquotify = (text: string) => {
+  const doc = new DOMParser().parseFromString(text, 'text/html')
+  for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
+    if (p.textContent?.startsWith('>')) {
+      const bq = doc.createElement('blockquote')
+      bq.textContent = p.innerHTML.substr(1);
+      p.outerHTML = bq.outerHTML;
+    }
+  }
+  for (const a of doc.querySelectorAll('a[href*="news.ycombinator.com"]') as HTMLAnchorElement[]) {
+    const url = new URL(a.href);
+    url.host = self.location.host;
+    url.protocol = self.location.protocol;
+    a.setAttribute('href', url.href);
+  }
+  return doc.toString();
+}
 
 const commentEl = ({ id, level, by, text, timeAgo, quality }: Comment) => {
   return html`<tr class="athing comtr " id="${id}">
@@ -31,7 +51,7 @@ const commentEl = ({ id, level, by, text, timeAgo, quality }: Comment) => {
                 </span></div><br>
               <div class="comment">
                 <span class="commtext ${quality}">
-                  ${text ? unsafeHTML(text) : ' '}
+                  ${text ? unsafeHTML(blockquotify(text)) : ' '}
                   <div class="reply">
                     <p>
                       <font size="1">

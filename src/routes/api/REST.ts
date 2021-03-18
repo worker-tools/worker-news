@@ -74,7 +74,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
         ...rest, 
         level, 
         quality: 'c00', // REST API doesn't support quality..
-        text: '<p>' + text,
+        text: text && '<p>' + text,
         timeAgo: formatDistanceToNowStrict(item.time * 1000, { addSuffix: true }),
         kids: crawlCommentTree(kids || [], dict, level + 1),
       };
@@ -106,7 +106,6 @@ export async function* take<T>(n: number, xs: AsyncIterable<T>): AsyncIterableIt
 export async function slurp<T>(xs: AsyncIterable<T>): Promise<T[]> {
   let ret: T[] = [];
   for await (const x of xs) {
-    // console.log(x);
     ret.push(x);
   }
   return ret;

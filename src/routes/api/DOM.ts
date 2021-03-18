@@ -12,6 +12,7 @@ const tryURL = (url: string): URL | null => {
   }
 }
 
+
 async function consume(r: Response) {
   const reader = r.body!.getReader()
   while (!(await reader.read()).done);
@@ -49,6 +50,10 @@ class AsyncIterableArray<T> extends Array<T> {
 //   } while(x)
 // }
 
+function parseAttrs(el: Element) {
+  return [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
+}
+
 async function stories(response: Response) {
   const posts = new AsyncIterableArray<Partial<Post>>();
 
@@ -59,7 +64,7 @@ async function stories(response: Response) {
       element(el) {
         const id = Number(el.getAttribute('id'))
         // et.dispatchEvent(new CustomEvent('post++', { detail: posts[0] }))
-        posts.unshift({ id, title: '', by: '', timeAgo: '' });
+        posts.unshift({ id, title: '', score: 0, by: '', timeAgo: '', descendants: 0 });
       }
     })
     .on('.athing[id] .title a.storylink', {
@@ -70,13 +75,13 @@ async function stories(response: Response) {
       text({ text }) { posts[0].title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
-    .on('.subtext > .score', { text({ text }) { posts[0].score ||= parseInt(text, 10) } })
+    .on('.subtext > .score', { text({ text }) { if (text?.match(/^\d/)) posts[0].score = parseInt(text, 10) } })
     .on('.subtext > .hnuser', { text({ text }) { posts[0].by += text } })
     .on('.subtext > .age', { text({ text }) { posts[0].timeAgo += text } })
-    .on('.subtext > a[href^=item]', { text({ text }) { posts[0].descendants ||= parseInt(text, 10) } })
+    .on('.subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) posts[0].descendants = parseInt(text, 10) } })
     .transform(response));
 
-  const postsX = posts.map(post => {
+  const postsX = posts.reverse().map(post => {
     post.type = 'story';
     // if (post.url?.match(/^item/i)) post.type = 'ask';
     if (!post.by) { // No users post this = job ads
@@ -106,7 +111,7 @@ export { getComments as comments }
 type _Stack = { _stack?: string[] };
 
 async function comments(response: Response) {
-  const post: Partial<Post> = { title: '', by: '', timeAgo: '' }
+  const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0 }
   const comments = new AsyncIterableArray<Partial<Comment> & _Stack>();
 
   await consume(new HTMLRewriter()
@@ -123,10 +128,10 @@ async function comments(response: Response) {
       text({ text }) { post.title += text },
     })
     // FIXME: concatenate text before parseInt jtbs..
-    .on('.fatitem .subtext > .score', { text({ text }) { post.score ||= parseInt(text, 10) } })
+    .on('.fatitem .subtext > .score', { text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) } })
     .on('.fatitem .subtext > .hnuser', { text({ text }) { post.by += text } })
     .on('.fatitem .subtext > .age', { text({ text }) { post.timeAgo += text } })
-    .on('.fatitem .subtext > a[href^=item]', { text({ text }) { post.descendants ||= parseInt(text, 10) } })
+    .on('.fatitem .subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) } })
     // Comment tree
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
@@ -152,24 +157,24 @@ async function comments(response: Response) {
     .on('.comment-tree .athing.comtr[id] .age', {
       text({ text }) { comments[0].timeAgo += text }
     })
+    .on('.comment-tree .athing.comtr[id] .commtext *', {
+      element(el: Element) {
+        const attrs = parseAttrs(el)
+        comments[0].text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
+        comments[0]._stack?.unshift(el.tagName)
+      },
+      text({ lastInTextNode }) {
+        let pop: string | undefined; if (lastInTextNode && (pop = comments[0]._stack?.shift())) {
+          comments[0].text += `</${pop}>`;
+        }
+      }
+    })
     .on('.comment-tree .athing.comtr[id] .commtext', {
       text({ text }) {
         comments[0].text += text;
       },
       element(el) {
         comments[0].quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality;
-      },
-    })
-    .on('.comment-tree .athing.comtr[id] .commtext *', {
-      text({ lastInTextNode }: Text) {
-        let pop; if (lastInTextNode && (pop = comments[0]._stack?.pop())) {
-          comments[0].text += `</${pop}>`;
-        }
-      },
-      element(el: Element) {
-        const attrs = [...(<any>el.attributes)].map(([n, v]) => `${n}="${v}"`).join(' ');
-        comments[0].text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
-        comments[0]._stack?.push(el.tagName)
       },
     })
     .transform(response));
@@ -195,69 +200,3 @@ export function stackComments(comments: AsyncIterableArray<Comment>): AsyncItera
   }
   return comments.filter(comment => comment.level === 0) as AsyncIterableArray<Comment>;
 }
-
-
-// export function moreComments(body: string) {
-//   if (!/[<>]/.test(body)) {
-//     if (/expired/i.test(body)) {
-//       throw new Error('Content expired');
-//     } else {
-//       throw new Error('Not HTML content');
-//     }
-//   } else {
-//     const { document } = parseHTML(body);
-//     const $ = document.querySelector.bind(document);
-//     const $$ = document.querySelectorAll.bind(document);
-
-//     const post: Post = {
-//       comments: [],
-//       more_comments_id: null,
-//     };
-
-//     const commentRows = $$('table:not(:has(table)):has(.comment)');
-//     post.comments = processComments(from(commentRows));
-
-//     // Check for 'More' comments (Rare case)
-//     const more = $('td.title a[href^="/x?"]');
-//     // Whatever 'fnid' means
-//     let fnidM = more?.getAttribute('href')?.match(/fnid=(\w+)/);
-//     if (fnidM) {
-//       const fnid = fnidM[1];
-//       post.more_comments_id = fnid;
-//     }
-
-//     return post;
-//   }
-// };
-
-// export function newComments(body: string) {
-//   if (!/[<>]/.test(body)) {
-//     throw new Error('Not HTML content');
-//   } else {
-//     const { document } = parseHTML(body);
-//     const $ = document.querySelector.bind(document);
-//     const $$ = document.querySelectorAll.bind(document);
-
-//     const commentRows = $$('tr:nth-child(3) tr:has(.comment)');
-//     return processComments(from(commentRows));
-//   }
-// };
-
-// export function user(body: string) {
-//   if (!/[<>]/.test(body)) {
-//     throw new Error('Not HTML content');
-//   } else {
-//     const { document } = parseHTML(body);
-//     const $ = document.querySelector.bind(document);
-//     const $$ = document.querySelectorAll.bind(document);
-
-//     const cells = $$('form tr td:odd');
-//     const id = cells[0].textContent;
-//     const created = cells[1].textContent;
-//     const karma = Number(cells[2].textContent);
-//     const avg = Number(cells[3].textContent);
-//     const about = cleanContent(cells[4].innerHTML);
-
-//     return { id, created, karma, avg, about };
-//   }
-// }
