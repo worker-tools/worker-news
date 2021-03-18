@@ -64,13 +64,14 @@ function cleanContent(html: string) {
 }
 
 export interface Comment {
-  id: string,
+  id: number,
   level: number,
-  user: any,
+  user: string,
   time_ago: string,
   content: string,
   quality: string,
   comments: Comment[]
+  _stack: string[]
 }
 
 function processComments(rows: Element[]) {
@@ -185,7 +186,7 @@ const API = 'https://news.ycombinator.com'
 async function getComments(id: number | string): Promise<Post> {
   try {
     const url = new ParamsURL('/item', { id }, API).href;
-    const body = await fetch(url).then(x => x.text());
+    const body = await fetch(url)
     return comments(body);
   } catch (err) {
     console.error(err)
@@ -203,111 +204,108 @@ const tryURL = (url: string): URL | null => {
   }
 }
 
-function comments(body: string) {
-  if (!/[<>]/.test(body)) {
-    throw new Error('Not HTML content');
-  } else {
-    const { document } = parseHTML(body);
-    const $ = document.querySelector.bind(document);
-    const $$ = document.querySelectorAll.bind(document);
+// class TextCon {
+//   obj: { [k: string]: string };
+//   prop: string;
+//   value = '';
+//   constructor(obj: { [k: string]: string }, prop: string) {
+//     this.obj = obj;
+//     this.prop = prop;
+//   }
+//   text({ text, lastInTextNode }: { text: string, lastInTextNode: boolean }) {
+//     this.value += text;
+//     if (lastInTextNode) this.obj[this.prop] = this.value;
+//   }
+// }
 
-    const table1 = has($$('td table'), 'td.title,textarea')[0];
-    const voteLink = table1?.querySelector('td a[id^=up]');
-    let id = (voteLink?.getAttribute('id')?.match(/\d+/) || [])[0] || null;
-    const cell1 = from(table1?.querySelectorAll('td.title') ?? []).filter(c => c.querySelector('a'))[0] as Element | undefined;
+async function consume(r: Response) {
+  const reader = r.body!.getReader()
+  while (!(await reader.read()).done);
+}
 
-    let link, title, url, domain, points, user, time_ago, comments_count;
-    let content: string | null = null;
-    let poll: Poll[] | null = null;
-    let type = 'link';
+async function comments(response: Response) {
+  const post: Partial<Post> = { title: '', user: '', time_ago: '' }
+  const comments: Partial<Comment>[] = []
 
-    if (cell1) {
-      link = cell1.querySelector('a')
-      title = link?.textContent?.trim();
-      url = link?.getAttribute('href');
-      // domain = (cell1?.querySelector('.comhead')?.textContent?.match(/\(\s?([^()]+)\s?\)/i) || [, null])[1];
-      domain = url && tryURL(url)?.origin;
+  await consume(new HTMLRewriter()
+    .on('.fatitem .athing[id]', {
+      element(voteLink) {
+        post.id = (voteLink.getAttribute('id')?.match(/\d+/) || [])[0] || null;
+      },
+    })
+    .on('.fatitem .title a.storylink', {
+      element(link) {
+        const url = post.url = link?.getAttribute('href');
+        post.domain = url && tryURL(url)?.hostname;
+      },
+      text({ text }) { post.title += text },
+    })
+    // FIXME: concatenate text before parseInt jtbs..
+    .on('.fatitem .subtext > .score', { text({ text }) { post.points ||= parseInt(text, 10) } })
+    .on('.fatitem .subtext > .hnuser', { text({ text }) { post.user += text } })
+    .on('.fatitem .subtext > .age', { text({ text }) { post.time_ago += text } })
+    .on('.fatitem .subtext > a[href^=item]', { text({ text }) { post.comments_count ||= parseInt(text, 10) } })
+    .on('.comment-tree .athing.comtr[id]', {
+      element(thing) {
+        const id = Number(thing.getAttribute('id'))
+        delete comments[0]?._stack;
+        comments.unshift({ id, user: '', time_ago: '', content: '<p>', _stack: ['p'], comments: [] });
+      },
+    })
+    .on('.comment-tree .athing.comtr[id] img[src*="s.gif"][width]', {
+      element(el) { comments[0].level = Number(el.getAttribute('width')) / 40 }
+    })
+    .on('.comment-tree .athing.comtr[id] .hnuser', {
+      text({ text }) { comments[0].user += text }
+    })
+    .on('.comment-tree .athing.comtr[id] .age', {
+      text({ text }) { comments[0].time_ago += text }
+    })
+    .on('.comment-tree .athing.comtr[id] .commtext', {
+      text({ text }) {
+        comments[0].content += text;
+      },
+      element(el) {
+        comments[0].quality = el.getAttribute('class')?.substr('commtext '.length);
+      },
+    })
+    .on('.comment-tree .athing.comtr[id] .commtext *', {
+      text({ lastInTextNode }: Text) {
+        let pop; if (lastInTextNode && (pop = comments[0]._stack?.pop())) {
+          comments[0].content += `</${pop}>`;
+        }
+      },
+      element(el: Element) {
+        const attrs = [...(<any>el.attributes)].map(([n, v]) => `${n}="${v}"`).join(' ');
+        comments[0].content += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
+        comments[0]._stack?.push(el.tagName)
+      },
+    })
+    .transform(response));
 
-      const cell2 = table1?.querySelector('td.subtext');
-      points = parseInt(cell2?.querySelector('.score')?.textContent ?? '', 10);
-      const userLink = cell2?.querySelector('.hnuser');
-      user = userLink?.textContent || null;
-      time_ago = userLink?.nextElementSibling?.textContent?.replace('|', '').trim() || '';
-      comments_count = parseInt(last(cell2?.querySelectorAll('a[href^=item]'))?.textContent ?? '', 10) || 0;
+  delete comments[0]?._stack;
 
-      const nextContentRows = notHas(nextAll(cell2?.parentElement, 'tr:not(:empty)'), 'textarea');
-      // var questionCell = nextContentRows.eq(0).children('td:not(:empty)');
-      const questionCell = nextContentRows[0]?.querySelector('td:not(:empty)');
-      let pollCell: Element | null;
+  try {
+    const commentsR = comments.reverse() as Comment[];
 
-      // The content could be question+poll, question or poll.
-      if (questionCell && !questionCell.querySelector('td.comment')) {
-        content = cleanContent(questionCell.innerHTML);
-        pollCell = has(nextContentRows[1]?.querySelectorAll('td:not(:empty)'), 'td.comment')[0];
-      } else {
-        pollCell = has(nextContentRows[0]?.querySelectorAll('td:not(:empty)'), 'td.comment')[0];
-      }
+    for (const [i, comment] of commentsR.entries()) {
+      const { level } = comment;
 
-      if (pollCell) {
-        poll = from(pollCell.querySelectorAll('td.comment'))?.map(el => ({
-          item: el.textContent?.trim(),
-          points: Number(el.parentElement?.nextElementSibling?.querySelector('.comhead span')?.textContent)
-        }));
-      }
-
-      if (url?.match(/^item/i)) type = 'ask';
-      if (!user) { // No users post this = job ads
-        type = 'job';
-        id = (url?.match(/\d+/) || [])[0];
-        time_ago = cell2?.textContent?.trim();
-      }
-    } else {
-      const cell = table1?.querySelector('td.default');
-      if (cell) {
-        const userLink = cell.querySelector('a[href^=user]');
-        user = userLink?.textContent,
-          time_ago = userLink?.children[0]?.nextSibling?.textContent?.replace('|', '').trim() || '';
-        id = (cell?.querySelector('a[href^=item]')?.getAttribute('href')?.match(/\d+/) || [])[0],
-          content = cleanContent(table1?.querySelector('.comment')?.innerHTML ?? '');
-        type = 'comment';
-      }
-    }
-
-    const post: Post = {
-      id,
-      title,
-      url,
-      domain,
-      points,
-      user,
-      time_ago,
-      comments_count,
-      content,
-      poll,
-      type,
-      comments: [],
-      more_comments_id: null,
-    };
-
-    const table2 = nextAll(table1, 'table')[0];
-
-    // If there are comments for a post
-    if (table2) {
-      const commentRows = table2.querySelectorAll('tr table');
-      post.comments = processComments(from(commentRows));
-
-      // Check for 'More' comments (Rare case)
-      const more = $('td.title a[href^="/x?"]');
-      // Whatever 'fnid' means
-      const fnidM = more?.getAttribute('href')?.match(/fnid=(\w+)/);
-      if (fnidM) {
-        const fnid = fnidM[1];
-        post.more_comments_id = fnid;
+      if (level > 0) {
+        let index = i, parentComment: Comment;
+        do {
+          parentComment = commentsR[--index];
+        } while (parentComment.level >= level);
+        parentComment.comments.push(comment);
       }
     }
 
-    return post;
-  }
+    // After that, remove the non-nested ones
+    // Q: WHAT?
+    post.comments = commentsR.filter(comment => comment.level === 0);
+
+    return post as Post;
+  } catch (e) { console.error(e.message); throw e }
 };
 
 export interface Post {
