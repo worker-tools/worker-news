@@ -1,11 +1,9 @@
-import { JSONResponse } from '@worker-tools/json-fetch';
 import { StorageArea } from '@worker-tools/kv-storage';
 import { ok } from '@worker-tools/response-creators';
 import { default as PQueue } from 'p-queue-browser';
 
 import { router } from "../router";
-import { API, api } from './api/api';
-import { comments, stories } from './api/apidom';
+import { API, api } from './api/_old/api';
 
 const storage = new StorageArea('hn-cache');
 
@@ -132,11 +130,11 @@ function crawlItem4(queue: PQueue, id: number) {
   };
 }
 
-router.get('/__foobar', async ({ event, searchParams }) => {
-  try {
-    return new JSONResponse(comments(await fetch('https://news.ycombinator.com/item?id=26474331').then(x => x.text())))
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-})
+// router.get('/__foobar', async ({ event, searchParams }) => {
+//   try {
+//     return new JSONResponse(comments(await fetch('https://news.ycombinator.com/item?id=26474331').then(x => x.text())))
+//   } catch (err) {
+//     console.error(err);
+//     throw err;
+//   }
+// })

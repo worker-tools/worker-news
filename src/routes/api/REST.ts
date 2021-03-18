@@ -19,8 +19,6 @@ import { Post, AThing, Comment, Quality } from './interface';
 import { default as PQueue } from 'p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
 
-export * from './interface';
-
 const CONCURRENCY = 128;
 
 // TypeScript, ugh..
@@ -38,10 +36,8 @@ function resolvablePromise<T>(): ResolvablePromise<T> {
 
 export const API = 'https://hacker-news.firebaseio.com';
 
-let i = 0;
 export const api = async <T>(path: string, useCache = true): Promise<T> => {
   const href = new URL(path, API).href;
-  console.log(i++, href);
   return fetch(href).then(x => x.json());
 }
 
@@ -51,6 +47,7 @@ export async function* stories(p = 1): AsyncIterableIterator<Post> {
   const ids: number[] = await api(`/v0/topstories.json`);
   const ps = ids
     .slice(PAGE * (p - 1), PAGE * p)
+    .reverse()
     .map(id => api<Post>(`/v0/item/${id}.json`));
   for (const p of ps) yield p;
 }
@@ -85,7 +82,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
   }
 }
 
-export async function comments(id: number | string): Promise<Post> {
+export async function comments(id: number): Promise<Post> {
   const post: RESTPost = await api(`/v0/item/${id}.json`);
   const queue = new PQueue({ concurrency: CONCURRENCY });
   const kids = post.kids ?? [];

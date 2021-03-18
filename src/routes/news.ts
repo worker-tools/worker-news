@@ -5,8 +5,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 import { RouteArgs, router } from "../router";
 import { page } from './components';
 
-import { Post, stories } from './api/apidom'
-// import { Post, stories } from './api/apirest'
+import { stories, Post } from './api/provider'
 
 const tryURL = (url: string): URL | null => {
   try {

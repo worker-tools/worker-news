@@ -1,6 +1,5 @@
 import { ParamsURL } from '@worker-tools/json-fetch';
 import { Post, Comment, Quality } from './interface';
-export * from './interface';
 // import { parseHTML, DOMParser } from 'linkedom';
 
 // const from = Array.from.bind(Array);

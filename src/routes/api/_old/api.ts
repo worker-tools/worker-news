@@ -1,6 +1,6 @@
 import { StorageArea } from '@worker-tools/kv-storage';
 import { ok } from '@worker-tools/response-creators';
-import { router } from "../../router";
+import { router } from "../../../router";
 
 const storage = new StorageArea('hn-cache');
 
