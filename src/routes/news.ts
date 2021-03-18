@@ -4,8 +4,8 @@ import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
 import { page } from './components';
-import { api } from './api';
-import { Post, stories } from './apidom'
+import { api } from './api/api';
+import { Post, stories } from './api/apidom'
 
 const tryURL = (url: string): URL | null => {
   try {

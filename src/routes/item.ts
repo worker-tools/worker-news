@@ -4,7 +4,7 @@ import { notFound } from "@worker-tools/response-creators";
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, Post, Comment } from "./apidom";
+import { comments as apiComments, Post, Comment } from "./api/apidom";
 
 import { page } from './components';
 import { aThing } from './news';

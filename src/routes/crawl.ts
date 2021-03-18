@@ -4,8 +4,8 @@ import { ok } from '@worker-tools/response-creators';
 import { default as PQueue } from 'p-queue-browser';
 
 import { router } from "../router";
-import { API, api } from './api';
-import { comments, stories } from './apidom';
+import { API, api } from './api/api';
+import { comments, stories } from './api/apidom';
 
 const storage = new StorageArea('hn-cache');
 
