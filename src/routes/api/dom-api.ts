@@ -1,23 +1,11 @@
 import { ParamsURL } from '@worker-tools/json-fetch';
-import { addISOWeekYears } from 'date-fns';
 import { asynciterify } from 'src/vendor/asynciterify';
 import { Post, Comment, Quality } from './interface';
-// import { parseHTML, DOMParser } from 'linkedom';
-
-// const from = Array.from.bind(Array);
-
-const tryURL = (url: string): URL | null => {
-  try {
-    return new URL(url);
-  } catch {
-    return null;
-  }
-}
 
 class DataEvent<T = any> extends Event {
-  data: T;
-  constructor(data: T) {
-    super('data')
+  data: T; 
+  constructor(data: T) { 
+    super('data'); 
     this.data = data;
   }
 }
@@ -33,7 +21,7 @@ async function* getStories(p = 1) {
   try {
     const url = new ParamsURL('/news', { p }, API).href;
     const body = await fetch(url);
-    yield* await stories(body);
+    yield* stories(body);
   } catch (err) {
     console.error(err)
     throw err;
@@ -47,17 +35,6 @@ class AsyncIterableArray<T> extends Array<T> {
     for (const x of this) yield x;
   }
 }
-
-// async function* listToAsyncIter<T>(xs: T[]): AsyncIterableIterator<T> {
-//   for (const x of xs) yield x;
-// }
-
-// async function* G<T>(): AsyncGenerator<T | undefined, void, T> {
-//   let x: T | undefined;
-//   do {
-//     x = yield x;
-//   } while(x)
-// }
 
 function parseAttrs(el: Element) {
   return [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
@@ -79,8 +56,7 @@ async function* stories(response: Response) {
     })
     .on('.athing[id] .title a.storylink', {
       element(link) {
-        const url = post.url = link?.getAttribute('href') || undefined;
-        post.domain = url && tryURL(url)?.hostname;
+        post.url = link?.getAttribute('href') || undefined;
       },
       text({ text }) { post.title += text },
     })
@@ -133,10 +109,7 @@ async function comments(response: Response) {
       },
     })
     .on('.fatitem .title a.storylink', {
-      element(link) {
-        const url = post.url = link?.getAttribute('href') || undefined;
-        post.domain = url && tryURL(url)?.hostname;
-      },
+      element(link) { post.url = link?.getAttribute('href') || undefined; },
       text({ text }) { post.title += text },
     })
     // FIXME: concatenate text before parseInt jtbs..
@@ -200,7 +173,7 @@ async function comments(response: Response) {
       it.return();
     });
 
-
+  // FIXME
   post.kids = aMap(asynciterify<DataEvent<Comment>>(et, 'data'), e => e.data);
 
   return post as Post;
@@ -210,7 +183,7 @@ async function* aMap<A, B>(as: AsyncIterable<A>, f: (a: A) => B) {
   for await (const a of as) yield f(a)
 }
 
-export function stackComments(comments: AsyncIterableArray<Comment>): AsyncIterableArray<Comment> {
+function stackComments(comments: AsyncIterableArray<Comment>): AsyncIterableArray<Comment> {
   for (const [i, comment] of comments.entries()) {
     const { level } = comment;
 

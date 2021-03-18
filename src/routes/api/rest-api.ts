@@ -15,24 +15,12 @@
  * It also works in a Service Worker, but due to the limit of 4 (?) open connections per page, it's noticeably slower.
  */
 
-import { Post, AThing, Comment, Quality } from './interface';
+import { Post, Comment } from './interface';
 import { default as PQueue } from 'p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
+import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
 
 const CONCURRENCY = 128;
-
-// TypeScript, ugh..
-type Resolve<T> = (value: T | PromiseLike<T>) => void
-type Reject = (reason?: any) => void
-type ResolvablePromise<T> = Promise<T> & { resolve: Resolve<T>, reject: Reject };
-function resolvablePromise<T>(): ResolvablePromise<T> {
-  let resolve!: Resolve<T>;
-  let reject!: Reject;
-  const p: Partial<ResolvablePromise<T>> = new Promise((res, rej) => { resolve = res; reject = rej; })
-  p.resolve = resolve;
-  p.reject = reject;
-  return p as ResolvablePromise<T>;
-}
 
 export const API = 'https://hacker-news.firebaseio.com';
 
@@ -43,13 +31,15 @@ export const api = async <T>(path: string, useCache = true): Promise<T> => {
 
 const PAGE = 30;
 
-export async function* stories(p = 1): AsyncIterableIterator<Post> {
+export async function* stories(page = 1): AsyncIterableIterator<Post> {
   const ids: number[] = await api(`/v0/topstories.json`);
   const ps = ids
-    .slice(PAGE * (p - 1), PAGE * p)
-    .reverse()
-    .map(id => api<Post>(`/v0/item/${id}.json`));
-  for (const p of ps) yield p;
+    .slice(PAGE * (page - 1), PAGE * page)
+    .map(id => api<RESTPost>(`/v0/item/${id}.json`));
+  for await (const { kids: _, ...p } of ps) yield {
+    ...p,
+    timeAgo: formatDistanceToNowStrict(p.time * 1000, { addSuffix: true }),
+  };
 }
 
 type RESTPost = Omit<Post, 'kids'> & { kids: number[], time: number }
@@ -95,7 +85,7 @@ export async function comments(id: number): Promise<Post> {
     kids: crawlCommentTree(kids, dict) };
 }
 
-export async function* take<T>(n: number, xs: AsyncIterable<T>): AsyncIterableIterator<T> {
+async function* aTake<T>(n: number, xs: AsyncIterable<T>): AsyncIterableIterator<T> {
   let i = 0;
   for await (const x of xs) {
     if (++i > n) break;
@@ -103,7 +93,7 @@ export async function* take<T>(n: number, xs: AsyncIterable<T>): AsyncIterableIt
   }
 }
 
-export async function slurp<T>(xs: AsyncIterable<T>): Promise<T[]> {
+async function slurp<T>(xs: AsyncIterable<T>): Promise<T[]> {
   let ret: T[] = [];
   for await (const x of xs) {
     ret.push(x);

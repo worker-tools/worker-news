@@ -4,7 +4,7 @@ export interface AThing {
   type: Type,
   id: number,
   by: string,
-  kids: AsyncIterable<Comment>,
+  kids?: AsyncIterable<Comment>,
 }
 
 export interface Comment extends AThing {
@@ -25,7 +25,6 @@ export type Type = "job" | "story" | "comment" | "poll" | "pollopt";
 export interface Post extends AThing {
   title: string,
   url: string
-  domain: string | null,
   score: number | null,
   timeAgo: string | null,
   descendants: number | null,

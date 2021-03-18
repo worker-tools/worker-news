@@ -20,7 +20,7 @@ const blockquotify = (text: string) => {
       p.outerHTML = bq.outerHTML;
     }
   }
-  for (const a of doc.querySelectorAll('a[href*="news.ycombinator.com"]') as HTMLAnchorElement[]) {
+  for (const a of doc.querySelectorAll('a[href*="news.ycombinator.com/item"]') as HTMLAnchorElement[]) {
     const url = new URL(a.href);
     url.host = self.location.host;
     url.protocol = self.location.protocol;
@@ -72,7 +72,7 @@ const commentEl = ({ id, level, by, text, timeAgo, quality }: Comment) => {
 async function* commentTree(kids: AsyncIterable<Comment>): AsyncGenerator<HTML> {
   for await (const item of kids) {
     yield commentEl(item);
-    yield* commentTree(item.kids);
+    if (item.kids) yield* commentTree(item.kids);
   }
 }
 
@@ -122,7 +122,7 @@ function getItem({ searchParams }: RouteArgs)  {
           </table><br><br>
           <table border="0" class="comment-tree">
             <tbody>
-              ${commentTree(kids)}
+              ${kids && commentTree(kids)}
             </tbody>
           </table>
           <br><br>

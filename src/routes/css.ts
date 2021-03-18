@@ -79,7 +79,7 @@ router.get('/news.css', () => {
     input    { font-family:monospace; font-size:10pt; }
     input[type="submit"] { font-family:Verdana, Geneva, sans-serif; }
     textarea { font-family:monospace; font-size:10pt; }
-    blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--c5a); padding-left: 10px; }
+    blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); padding-left: 10px; }
 
     a:link    { color:var(--text-strong); text-decoration:none; }
     a:visited { color:var(--text); text-decoration:none; }
@@ -221,48 +221,38 @@ router.get('/news.css', () => {
     }
 
     .comment { max-width: 1215px; overflow: hidden }
-    pre { max-width: 900px; }
 
     @media only screen and (min-width : 300px) and (max-width : 389px) {
       .comment { max-width: 270px; overflow: hidden }
-      pre { max-width: 200px; }
     }
     @media only screen and (min-width : 390px) and (max-width : 509px) {
       .comment { max-width: 350px; overflow: hidden }
-      pre { max-width: 260px; }
     }
     @media only screen and (min-width : 510px) and (max-width : 599px) {
       .comment { max-width: 460px; overflow: hidden }
-      pre { max-width: 340px; }
     }
     @media only screen and (min-width : 600px) and (max-width : 689px) {
       .comment { max-width: 540px; overflow: hidden }
-      pre { max-width: 400px; }
     }
     @media only screen and (min-width : 690px) and (max-width : 809px) {
       .comment { max-width: 620px; overflow: hidden }
-      pre { max-width: 460px; }
     }
     @media only screen and (min-width : 810px) and (max-width : 899px) {
       .comment { max-width: 730px; overflow: hidden }
-      pre { max-width: 540px; }
     }
     @media only screen and (min-width : 900px) and (max-width : 1079px) {
       .comment { max-width: 810px; overflow: hidden }
-      pre { max-width: 600px; }
     }
     @media only screen and (min-width : 1080px) and (max-width : 1169px) {
       .comment { max-width: 970px; overflow: hidden }
-      pre { max-width: 720px; }
     }
     @media only screen and (min-width : 1170px) and (max-width : 1259px) {
       .comment { max-width: 1050px; overflow: hidden }
-      pre { max-width: 780px; }
     }
     @media only screen and (min-width : 1260px) and (max-width : 1349px) {
       .comment { max-width: 1130px; overflow: hidden }
-      pre { max-width: 840px; }
     }
+    
   `);
   // FIXME: better solution?
   response.headers.set('content-type', 'text/css');
