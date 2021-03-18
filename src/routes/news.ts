@@ -79,7 +79,7 @@ export const aThing2 = ({ id, url, title }: Post, index = 0) => {
     </tr>`;
 }
 
-const subtext2 = ({ id, time_ago, points: score, user: by, comments_count: descendants }: Post) => {
+const subtext2 = ({ id, timeAgo: time_ago, score, by, descendants }: Post) => {
   return html`
     <tr>
       <td colspan="2"></td>

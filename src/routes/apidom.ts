@@ -1,7 +1,7 @@
 import { ParamsURL } from '@worker-tools/json-fetch';
-import { parseHTML, DOMParser } from 'linkedom';
+// import { parseHTML, DOMParser } from 'linkedom';
 
-const from = Array.from.bind(Array);
+// const from = Array.from.bind(Array);
 
 const tryURL = (url: string): URL | null => {
   try {
@@ -39,7 +39,7 @@ async function stories(response: Response) {
       element(el) {
         const id = Number(el.getAttribute('id'))
         console.log(id)
-        posts.unshift({ id, title: '', user: '', time_ago: '' });
+        posts.unshift({ id, title: '', by: '', timeAgo: '' });
       }
     })
     .on('.athing[id] .title a.storylink', {
@@ -50,16 +50,16 @@ async function stories(response: Response) {
       text({ text }) { posts[0].title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
-    .on('.subtext > .score', { text({ text }) { posts[0].points ||= parseInt(text, 10) } })
-    .on('.subtext > .hnuser', { text({ text }) { posts[0].user += text } })
-    .on('.subtext > .age', { text({ text }) { posts[0].time_ago += text } })
-    .on('.subtext > a[href^=item]', { text({ text }) { posts[0].comments_count ||= parseInt(text, 10) } })
+    .on('.subtext > .score', { text({ text }) { posts[0].score ||= parseInt(text, 10) } })
+    .on('.subtext > .hnuser', { text({ text }) { posts[0].by += text } })
+    .on('.subtext > .age', { text({ text }) { posts[0].timeAgo += text } })
+    .on('.subtext > a[href^=item]', { text({ text }) { posts[0].descendants ||= parseInt(text, 10) } })
     .transform(response));
 
   const postsX = posts.map(post => {
     post.type = 'story';
-    if (post.url?.match(/^item/i)) post.type = 'ask';
-    if (!post.user) { // No users post this = job ads
+    // if (post.url?.match(/^item/i)) post.type = 'ask';
+    if (!post.by) { // No users post this = job ads
       post.type = 'job';
     }
     return post as Post;
@@ -68,15 +68,21 @@ async function stories(response: Response) {
   return postsX;
 }
 
-export interface Comment {
+export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
+
+interface AThing {
+  type: Type,
   id: number,
+  by: string,
+  kids: Comment[]
+}
+
+export interface Comment extends AThing {
+  type: 'comment',
   level: number,
-  user: string,
-  time_ago: string,
-  content: string,
-  quality: string,
-  comments: Comment[]
-  _stack: string[]
+  timeAgo: string,
+  text: string,
+  quality: Quality,
 }
 
 export interface Poll {
@@ -98,8 +104,8 @@ async function getComments(id: number | string): Promise<Post> {
 export { getComments as comments }
 
 async function comments(response: Response) {
-  const post: Partial<Post> = { title: '', user: '', time_ago: '' }
-  const comments: Partial<Comment>[] = []
+  const post: Partial<Post> = { title: '', by: '', timeAgo: '' }
+  const comments: (Partial<Comment> & { _stack?: string[] })[] = []
 
   await consume(new HTMLRewriter()
     .on('.fatitem .athing[id]', {
@@ -115,43 +121,44 @@ async function comments(response: Response) {
       text({ text }) { post.title += text },
     })
     // FIXME: concatenate text before parseInt jtbs..
-    .on('.fatitem .subtext > .score', { text({ text }) { post.points ||= parseInt(text, 10) } })
-    .on('.fatitem .subtext > .hnuser', { text({ text }) { post.user += text } })
-    .on('.fatitem .subtext > .age', { text({ text }) { post.time_ago += text } })
-    .on('.fatitem .subtext > a[href^=item]', { text({ text }) { post.comments_count ||= parseInt(text, 10) } })
+    .on('.fatitem .subtext > .score', { text({ text }) { post.score ||= parseInt(text, 10) } })
+    .on('.fatitem .subtext > .hnuser', { text({ text }) { post.by += text } })
+    .on('.fatitem .subtext > .age', { text({ text }) { post.timeAgo += text } })
+    .on('.fatitem .subtext > a[href^=item]', { text({ text }) { post.descendants ||= parseInt(text, 10) } })
+    // Comment tree
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
         const id = Number(thing.getAttribute('id'))
         delete comments[0]?._stack;
-        comments.unshift({ id, user: '', time_ago: '', content: '<p>', _stack: ['p'], comments: [] });
+        comments.unshift({ type: 'comment', id, by: '', timeAgo: '', text: '<p>', _stack: ['p'], kids: [] });
       },
     })
     .on('.comment-tree .athing.comtr[id] img[src*="s.gif"][width]', {
       element(el) { comments[0].level = Number(el.getAttribute('width')) / 40 }
     })
     .on('.comment-tree .athing.comtr[id] .hnuser', {
-      text({ text }) { comments[0].user += text }
+      text({ text }) { comments[0].by += text }
     })
     .on('.comment-tree .athing.comtr[id] .age', {
-      text({ text }) { comments[0].time_ago += text }
+      text({ text }) { comments[0].timeAgo += text }
     })
     .on('.comment-tree .athing.comtr[id] .commtext', {
       text({ text }) {
-        comments[0].content += text;
+        comments[0].text += text;
       },
       element(el) {
-        comments[0].quality = el.getAttribute('class')?.substr('commtext '.length);
+        comments[0].quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality;
       },
     })
     .on('.comment-tree .athing.comtr[id] .commtext *', {
       text({ lastInTextNode }: Text) {
         let pop; if (lastInTextNode && (pop = comments[0]._stack?.pop())) {
-          comments[0].content += `</${pop}>`;
+          comments[0].text += `</${pop}>`;
         }
       },
       element(el: Element) {
         const attrs = [...(<any>el.attributes)].map(([n, v]) => `${n}="${v}"`).join(' ');
-        comments[0].content += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
+        comments[0].text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
         comments[0]._stack?.push(el.tagName)
       },
     })
@@ -169,29 +176,26 @@ async function comments(response: Response) {
       do {
         parentComment = commentsR[--index];
       } while (parentComment.level >= level);
-      parentComment.comments.push(comment);
+      parentComment.kids.push(comment);
     }
   }
 
   // After that, remove the non-nested ones
-  post.comments = commentsR.filter(comment => comment.level === 0);
+  post.kids = commentsR.filter(comment => comment.level === 0);
 
   return post as Post;
 };
 
-export interface Post {
-  id: number | null,
+export type Type = "job" | "story" | "comment" | "poll" | "pollopt";
+export interface Post extends AThing {
   title: string,
   url: string
   domain: string | null,
-  points: number | null,
-  user: string | null,
-  time_ago: string | null,
-  comments_count: number | null,
-  content: string | null
+  score: number | null,
+  timeAgo: string | null,
+  descendants: number | null,
+  text: string | null
   poll?: Poll[] | null,
-  type: string,
-  comments: Comment[],
   more_comments_id?: string | null;
 }
 
