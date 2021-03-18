@@ -1,4 +1,6 @@
 import { ParamsURL } from '@worker-tools/json-fetch';
+import { Post, Comment, Quality } from './interface';
+export * from './interface';
 // import { parseHTML, DOMParser } from 'linkedom';
 
 // const from = Array.from.bind(Array);
@@ -18,11 +20,11 @@ async function consume(r: Response) {
 
 const API = 'https://news.ycombinator.com'
 
-async function getStories(p = 1): Promise<Post[]> {
+async function* getStories(p = 1) {
   try {
     const url = new ParamsURL('/news', { p }, API).href;
     const body = await fetch(url);
-    return stories(body);
+    yield* await stories(body);
   } catch (err) {
     console.error(err)
     throw err;
@@ -31,14 +33,33 @@ async function getStories(p = 1): Promise<Post[]> {
 
 export { getStories as stories }
 
+class AsyncIterableArray<T> extends Array<T> {
+  async *[Symbol.asyncIterator]() {
+    for (const x of this) yield x;
+  }
+}
+
+// async function* listToAsyncIter<T>(xs: T[]): AsyncIterableIterator<T> {
+//   for (const x of xs) yield x;
+// }
+
+// async function* G<T>(): AsyncGenerator<T | undefined, void, T> {
+//   let x: T | undefined;
+//   do {
+//     x = yield x;
+//   } while(x)
+// }
+
 async function stories(response: Response) {
-  const posts: Partial<Post>[] = [];
+  const posts = new AsyncIterableArray<Partial<Post>>();
+
+  // const et = new EventTarget();
 
   await consume(new HTMLRewriter()
     .on('.athing[id]', {
       element(el) {
         const id = Number(el.getAttribute('id'))
-        console.log(id)
+        // et.dispatchEvent(new CustomEvent('post++', { detail: posts[0] }))
         posts.unshift({ id, title: '', by: '', timeAgo: '' });
       }
     })
@@ -63,34 +84,14 @@ async function stories(response: Response) {
       post.type = 'job';
     }
     return post as Post;
-  })
+  }) as AsyncIterableArray<Post>
+
+  // et.addEventListener('post++')
 
   return postsX;
 }
 
-export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
-
-interface AThing {
-  type: Type,
-  id: number,
-  by: string,
-  kids: Comment[]
-}
-
-export interface Comment extends AThing {
-  type: 'comment',
-  level: number,
-  timeAgo: string,
-  text: string,
-  quality: Quality,
-}
-
-export interface Poll {
-  item: string | undefined,
-  points: number,
-}
-
-async function getComments(id: number | string): Promise<Post> {
+async function getComments(id: number): Promise<Post> {
   try {
     const url = new ParamsURL('/item', { id }, API).href;
     const body = await fetch(url)
@@ -103,9 +104,11 @@ async function getComments(id: number | string): Promise<Post> {
 
 export { getComments as comments }
 
+type _Stack = { _stack?: string[] };
+
 async function comments(response: Response) {
   const post: Partial<Post> = { title: '', by: '', timeAgo: '' }
-  const comments: (Partial<Comment> & { _stack?: string[] })[] = []
+  const comments = new AsyncIterableArray<Partial<Comment> & _Stack>();
 
   await consume(new HTMLRewriter()
     .on('.fatitem .athing[id]', {
@@ -130,7 +133,15 @@ async function comments(response: Response) {
       element(thing) {
         const id = Number(thing.getAttribute('id'))
         delete comments[0]?._stack;
-        comments.unshift({ type: 'comment', id, by: '', timeAgo: '', text: '<p>', _stack: ['p'], kids: [] });
+        comments.unshift({ 
+          type: 'comment', 
+          id, 
+          by: '', 
+          timeAgo: '', 
+          text: '<p>', 
+          _stack: ['p'], 
+          kids: new AsyncIterableArray(),
+        });
       },
     })
     .on('.comment-tree .athing.comtr[id] img[src*="s.gif"][width]', {
@@ -166,38 +177,26 @@ async function comments(response: Response) {
 
   delete comments[0]?._stack;
 
-  const commentsR = comments.reverse() as Comment[];
+  post.kids = stackComments(comments.reverse() as AsyncIterableArray<Comment>)
 
-  for (const [i, comment] of commentsR.entries()) {
+  return post as Post;
+};
+
+export function stackComments(comments: AsyncIterableArray<Comment>): AsyncIterableArray<Comment> {
+  for (const [i, comment] of comments.entries()) {
     const { level } = comment;
 
     if (level > 0) {
       let index = i, parentComment: Comment;
       do {
-        parentComment = commentsR[--index];
+        parentComment = comments[--index];
       } while (parentComment.level >= level);
-      parentComment.kids.push(comment);
+      (parentComment.kids as AsyncIterableArray<Comment>).push(comment);
     }
   }
-
-  // After that, remove the non-nested ones
-  post.kids = commentsR.filter(comment => comment.level === 0);
-
-  return post as Post;
-};
-
-export type Type = "job" | "story" | "comment" | "poll" | "pollopt";
-export interface Post extends AThing {
-  title: string,
-  url: string
-  domain: string | null,
-  score: number | null,
-  timeAgo: string | null,
-  descendants: number | null,
-  text: string | null
-  poll?: Poll[] | null,
-  more_comments_id?: string | null;
+  return comments.filter(comment => comment.level === 0) as AsyncIterableArray<Comment>;
 }
+
 
 // export function moreComments(body: string) {
 //   if (!/[<>]/.test(body)) {

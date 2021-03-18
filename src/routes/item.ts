@@ -4,7 +4,8 @@ import { notFound } from "@worker-tools/response-creators";
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, Post, Comment } from "./api/apidom";
+import { comments as apiComments, Comment } from "./api/apidom";
+// import { comments as apiComments, Comment } from "./api/apirest";
 
 import { page } from './components';
 import { aThing } from './news';
@@ -49,8 +50,8 @@ const commentEl = ({ id, level, by, text, timeAgo, quality }: Comment) => {
   </tr>`;
 }
 
-async function* commentTree(kids: Comment[]): AsyncGenerator<HTML> {
-  for (const item of kids) {
+async function* commentTree(kids: AsyncIterable<Comment>): AsyncGenerator<HTML> {
+  for await (const item of kids) {
     yield commentEl(item);
     yield* commentTree(item.kids);
   }
@@ -77,7 +78,7 @@ function getItem({ searchParams }: RouteArgs)  {
                 <td colspan="2"></td>
                 <td class="subtext">
                   <span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}"
-                    class="hnuser">${by}</a> <span class="age"><a href="item?id=${id}">${/*formatDistanceToNowStrict(date, { addSuffix: true })*/ timeAgo}</a></span>
+                    class="hnuser">${by}</a> <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
                   <span id="unv_${id}"></span> 
                   | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D26443768">hide</a>
                   | <a href="https://hn.algolia.com/?query=Speed%20of%20Rust%20vs.%20C&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0"

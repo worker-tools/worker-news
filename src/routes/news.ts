@@ -4,8 +4,9 @@ import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
 import { page } from './components';
-import { api } from './api/api';
+
 import { Post, stories } from './api/apidom'
+// import { Post, stories } from './api/apirest'
 
 const tryURL = (url: string): URL | null => {
   try {
@@ -113,9 +114,9 @@ export function news({ searchParams }: RouteArgs) {
       <td>
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
           <tbody>
-            ${async () => {
-              const posts = await stories(p);
-              return posts.map(rowEl2);
+            ${async function* () {
+              let i = 0;
+              for await (const post of stories(p)) yield rowEl2(post, i++);
             }}
             <tr class="morespace" style="height:10px"></tr>
             <tr>
