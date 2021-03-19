@@ -25,23 +25,23 @@ async function* promiseToAsyncIterable<T>(promise: Promise<T>): AsyncIterableIte
   yield await promise;
 }
 
-/* Checks if this element or any of its parents matches a given `selector`. */
-export function matchesAncestors(el: Element | null, selector: string): Element | null {
-  let curr = el;
-  while (curr != null) {
-    if (curr.matches(selector)) return curr;
-    curr = curr.parentElement;
-  }
-  return null;
-}
+// /* Checks if this element or any of its parents matches a given `selector`. */
+// function matchesAncestors(el: Element | null, selector: string): Element | null {
+//   let curr = el;
+//   while (curr != null) {
+//     if (curr.matches(selector)) return curr;
+//     curr = curr.parentElement;
+//   }
+//   return null;
+// }
 
 const isText = (n: Node): n is Text => n.nodeType === TEXT_NODE
 const isElement = (n: Node): n is Element => n.nodeType === ELEMENT_NODE
 
-function* sniffTextNodes(el: Element): Iterable<Text> {
+function* findTextNodes(el: Element): Iterable<Text> {
   for (const c of Array.from(el.childNodes)) { 
     if (isText(c)) yield c;
-    else if (isElement(c)) yield* sniffTextNodes(c);
+    else if (isElement(c)) yield* findTextNodes(c);
   }
 }
 
@@ -81,47 +81,59 @@ type Awaitable<T> = T | Promise<T>;
  * - comment callbacks
  */
 export class DumbHTMLRewriter implements HTMLRewriter {
-  #onMap = new Map<string, ElementHandler>();
-  #onDocument = new Array<DocumentHandler>();
+  #onMap = new AppendMap<string, ElementHandler>();
+  // #onDocument = new Array<DocumentHandler>();
 
   public on(selector: string, handlers: ElementHandler): HTMLRewriter {
-    this.#onMap.set(selector, handlers);
+    this.#onMap.append(selector, handlers);
     return this;
   }
+
   public onDocument(handlers: DocumentHandler): HTMLRewriter {
+    // this.#onDocument.push(handlers);
+    // return this;
     throw Error('Method not implemented.');
-    this.#onDocument.push(handlers);
-    return this;
   }
+
   public transform(response: Response): Response {
+    // Kinda hard to explain... Check the type signatures of `Response.constructor` and `transform` 
+    // to see why this dance is necessary...
     return new Response(asyncIterableToStream(promiseToAsyncIterable((async () => {
       try {
         // This is where the "dumb" part comes in: We're not actually stream processing, 
-        // instead we'll just build the DOM in memory and run the selectors...
+        // instead we'll just build the DOM in memory and run the selectors.
         const text = await response.text()
         const document = new DOMParser().parseFromString(text, 'text/html');
 
-        const poiMap = new AppendMap<Element, (el: Element) => Awaitable<void>>();
+        // After that, the hardest part is actually getting the order right.
+        // First, we'll build a map of all elements that are "interesting", based on the registered handlers.
+        // We take advantage of existing DOM APIs 
+        const elemMap = new AppendMap<Element, (el: Element) => Awaitable<void>>();
         const textMap = new AppendMap<Text, (text: Text) => Awaitable<void>>();
 
-        for (const [selector, handler] of this.#onMap) {
+        for (const [selector, handlers] of this.#onMap) {
           for (const elOfInterest of document.querySelectorAll(selector)) {
-            if (handler.element) 
-              poiMap.append(elOfInterest, handler.element.bind(handler));
+            for (const handler of handlers) {
+              if (handler.element) 
+                elemMap.append(elOfInterest, handler.element.bind(handler));
 
-            if (handler.text) 
-              for (const textOfInterest of sniffTextNodes(elOfInterest))
-                textMap.append(textOfInterest, handler.text.bind(handler))
+              // Non-element handlers are odd, in the sense that they run for _any_ children
+              if (handler.text) 
+                for (const textOfInterest of findTextNodes(elOfInterest))
+                  textMap.append(textOfInterest, handler.text.bind(handler))
+            }
           }
         }
 
+        // We'll then walk the DOM and run the registered handlers each time we encounter an "interesting" node.
+        // Because we've stored them in a hash map, this is now O(n)...
         const walker = document.createTreeWalker(document.documentElement, SHOW_ELEMENT + SHOW_TEXT + SHOW_COMMENT);
 
         let { currentNode: node } = walker;
         while(node) {
           if (node.nodeType === ELEMENT_NODE) {
             const n = node as Element
-            const registration = poiMap.get(n) ?? [];
+            const registration = elemMap.get(n) ?? [];
             for (const handler of registration) {
               handler(prepElem(n));
             }
