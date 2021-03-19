@@ -84,6 +84,10 @@ class AppendMap<K, V> extends Map<K, V[]> {
 
 type Awaitable<T> = T | Promise<T>;
 
+export type ExtElementHandler =  ElementHandler & {
+  innerHTML?(html: string): void | Promise<void>;
+}
+
 /**
  * A dumb implementation of Cloudflare's HTMLRewriter in pure JavaScript.
  * 
@@ -95,13 +99,12 @@ type Awaitable<T> = T | Promise<T>;
  * TODO:
  * - Rewriting...
  * - document callback
- * - comment callbacks
  */
 export class DumbHTMLRewriter implements HTMLRewriter {
-  #onMap = new AppendMap<string, ElementHandler>();
+  #onMap = new AppendMap<string, ExtElementHandler>();
   // #onDocument = new Array<DocumentHandler>();
 
-  public on(selector: string, handlers: ElementHandler): HTMLRewriter {
+  public on(selector: string, handlers: ExtElementHandler): HTMLRewriter {
     this.#onMap.append(selector, handlers);
     return this;
   }
@@ -126,6 +129,7 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         // First, we'll build a map of all elements that are "interesting", based on the registered handlers.
         // We take advantage of existing DOM APIs 
         const elemMap = new AppendMap<Element, (el: Element) => Awaitable<void>>();
+        const htmlMap = new AppendMap<Element, (html: string) => Awaitable<void>>();
         const textMap = new AppendMap<Text, (text: Text) => Awaitable<void>>();
         const commMap = new AppendMap<Comment, (comment: Comment) => Awaitable<void>>();
 
@@ -134,6 +138,10 @@ export class DumbHTMLRewriter implements HTMLRewriter {
             for (const handler of handlers) {
               if (handler.element) {
                 elemMap.append(elem, handler.element.bind(handler));
+              }
+
+              if (handler.innerHTML) {
+                htmlMap.append(elem, handler.innerHTML.bind(handler));
               }
 
               // Non-element handlers are odd, in the sense that they run for _any_ children
@@ -162,6 +170,11 @@ export class DumbHTMLRewriter implements HTMLRewriter {
             const handlers = elemMap.get(node) ?? [];
             for (const handler of handlers) {
               handler(prepElem(node));
+            }
+            for (const handler of htmlMap.get(node) ?? []) {
+              // Not using .innerHTML here due to a bug in linkedom: 
+              // https://github.com/WebReflection/linkedom/issues/45
+              handler((<any>node.childNodes).join(''));
             }
           }
           else if (isText(node)) {

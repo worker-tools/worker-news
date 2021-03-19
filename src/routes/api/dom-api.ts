@@ -2,7 +2,11 @@
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
 import { ParamsURL } from '@worker-tools/json-fetch';
+import { ExtElementHandler } from 'src/vendor/dumb-html-rewriter';
 import { eventTargetToAsyncGen } from 'src/vendor/event-target-to-async-gen';
+
+// Sadly, `DumbHTMLRewriter` is necessary until Cloudflare's native HTMLRewrite supports the `innerHTML` handler...
+import { DumbHTMLRewriter as HTMLRewriter } from 'src/vendor/dumb-html-rewriter';
 
 import { Post, AComment, Quality } from './interface';
 import { aMap } from './iter';
@@ -119,27 +123,28 @@ async function comments(response: Response) {
     .on('.comment-tree .athing.comtr[id] .age', {
       text({ text }) { comment.timeAgo += text }
     })
-    .on('.comment-tree .athing.comtr[id] .commtext *', {
-      element(el: Element) {
-        const attrs = [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
-        comment.text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
-        comment._stack?.unshift(el.tagName)
-      },
-      text({ lastInTextNode }) {
-        let pop: string | undefined; if (lastInTextNode && (pop = comment._stack?.shift())) {
-          comment.text += `</${pop}>`;
-        }
-      }
-    })
-    .on('.comment-tree .athing.comtr[id] .commtext', {
-      text({ text }) { comment.text += text; },
+    .on('.comment-tree .athing.comtr[id] .commtext', <ExtElementHandler>{
+      // text({ text }) { comment.text += text },
       element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
+      innerHTML(text) { comment.text += text }
     })
     .transform(response)).then(() => {
       delete comment._stack;
       data.dispatchEvent(new CustomEvent('data', { detail: comment }))
       iter.return();
     })
+    // .on('.comment-tree .athing.comtr[id] .commtext *', {
+    //   element(el: Element) {
+    //     const attrs = [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
+    //     comment.text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
+    //     comment._stack?.unshift(el.tagName)
+    //   },
+    //   text({ lastInTextNode }) {
+    //     let pop: string | undefined; if (lastInTextNode && (pop = comment._stack?.shift())) {
+    //       comment.text += `</${pop}>`;
+    //     }
+    //   }
+    // })
 
   // FIXME
   post.kids = aMap(iter, e => e.detail);
@@ -173,4 +178,27 @@ async function consume(r: Response) {
 //     }
 //   }
 //   return comments.filter(comment => comment.level === 0) as AsyncIterableArray<Comment>;
+// }
+
+// class LoggingHTMLRewriter extends HTMLRewriter {
+//   on(x: string, h: ElementHandler) {
+//     return super.on(x, {
+//       text(n) { 
+//         if (h.text) {
+//           const textS = n.text?.substr(0, 80).trim()
+//           console.log(`#Text { ${textS.length >= 77 ? (textS + '...') : textS } } lastInTextNode=${n.lastInTextNode}`)
+//           h.text(n);
+//         } 
+//       },
+//       element(n) { 
+//         if (h.element) {
+//           // const attributes = [...n.attributes as any];
+//           // const attrS = [attributes as any].map(([k, v]) => `${k}="${v}"`).join(' ')
+//           console.log(`<${n.tagName}${/*attrS ? (' ' + attrS) : ''*/''}>`)
+//           h.element(n as any) 
+//         }
+//       },
+//       comments(arg) { h.comments?.(arg) },
+//     });
+//   }
 // }
