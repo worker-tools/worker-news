@@ -1,5 +1,14 @@
 import { parseHTML } from 'linkedom'
 import { asyncIterableToStream } from 'whatwg-stream-to-async-iter';
+import { Awaitable } from './common-types';
+import { 
+  AppendMap, 
+  DumbHTMLRewriterComment, 
+  DumbHTMLRewriterElement, 
+  DumbHTMLRewriterText, 
+  promiseToAsyncIterable, 
+  treeWalkerToIter,
+} from './dumb-html-rewriter-support';
 
 const NODE_END = -1;
 const ELEMENT_NODE = 1;
@@ -13,10 +22,6 @@ const SHOW_ALL = -1;
 const SHOW_ELEMENT = 1;
 const SHOW_TEXT = 4;
 const SHOW_COMMENT = 128;
-
-async function* promiseToAsyncIterable<T>(promise: Promise<T>): AsyncIterableIterator<T> {
-  yield await promise;
-}
 
 const isText = (n?: Node | null): n is Text => n?.nodeType === TEXT_NODE;
 const isElement = (n?: Node | null): n is Element => n?.nodeType === ELEMENT_NODE;
@@ -39,166 +44,6 @@ function* findCommentNodes(el: Element, document: any): Iterable<Comment> {
     node = tw.nextNode();
   }
 }
-
-// function* ancestors(el: Node) {
-//   while (el.parentElement) {
-//     yield el.parentElement
-//     el = el.parentElement
-//   }
-// }
-
-// function root(el: Node): globalThis.HTMLElement | undefined {
-//   const ancs = [...ancestors(el)]
-//   return ancs[ancs.length - 1];
-// }
-
-function enumerable(value: boolean = true) {
-  return function (_: any, __: string, descriptor: PropertyDescriptor) {
-    descriptor.enumerable = value;
-  };
-}
-
-type Content = string;
-
-/** Fragment form string function that works with linkedom. */
-function fragmentFromString(document: HTMLDocument, html: string) {
-  const temp = document.createElement('template');
-  temp.innerHTML = html;
-  return temp.content;
-}
-
-abstract class DumbHTMLRewriterNode {
-  #node: Element | Text | Comment | null;
-  #doc: HTMLDocument;
-  constructor(node: Element | Text | Comment | null, document: HTMLDocument) {
-    this.#node = node;
-    this.#doc = document;
-  }
-
-  @enumerable() get removed() { return !this.#doc.contains(this.#node) }
-
-  #replace = (node: Element | Text | Comment | null, content: string, opts?: ContentOptions) => {
-    node?.replaceWith(...opts?.html
-      ? fragmentFromString(this.#doc, content).childNodes
-      : [content]);
-  }
-
-  before(content: Content, opts?: ContentOptions): this {
-    const before = this.#doc.createComment('');
-    this.#node?.parentElement?.insertBefore(before, this.#node)
-    this.#replace(before, content, opts);
-    return this;
-  }
-
-  after(content: Content, opts?: ContentOptions): this {
-    const after = this.#doc.createComment('');
-    this.#node?.parentElement?.insertBefore(after, this.#node.nextSibling)
-    this.#replace(after, content, opts);
-    return this;
-  }
-
-  replace(content: Content, opts?: ContentOptions): this {
-    this.#replace(this.#node, content, opts);
-    return this;
-  }
-
-  remove(): this {
-    this.#node?.remove()
-    return this;
-  }
-}
-
-// function prepElem(node: Element, document: HTMLDocument) {
-//   const attributes = node.getAttributeNames().map(k => [k, node.getAttribute(k)] as [string, string]);
-//   return new DumbHTMLRewriterElement(node, document)
-//   return {
-//     tagName: node.tagName.toLowerCase(),
-//     attributes: attributes,
-//     namespaceURI: node.namespaceURI,
-//     removed: !document.contains(node), // TODO: improve perf!
-//   } as any;
-// }
-
-class DumbHTMLRewriterElement extends DumbHTMLRewriterNode {
-  #node: Element;
-  #attributes: [string, string][];
-  constructor(node: Element, document: HTMLDocument) {
-    super(node, document)
-    this.#node = node;
-    this.#attributes = node.getAttributeNames().map(k => [k, node.getAttribute(k)] as [string, string]);
-  }
-  @enumerable() get tagName() { return this.#node.tagName.toLowerCase() }
-  @enumerable() get attributes() { return [...this.#attributes] }
-  @enumerable() get namespaceURI() { return this.#node.namespaceURI } 
-
-  getAttribute(name: string) {
-    return this.#node.getAttribute(name); 
-  }
-
-  hasAttribute(name: string) {
-    return this.#node.hasAttribute(name);
-  }
-
-  setAttribute(name: string, value: string): this {
-    this.#node.setAttribute(name, value); 
-    return this; 
-  }
-
-  removeAttribute(name: string): this {
-    this.#node.removeAttribute(name); 
-    return this; 
-  }
-
-  prepend(content: Content, opts?: ContentOptions):this {
-    return this.before(content, opts);
-  }
-
-  append(content: Content, opts?: ContentOptions): this {
-    return this.after(content, opts);
-  }
-
-  setInnerContent(content: Content, opts?: ContentOptions): this {
-    this.#node[opts?.html ? 'innerHTML' : 'textContent'] = content;
-    return this;
-  }
-
-  removeAndKeepContent(): this {
-    this.#node?.replaceWith(...this.#node.childNodes);
-    return this;
-  }
-}
-
-class DumbHTMLRewriterText extends DumbHTMLRewriterNode {
-  #text: Text | null;
-  #done: boolean;
-
-  constructor(text: Text | null, document: HTMLDocument, lastInTextNode = false) {
-    super(text, document);
-    this.#text = text;
-    this.#done = lastInTextNode;
-  }
-  @enumerable() get text() { return this.#text?.textContent ?? '' }
-  @enumerable() get lastInTextNode() { return this.#done }
-}
-
-class DumbHTMLRewriterComment extends DumbHTMLRewriterNode {
-  #comm: Comment;
-  constructor(comm: Comment, document: HTMLDocument) {
-    super(comm, document);
-    this.#comm = comm;
-  }
-  @enumerable() get text() { return this.#comm?.nodeValue ?? '' }
-}
-
-class AppendMap<K, V> extends Map<K, V[]> {
-  append(k: K, v: V) {
-    const list = this.get(k) ?? [];
-    list.push(v);
-    this.set(k, list);
-  }
-}
-
-type Awaitable<T> = T | Promise<T>;
 
 export type ExtElementHandler =  ElementHandler & {
   innerHTML?(html: string): void | Promise<void>;
@@ -315,36 +160,10 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         }
 
         return new TextEncoder().encode(document.toString());
-      } catch (err) { console.error(err); throw err }
+      } catch (err) { 
+        console.error(err); 
+        throw err;
+      }
     })())), response);
   }
 }
-
-function* treeWalkerToIter(walker: TreeWalker): IterableIterator<Node> {
-  let { currentNode: node } = walker;
-  while (node) {
-    yield node;
-    // @ts-ignore
-    node = walker.nextNode();
-  }
-}
-
-// function* zip<X, Y>(xs: Iterable<X>, ys: Iterable<Y>): IterableIterator<[X, Y]> {
-//   const xit = xs[Symbol.iterator]();
-//   const yit = ys[Symbol.iterator]();
-//   while (true) {
-//     const [xr, yr] = [xit.next(), yit.next()];
-//     if (xr.done || yr.done) break;
-//     yield [xr.value, yr.value];
-//   }
-// }
-
-// /* Checks if this element or any of its parents matches a given `selector`. */
-// function matchesAncestors(el: Element | null, selector: string): Element | null {
-//   let curr = el;
-//   while (curr != null) {
-//     if (curr.matches(selector)) return curr;
-//     curr = curr.parentElement;
-//   }
-//   return null;
-// }
