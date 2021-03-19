@@ -1,4 +1,4 @@
 import '@worker-tools/location-polyfill';
-import 'event-target-polyfill/force';
-import 'src/vendor/custom-event';
+import '@worker-tools/event-target-polyfill';
+import 'src/vendor/custom-event-polyfill';
 import './entry';
