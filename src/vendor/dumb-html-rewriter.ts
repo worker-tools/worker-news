@@ -1,4 +1,4 @@
-import { DOMParser } from  'linkedom'
+import { DOMParser } from 'linkedom'
 import { asyncIterableToStream } from 'whatwg-stream-to-async-iter';
 
 const NODE_END = -1;
@@ -25,27 +25,29 @@ async function* promiseToAsyncIterable<T>(promise: Promise<T>): AsyncIterableIte
   yield await promise;
 }
 
-// /* Checks if this element or any of its parents matches a given `selector`. */
-// function matchesAncestors(el: Element | null, selector: string): Element | null {
-//   let curr = el;
-//   while (curr != null) {
-//     if (curr.matches(selector)) return curr;
-//     curr = curr.parentElement;
-//   }
-//   return null;
-// }
+const isText = (n?: Node | null): n is Text => n?.nodeType === TEXT_NODE;
+const isElement = (n?: Node | null): n is Element => n?.nodeType === ELEMENT_NODE;
+const isComment = (n?: Node | null): n is Comment => n?.nodeType === COMMENT_NODE;
 
-const isText = (n: Node): n is Text => n.nodeType === TEXT_NODE
-const isElement = (n: Node): n is Element => n.nodeType === ELEMENT_NODE
-
-function* findTextNodes(el: Element): Iterable<Text> {
-  for (const c of Array.from(el.childNodes)) { 
-    if (isText(c)) yield c;
-    else if (isElement(c)) yield* findTextNodes(c);
+function* findTextNodes(el: Element, document: any): Iterable<Text> {
+  const tw = document.createTreeWalker(el, SHOW_TEXT);
+  let node = tw.currentNode;
+  while (node) {
+    yield node as Text;
+    node = tw.nextNode();
   }
 }
 
-function prepElem(n: Element): any {
+function* findCommentNodes(el: Element, document: any): Iterable<Comment> {
+  const tw = document.createTreeWalker(el, SHOW_COMMENT);
+  let node = tw.currentNode;
+  while (node) {
+    yield node as Comment;
+    node = tw.nextNode();
+  }
+}
+
+function prepElem(n: Element) {
   const attributes = n.getAttributeNames().map(k => [k, n.getAttribute(k)] as [string, string]);
   return {
     tagName: n.tagName.toLowerCase(),
@@ -55,6 +57,21 @@ function prepElem(n: Element): any {
     hasAttribute: n.hasAttribute.bind(n),
     // TODO
   } as any;
+}
+
+function prepText(text: Text | null, done = false) {
+  return {
+    text: text?.textContent ?? '',
+    lastInTextNode: done,
+    // TODO
+  } as any
+}
+
+function prepComm(comm: Comment): any {
+  return {
+    text: comm.nodeValue
+    // TODO
+  }
 }
 
 class AppendMap<K, V> extends Map<K, V[]> {
@@ -110,17 +127,27 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         // We take advantage of existing DOM APIs 
         const elemMap = new AppendMap<Element, (el: Element) => Awaitable<void>>();
         const textMap = new AppendMap<Text, (text: Text) => Awaitable<void>>();
+        const commMap = new AppendMap<Comment, (comment: Comment) => Awaitable<void>>();
 
         for (const [selector, handlers] of this.#onMap) {
-          for (const elOfInterest of document.querySelectorAll(selector)) {
+          for (const elem of document.querySelectorAll(selector)) {
             for (const handler of handlers) {
-              if (handler.element) 
-                elemMap.append(elOfInterest, handler.element.bind(handler));
+              if (handler.element) {
+                elemMap.append(elem, handler.element.bind(handler));
+              }
 
               // Non-element handlers are odd, in the sense that they run for _any_ children
-              if (handler.text) 
-                for (const textOfInterest of findTextNodes(elOfInterest))
-                  textMap.append(textOfInterest, handler.text.bind(handler))
+              if (handler.text) {
+                for (const text of findTextNodes(elem, document)) {
+                  textMap.append(text, handler.text.bind(handler))
+                }
+              }
+
+              if (handler.comments) {
+                for (const comm of findCommentNodes(elem, document)) {
+                  commMap.append(comm, handler.comments.bind(handler))
+                }
+              }
             }
           }
         }
@@ -130,26 +157,29 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         const walker = document.createTreeWalker(document.documentElement, SHOW_ELEMENT + SHOW_TEXT + SHOW_COMMENT);
 
         let { currentNode: node } = walker;
-        while(node) {
-          if (node.nodeType === ELEMENT_NODE) {
-            const n = node as Element
-            const registration = elemMap.get(n) ?? [];
-            for (const handler of registration) {
-              handler(prepElem(n));
-            }
-          }
-          if (node.nodeType === TEXT_NODE) {
-            const n = node as Text
-            const handlers = textMap.get(n) ?? [];
+        while (node) {
+          if (isElement(node)) {
+            const handlers = elemMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler({ text: n.textContent, lastInTextNode: false } as any)
-            }
-            if (n.nextSibling?.nodeType !== TEXT_NODE) for (const handler of handlers) {
-              handler({ text: '', lastInTextNode: true } as any)
+              handler(prepElem(node));
             }
           }
-          if (node.nodeType === COMMENT_NODE) {
-            // TODO
+          else if (isText(node)) {
+            const handlers = textMap.get(node) ?? [];
+            for (const handler of handlers) {
+              handler(prepText(node, false))
+            }
+            if (!isText(node.nextSibling)) {
+              for (const handler of handlers) {
+                handler(prepText(null, true))
+              }
+            }
+          }
+          else if (isComment(node)) {
+            const handlers = commMap.get(node) ?? [];
+            for (const handler of handlers) {
+              handler(prepComm(node))
+            }
           }
 
           node = walker.nextNode();
@@ -160,3 +190,13 @@ export class DumbHTMLRewriter implements HTMLRewriter {
     })())), response);
   }
 }
+
+// /* Checks if this element or any of its parents matches a given `selector`. */
+// function matchesAncestors(el: Element | null, selector: string): Element | null {
+//   let curr = el;
+//   while (curr != null) {
+//     if (curr.matches(selector)) return curr;
+//     curr = curr.parentElement;
+//   }
+//   return null;
+// }

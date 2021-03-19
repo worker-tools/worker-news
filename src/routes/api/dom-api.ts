@@ -4,7 +4,7 @@
 import { ParamsURL } from '@worker-tools/json-fetch';
 import { eventTargetToAsyncGen } from 'src/vendor/event-target-to-async-gen';
 
-import { Post, Comment, Quality } from './interface';
+import { Post, AComment, Quality } from './interface';
 import { aMap } from './iter';
 
 const API = 'https://news.ycombinator.com'
@@ -94,10 +94,10 @@ async function comments(response: Response) {
   );
 
   // Crawl comment tree (well, technically it's just table rows...)
-  let comment!: Partial<Comment> & _Stack;
+  let comment!: Partial<AComment> & _Stack;
 
   const data = new EventTarget();
-  const iter = eventTargetToAsyncGen<CustomEvent<Comment>>(data, 'data');
+  const iter = eventTargetToAsyncGen<CustomEvent<AComment>>(data, 'data');
 
   // No `await` here, b/c we're yielding data as it streams in (via event target).
   consume(new HTMLRewriter()

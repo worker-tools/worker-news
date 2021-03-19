@@ -15,7 +15,7 @@
  * It also works in a Service Worker, but due to the limit of 4 (?) open connections per page, it's noticeably slower.
  */
 
-import { Post, Comment } from './interface';
+import { Post, AComment } from './interface';
 import { default as PQueue } from 'p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
@@ -43,7 +43,7 @@ export async function* stories(page = 1): AsyncIterableIterator<Post> {
 }
 
 type RESTPost = Omit<Post, 'kids'> & { kids: number[], time: number }
-type RESTComment = Omit<Comment, 'kids'> & { kids: number[], time: number }
+type RESTComment = Omit<AComment, 'kids'> & { kids: number[], time: number }
 
 async function commentTask(id: number, queue: PQueue, dict: Map<number, ResolvablePromise<RESTComment>>) {
   const x: RESTComment = await api(`/v0/item/${id}.json`);
@@ -55,7 +55,7 @@ async function commentTask(id: number, queue: PQueue, dict: Map<number, Resolvab
   }
 }
 
-async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePromise<RESTComment>>, level = 0): AsyncGenerator<Comment> {
+async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePromise<RESTComment>>, level = 0): AsyncGenerator<AComment> {
   for (const kid of kids) {
     const item = await dict.get(kid);
     if (item) {

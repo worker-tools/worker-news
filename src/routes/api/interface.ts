@@ -4,10 +4,10 @@ export interface AThing {
   type: Type,
   id: number,
   by: string,
-  kids?: AsyncIterable<Comment>,
+  kids?: AsyncIterable<AComment>,
 }
 
-export interface Comment extends AThing {
+export interface AComment extends AThing {
   type: 'comment',
   level: number,
   timeAgo: string,

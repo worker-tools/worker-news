@@ -5,7 +5,7 @@ import { DOMParser } from 'linkedom';
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, Comment } from "./api/provider";
+import { comments as apiComments, AComment } from "./api/provider";
 
 import { page } from './components';
 import { aThing } from './news';
@@ -29,7 +29,7 @@ const blockquotify = (text: string) => {
   return doc.toString();
 }
 
-const commentEl = ({ id, level, by, text, timeAgo, quality }: Comment) => {
+const commentEl = ({ id, level, by, text, timeAgo, quality }: AComment) => {
   return html`<tr class="athing comtr " id="${id}">
     <td>
       <table border="0">
@@ -69,7 +69,7 @@ const commentEl = ({ id, level, by, text, timeAgo, quality }: Comment) => {
   </tr>`;
 }
 
-async function* commentTree(kids: AsyncIterable<Comment>): AsyncGenerator<HTML> {
+async function* commentTree(kids: AsyncIterable<AComment>): AsyncGenerator<HTML> {
   for await (const item of kids) {
     yield commentEl(item);
     if (item.kids) yield* commentTree(item.kids);
