@@ -84,19 +84,3 @@ export async function comments(id: number): Promise<Post> {
     timeAgo: formatDistanceToNowStrict(post.time * 1000, { addSuffix: true }),
     kids: crawlCommentTree(kids, dict) };
 }
-
-async function* aTake<T>(n: number, xs: AsyncIterable<T>): AsyncIterableIterator<T> {
-  let i = 0;
-  for await (const x of xs) {
-    if (++i > n) break;
-    yield x;
-  }
-}
-
-async function slurp<T>(xs: AsyncIterable<T>): Promise<T[]> {
-  let ret: T[] = [];
-  for await (const x of xs) {
-    ret.push(x);
-  }
-  return ret;
-}

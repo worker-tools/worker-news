@@ -1,27 +1,18 @@
+/**
+ * A web scraping (DOM-based) implementation of the Hacker News API.
+ */
 import { ParamsURL } from '@worker-tools/json-fetch';
-import { asynciterify } from 'src/vendor/asynciterify';
+import { eventTargetToAsyncGen } from 'src/vendor/event-target-to-async-gen';
+
 import { Post, Comment, Quality } from './interface';
-
-class DataEvent<T = any> extends Event {
-  data: T; 
-  constructor(data: T) { 
-    super('data'); 
-    this.data = data;
-  }
-}
-
-async function consume(r: Response) {
-  const reader = r.body!.getReader()
-  while (!(await reader.read()).done);
-}
+import { aMap } from './iter';
 
 const API = 'https://news.ycombinator.com'
 
 async function* getStories(p = 1) {
   try {
     const url = new ParamsURL('/news', { p }, API).href;
-    const body = await fetch(url);
-    yield* stories(body);
+    yield* stories(await fetch(url));
   } catch (err) {
     console.error(err)
     throw err;
@@ -30,34 +21,23 @@ async function* getStories(p = 1) {
 
 export { getStories as stories }
 
-class AsyncIterableArray<T> extends Array<T> {
-  async *[Symbol.asyncIterator]() {
-    for (const x of this) yield x;
-  }
-}
-
-function parseAttrs(el: Element) {
-  return [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
-}
-
 async function* stories(response: Response) {
   let post!: Partial<Post>;
 
-  const et = new EventTarget();
-  const it = asynciterify<DataEvent<Post>>(et, 'data')
+  const data = new EventTarget();
+  const iter = eventTargetToAsyncGen<CustomEvent<Post>>(data, 'data');
 
   consume(new HTMLRewriter()
     .on('.athing[id]', {
       element(el) {
-        const id = Number(el.getAttribute('id'))
-        if (post) et.dispatchEvent(new DataEvent(post as Post))
-        post = { id, title: '', score: 0, by: '', timeAgo: '', descendants: 0 }
+        if (post) data.dispatchEvent(new CustomEvent('data', { detail: post }));
+
+        const id = Number(el.getAttribute('id'));
+        post = { id, title: '', score: 0, by: '', timeAgo: '', descendants: 0 };
       }
     })
     .on('.athing[id] .title a.storylink', {
-      element(link) {
-        post.url = link?.getAttribute('href') || undefined;
-      },
+      element(link) { post.url = link?.getAttribute('href') || undefined; },
       text({ text }) { post.title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
@@ -66,13 +46,11 @@ async function* stories(response: Response) {
     .on('.subtext > .age', { text({ text }) { post.timeAgo += text } })
     .on('.subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) } })
     .transform(response)).then(() => {
-      // Dispatch last post
-      et.dispatchEvent(new DataEvent(post as Post))
-      // Tell async iterable to stop
-      it.return();
+      data.dispatchEvent(new CustomEvent('data', { detail: post }))
+      iter.return();
     });
 
-  for await (const { data: post } of it) {
+  for await (const { detail: post } of iter) {
     post.type = 'story';
     if (!post.by) { // No users post this = job ads
       post.type = 'job';
@@ -99,14 +77,9 @@ type _Stack = { _stack?: string[] };
 async function comments(response: Response) {
   const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0 }
 
-  const et = new EventTarget();
-  const it = asynciterify<DataEvent<Post>>(et, 'data')
-
   await consume(new HTMLRewriter()
     .on('.fatitem .athing[id]', {
-      element(el) {
-        post.id = Number(el.getAttribute('id'))
-      },
+      element(el) { post.id = Number(el.getAttribute('id')) },
     })
     .on('.fatitem .title a.storylink', {
       element(link) { post.url = link?.getAttribute('href') || undefined; },
@@ -120,22 +93,21 @@ async function comments(response: Response) {
     .transform(response.clone())
   );
 
-  // Comment tree
+  // Crawl comment tree (well, technically it's just table rows...)
   let comment!: Partial<Comment> & _Stack;
+
+  const data = new EventTarget();
+  const iter = eventTargetToAsyncGen<CustomEvent<Comment>>(data, 'data');
+
+  // No `await` here, b/c we're yielding data as it streams in (via event target).
   consume(new HTMLRewriter()
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
         delete comment?._stack;
-        if (comment) et.dispatchEvent(new DataEvent(comment as Comment))
+        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }))
+
         const id = Number(thing.getAttribute('id'))
-        comment = {
-          type: 'comment',
-          id,
-          by: '',
-          timeAgo: '',
-          text: '<p>',
-          _stack: ['p'],
-        };
+        comment = { id, type: 'comment', by: '', timeAgo: '', text: '<p>', _stack: ['p'] };
       },
     })
     .on('.comment-tree .athing.comtr[id] img[src*="s.gif"][width]', {
@@ -149,7 +121,7 @@ async function comments(response: Response) {
     })
     .on('.comment-tree .athing.comtr[id] .commtext *', {
       element(el: Element) {
-        const attrs = parseAttrs(el)
+        const attrs = [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
         comment.text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
         comment._stack?.unshift(el.tagName)
       },
@@ -160,40 +132,45 @@ async function comments(response: Response) {
       }
     })
     .on('.comment-tree .athing.comtr[id] .commtext', {
-      text({ text }) {
-        comment.text += text;
-      },
-      element(el) {
-        comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality;
-      },
+      text({ text }) { comment.text += text; },
+      element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
     })
     .transform(response)).then(() => {
       delete comment._stack;
-      et.dispatchEvent(new DataEvent(comment as Comment))
-      it.return();
-    });
+      data.dispatchEvent(new CustomEvent('data', { detail: comment }))
+      iter.return();
+    })
 
   // FIXME
-  post.kids = aMap(asynciterify<DataEvent<Comment>>(et, 'data'), e => e.data);
+  post.kids = aMap(iter, e => e.detail);
 
   return post as Post;
 };
 
-async function* aMap<A, B>(as: AsyncIterable<A>, f: (a: A) => B) {
-  for await (const a of as) yield f(a)
+/** Consumes a `Response` body while discarding all chunks. 
+ *  Useful for pulling data into `HTMLRewriter`. */
+async function consume(r: Response) {
+  const reader = r.body!.getReader()
+  while (!(await reader.read()).done);
 }
 
-function stackComments(comments: AsyncIterableArray<Comment>): AsyncIterableArray<Comment> {
-  for (const [i, comment] of comments.entries()) {
-    const { level } = comment;
+// class AsyncIterableArray<T> extends Array<T> {
+//   async *[Symbol.asyncIterator]() {
+//     for (const x of this) yield x;
+//   }
+// }
 
-    if (level > 0) {
-      let index = i, parentComment: Comment;
-      do {
-        parentComment = comments[--index];
-      } while (parentComment.level >= level);
-      (parentComment.kids as AsyncIterableArray<Comment>).push(comment);
-    }
-  }
-  return comments.filter(comment => comment.level === 0) as AsyncIterableArray<Comment>;
-}
+// function stackComments(comments: AsyncIterableArray<Comment>): AsyncIterableArray<Comment> {
+//   for (const [i, comment] of comments.entries()) {
+//     const { level } = comment;
+
+//     if (level > 0) {
+//       let index = i, parentComment: Comment;
+//       do {
+//         parentComment = comments[--index];
+//       } while (parentComment.level >= level);
+//       (parentComment.kids as AsyncIterableArray<Comment>).push(comment);
+//     }
+//   }
+//   return comments.filter(comment => comment.level === 0) as AsyncIterableArray<Comment>;
+// }

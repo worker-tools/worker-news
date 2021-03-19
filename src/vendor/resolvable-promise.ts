@@ -1,10 +1,10 @@
 // TypeScript, ugh..
-export type Resolve<T> = (value: T | PromiseLike<T>) => void
-export type Reject = (reason?: any) => void
-export type ResolvablePromise<T> = Promise<T> & { resolve: Resolve<T>, reject: Reject };
+export type Resolver<T> = (value: T | PromiseLike<T>) => void
+export type Rejecter = (reason?: any) => void
+export type ResolvablePromise<T> = Promise<T> & { resolve: Resolver<T>, reject: Rejecter };
 export function resolvablePromise<T>(): ResolvablePromise<T> {
-  let resolve!: Resolve<T>;
-  let reject!: Reject;
+  let resolve!: Resolver<T>;
+  let reject!: Rejecter;
   const p: Partial<ResolvablePromise<T>> = new Promise((res, rej) => { resolve = res; reject = rej; })
   p.resolve = resolve;
   p.reject = reject;

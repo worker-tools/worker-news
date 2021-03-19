@@ -10,7 +10,7 @@ router.get('/news.css', () => {
       --black: #000000;
       --dark-grey: #222;
       --light-grey: #828282;
-      --lightest-grey: #c8c8c8;
+      --lightest-grey: #b8b8b8;
       --white: #ffffff;
       --orange: #ff6600;
       --beige: #f6f6ef;
@@ -130,7 +130,7 @@ router.get('/news.css', () => {
 
     .pagebreak {page-break-before:always}
 
-    pre { overflow: auto; padding: 2px; }
+    pre { overflow: auto; padding: 2px; white-space: pre-wrap; word-wrap: break-word; }
     pre:hover { overflow:auto }
 
     .votearrow {

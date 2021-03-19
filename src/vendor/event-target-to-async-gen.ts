@@ -19,17 +19,24 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-type Resolve<T> = (value: T | PromiseLike<T>) => void
-type Reject = (reason?: any) => void
+type Resolver<T> = (value: T | PromiseLike<T>) => void;
+type Rejecter = (reason?: any) => void;
 
-export function asynciterify<E extends Event>(eventTarget: EventTarget, event: string): AsyncGenerator<E, void, unknown> {
+/**
+ * Taken from: https://github.com/nodejs/node/blob/master/lib/events.js
+ * 
+ * Changes:
+ * - Changed to `EventTarget` only.
+ * - Removed Abort support (temp)
+ */
+export function eventTargetToAsyncGen<E extends Event>(target: EventTarget, event: string): AsyncGenerator<E, void, unknown> {
   // const signal = options?.signal;
   // validateAbortSignal(signal, 'options.signal');
   // if (signal?.aborted)
   //   throw new AbortError();
 
   const unconsumedEvents: E[] = [];
-  const unconsumedPromises: { resolve: Resolve<IteratorResult<E, void>>, reject: Reject }[] = [];
+  const unconsumedPromises: { resolve: Resolver<IteratorResult<E, void>>, reject: Rejecter }[] = [];
   let error: any = null;
   let finished = false;
 
@@ -63,8 +70,8 @@ export function asynciterify<E extends Event>(eventTarget: EventTarget, event: s
     },
 
     return(): Promise<IteratorResult<E, void>> {
-      eventTarget.removeEventListener(event, eventHandler);
-      eventTarget.removeEventListener('error', errorHandler);
+      target.removeEventListener(event, eventHandler);
+      target.removeEventListener('error', errorHandler);
 
       // if (signal) {
       //   eventTargetAgnosticRemoveListener(
@@ -89,8 +96,8 @@ export function asynciterify<E extends Event>(eventTarget: EventTarget, event: s
       //                                  'Error', err);
       // }
       error = err;
-      eventTarget.removeEventListener(event, eventHandler);
-      eventTarget.removeEventListener('error', errorHandler);
+      target.removeEventListener(event, eventHandler);
+      target.removeEventListener('error', errorHandler);
 
       // ??
       return Promise.reject(err)
@@ -101,9 +108,9 @@ export function asynciterify<E extends Event>(eventTarget: EventTarget, event: s
     }
   };
 
-  eventTarget.addEventListener(event, eventHandler);
+  target.addEventListener(event, eventHandler);
   if (event !== 'error') {
-    eventTarget.addEventListener('error', errorHandler);
+    target.addEventListener('error', errorHandler);
   }
 
   // if (signal) {
