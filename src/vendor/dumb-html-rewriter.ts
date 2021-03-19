@@ -35,6 +35,38 @@ export function matchesAncestors(el: Element | null, selector: string): Element 
   return null;
 }
 
+const isText = (n: Node): n is Text => n.nodeType === TEXT_NODE
+const isElement = (n: Node): n is Element => n.nodeType === ELEMENT_NODE
+
+function* sniffTextNodes(el: Element): Iterable<Text> {
+  for (const c of Array.from(el.childNodes)) { 
+    if (isText(c)) yield c;
+    else if (isElement(c)) yield* sniffTextNodes(c);
+  }
+}
+
+function prepElem(n: Element): any {
+  const attributes = n.getAttributeNames().map(k => [k, n.getAttribute(k)] as [string, string]);
+  return {
+    tagName: n.tagName.toLowerCase(),
+    attributes: attributes,
+    namespaceURI: n.namespaceURI,
+    getAttribute: n.getAttribute.bind(n),
+    hasAttribute: n.hasAttribute.bind(n),
+    // TODO
+  } as any;
+}
+
+class AppendMap<K, V> extends Map<K, V[]> {
+  append(k: K, v: V) {
+    const list = this.get(k) ?? [];
+    list.push(v);
+    this.set(k, list);
+  }
+}
+
+type Awaitable<T> = T | Promise<T>;
+
 /**
  * A dumb implementation of Cloudflare's HTMLRewriter in pure JavaScript.
  * 
@@ -69,35 +101,39 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         const text = await response.text()
         const document = new DOMParser().parseFromString(text, 'text/html');
 
+        const poiMap = new AppendMap<Element, (el: Element) => Awaitable<void>>();
+        const textMap = new AppendMap<Text, (text: Text) => Awaitable<void>>();
+
+        for (const [selector, handler] of this.#onMap) {
+          for (const elOfInterest of document.querySelectorAll(selector)) {
+            if (handler.element) 
+              poiMap.append(elOfInterest, handler.element.bind(handler));
+
+            if (handler.text) 
+              for (const textOfInterest of sniffTextNodes(elOfInterest))
+                textMap.append(textOfInterest, handler.text.bind(handler))
+          }
+        }
+
         const walker = document.createTreeWalker(document.documentElement, SHOW_ELEMENT + SHOW_TEXT + SHOW_COMMENT);
-        const elemEntries = [...this.#onMap.entries()].filter(x => x[1].element);
-        const textEntries = [...this.#onMap.entries()].filter(x => x[1].text);
-        const commEntries = [...this.#onMap.entries()].filter(x => x[1].comments);
 
         let { currentNode: node } = walker;
         while(node) {
           if (node.nodeType === ELEMENT_NODE) {
-            let n = node as Element
-            const handlers = elemEntries.filter(([sel]) => n.matches(sel))
-            for (const [, handler] of handlers) {
-              const attributes = n.getAttributeNames().map(k => [k, n.getAttribute(k)] as [string, string]);
-              handler.element!({
-                tagName: n.tagName,
-                attributes: attributes[Symbol.iterator](),
-                namespaceURI: n.namespaceURI,
-                getAttribute: n.getAttribute.bind(n),
-                hasAttribute: n.hasAttribute.bind(n),
-                // TODO
-              } as any);
+            const n = node as Element
+            const registration = poiMap.get(n) ?? [];
+            for (const handler of registration) {
+              handler(prepElem(n));
             }
           }
           if (node.nodeType === TEXT_NODE) {
-            let n = node as Text
-            const handlers = textEntries.filter(([sel]) => matchesAncestors(n.parentElement, sel));
-            for (const [, handler] of handlers) {
-              if (n.textContent && n.textContent.trim() !== '') {
-                handler.text!({ text: n.textContent, lastInTextNode: true } as any)
-              }
+            const n = node as Text
+            const handlers = textMap.get(n) ?? [];
+            for (const handler of handlers) {
+              handler({ text: n.textContent, lastInTextNode: false } as any)
+            }
+            if (n.nextSibling?.nodeType !== TEXT_NODE) for (const handler of handlers) {
+              handler({ text: '', lastInTextNode: true } as any)
             }
           }
           if (node.nodeType === COMMENT_NODE) {
