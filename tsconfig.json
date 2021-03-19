@@ -13,6 +13,7 @@
       "ESNext",
       "WebWorker",
       "DOM",
+      "DOM.Iterable",
       "ESNext.AsyncIterable"
     ],
     "moduleResolution": "node",

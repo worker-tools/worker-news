@@ -7,6 +7,29 @@ import { API, api } from './api/_old/api';
 
 const storage = new StorageArea('hn-cache');
 
+router.get('/__rewrite', async () => {
+  const text = await new HTMLRewriter() 
+    .on('#delete-me', {
+      element(el) {
+      }
+    })
+    .on('a[href]', {
+      element(el) { 
+        console.log('hello?')
+        el.prepend('<span>Hello </span>', { html: true })
+        // el.append('<span> World</span>', { html: true })
+        // el.removeAndKeepContent();
+        // el.setInnerContent('<em>fizzbuzz</em>', { html: true })
+        // console.log(el.setAttribute('href', '#foobar'))
+        // el.replace('<a href="#rickroll">Rick Roll</a>', { html: true })
+        // console.log(el.removed)
+      }
+    })
+    .transform(new Response('<html><body><div id="delete-me"><span>X</span><a href="#">foobar</a></div></body></html>'))
+    .text();
+  return ok(text, { headers: [['content-type', 'text/plain']] })
+})
+
 router.get('/__crawl-sliced', async ({ event }) => {
   const ids = await api('/v0/topstories.json') as any[];
   await storage.set('/v0/topstories.json', ids);

@@ -5,7 +5,8 @@ import { ParamsURL } from '@worker-tools/json-fetch';
 import { ExtElementHandler } from 'src/vendor/dumb-html-rewriter';
 import { eventTargetToAsyncGen } from 'src/vendor/event-target-to-async-gen';
 
-// Sadly, `DumbHTMLRewriter` is necessary until Cloudflare's native HTMLRewrite supports the `innerHTML` handler...
+// Sadly, `DumbHTMLRewriter` is necessary until Cloudflare's native HTMLRewrite supports the `innerHTML` handler.
+// Without this, it is (nearly?) impossible to read HTML content from an element.
 import { DumbHTMLRewriter as HTMLRewriter } from 'src/vendor/dumb-html-rewriter';
 
 import { Post, AComment, Quality } from './interface';
@@ -107,8 +108,10 @@ async function comments(response: Response) {
   consume(new HTMLRewriter()
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
-        delete comment?._stack;
-        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }))
+        if (comment) {
+          delete comment._stack;
+          data.dispatchEvent(new CustomEvent('data', { detail: comment }))
+        }
 
         const id = Number(thing.getAttribute('id'))
         comment = { id, type: 'comment', by: '', timeAgo: '', text: '<p>', _stack: ['p'] };
@@ -129,8 +132,10 @@ async function comments(response: Response) {
       innerHTML(text) { comment.text += text }
     })
     .transform(response)).then(() => {
-      delete comment._stack;
-      data.dispatchEvent(new CustomEvent('data', { detail: comment }))
+      if (comment) {
+        delete comment._stack;
+        data.dispatchEvent(new CustomEvent('data', { detail: comment }))
+      }
       iter.return();
     })
     // .on('.comment-tree .athing.comtr[id] .commtext *', {

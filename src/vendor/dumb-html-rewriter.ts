@@ -1,4 +1,4 @@
-import { DOMParser } from 'linkedom'
+import { parseHTML } from 'linkedom'
 import { asyncIterableToStream } from 'whatwg-stream-to-async-iter';
 
 const NODE_END = -1;
@@ -13,13 +13,6 @@ const SHOW_ALL = -1;
 const SHOW_ELEMENT = 1;
 const SHOW_TEXT = 4;
 const SHOW_COMMENT = 128;
-const DOCUMENT_POSITION_DISCONNECTED = 1;
-const DOCUMENT_POSITION_PRECEDING = 2;
-const DOCUMENT_POSITION_FOLLOWING = 4;
-const DOCUMENT_POSITION_CONTAINS = 8;
-const DOCUMENT_POSITION_CONTAINED_BY = 16;
-const DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 32;
-const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 async function* promiseToAsyncIterable<T>(promise: Promise<T>): AsyncIterableIterator<T> {
   yield await promise;
@@ -47,31 +40,154 @@ function* findCommentNodes(el: Element, document: any): Iterable<Comment> {
   }
 }
 
-function prepElem(n: Element) {
-  const attributes = n.getAttributeNames().map(k => [k, n.getAttribute(k)] as [string, string]);
-  return {
-    tagName: n.tagName.toLowerCase(),
-    attributes: attributes,
-    namespaceURI: n.namespaceURI,
-    getAttribute: n.getAttribute.bind(n),
-    hasAttribute: n.hasAttribute.bind(n),
-    // TODO
-  } as any;
+// function* ancestors(el: Node) {
+//   while (el.parentElement) {
+//     yield el.parentElement
+//     el = el.parentElement
+//   }
+// }
+
+// function root(el: Node): globalThis.HTMLElement | undefined {
+//   const ancs = [...ancestors(el)]
+//   return ancs[ancs.length - 1];
+// }
+
+function enumerable(value: boolean = true) {
+  return function (_: any, __: string, descriptor: PropertyDescriptor) {
+    descriptor.enumerable = value;
+  };
 }
 
-function prepText(text: Text | null, done = false) {
-  return {
-    text: text?.textContent ?? '',
-    lastInTextNode: done,
-    // TODO
-  } as any
+type Content = string;
+
+/** Fragment form string function that works with linkedom. */
+function fragmentFromString(document: HTMLDocument, html: string) {
+  const temp = document.createElement('template');
+  temp.innerHTML = html;
+  return temp.content;
 }
 
-function prepComm(comm: Comment): any {
-  return {
-    text: comm.nodeValue
-    // TODO
+abstract class DumbHTMLRewriterNode {
+  #node: Element | Text | Comment | null;
+  #doc: HTMLDocument;
+  constructor(node: Element | Text | Comment | null, document: HTMLDocument) {
+    this.#node = node;
+    this.#doc = document;
   }
+
+  @enumerable() get removed() { return !this.#doc.contains(this.#node) }
+
+  #replace = (node: Element | Text | Comment | null, content: string, opts?: ContentOptions) => {
+    node?.replaceWith(...opts?.html
+      ? fragmentFromString(this.#doc, content).childNodes
+      : [content]);
+  }
+
+  before(content: Content, opts?: ContentOptions): this {
+    const before = this.#doc.createComment('');
+    this.#node?.parentElement?.insertBefore(before, this.#node)
+    this.#replace(before, content, opts);
+    return this;
+  }
+
+  after(content: Content, opts?: ContentOptions): this {
+    const after = this.#doc.createComment('');
+    this.#node?.parentElement?.insertBefore(after, this.#node.nextSibling)
+    this.#replace(after, content, opts);
+    return this;
+  }
+
+  replace(content: Content, opts?: ContentOptions): this {
+    this.#replace(this.#node, content, opts);
+    return this;
+  }
+
+  remove(): this {
+    this.#node?.remove()
+    return this;
+  }
+}
+
+// function prepElem(node: Element, document: HTMLDocument) {
+//   const attributes = node.getAttributeNames().map(k => [k, node.getAttribute(k)] as [string, string]);
+//   return new DumbHTMLRewriterElement(node, document)
+//   return {
+//     tagName: node.tagName.toLowerCase(),
+//     attributes: attributes,
+//     namespaceURI: node.namespaceURI,
+//     removed: !document.contains(node), // TODO: improve perf!
+//   } as any;
+// }
+
+class DumbHTMLRewriterElement extends DumbHTMLRewriterNode {
+  #node: Element;
+  #attributes: [string, string][];
+  constructor(node: Element, document: HTMLDocument) {
+    super(node, document)
+    this.#node = node;
+    this.#attributes = node.getAttributeNames().map(k => [k, node.getAttribute(k)] as [string, string]);
+  }
+  @enumerable() get tagName() { return this.#node.tagName.toLowerCase() }
+  @enumerable() get attributes() { return [...this.#attributes] }
+  @enumerable() get namespaceURI() { return this.#node.namespaceURI } 
+
+  getAttribute(name: string) {
+    return this.#node.getAttribute(name); 
+  }
+
+  hasAttribute(name: string) {
+    return this.#node.hasAttribute(name);
+  }
+
+  setAttribute(name: string, value: string): this {
+    this.#node.setAttribute(name, value); 
+    return this; 
+  }
+
+  removeAttribute(name: string): this {
+    this.#node.removeAttribute(name); 
+    return this; 
+  }
+
+  prepend(content: Content, opts?: ContentOptions):this {
+    return this.before(content, opts);
+  }
+
+  append(content: Content, opts?: ContentOptions): this {
+    return this.after(content, opts);
+  }
+
+  setInnerContent(content: Content, opts?: ContentOptions): this {
+    this.#node[opts?.html ? 'innerHTML' : 'textContent'] = content;
+    return this;
+  }
+
+  removeAndKeepContent(): this {
+    this.#node?.replaceWith(...this.#node.childNodes);
+    return this;
+  }
+}
+
+class DumbHTMLRewriterText extends DumbHTMLRewriterNode {
+  #text: Text | null;
+  #done: boolean;
+
+  constructor(text: Text | null, document: HTMLDocument, lastInTextNode = false) {
+    super(text, document);
+    this.#text = text;
+    this.#done = lastInTextNode;
+  }
+  @enumerable() get text() { return this.#text?.textContent ?? '' }
+  @enumerable() get lastInTextNode() { return this.#done }
+}
+
+class DumbHTMLRewriterComment extends DumbHTMLRewriterNode {
+  #comm: Comment;
+  constructor(comm: Comment, document: HTMLDocument) {
+    super(comm, document);
+    this.#comm = comm;
+  }
+  @enumerable() get text() { return this.#comm?.nodeValue ?? '' }
 }
 
 class AppendMap<K, V> extends Map<K, V[]> {
@@ -97,7 +213,6 @@ export type ExtElementHandler =  ElementHandler & {
  * As a result, it is several orders of magnitude slower and memory intensive!
  * 
  * TODO:
- * - Rewriting...
  * - document callback
  */
 export class DumbHTMLRewriter implements HTMLRewriter {
@@ -122,8 +237,9 @@ export class DumbHTMLRewriter implements HTMLRewriter {
       try {
         // This is where the "dumb" part comes in: We're not actually stream processing, 
         // instead we'll just build the DOM in memory and run the selectors.
-        const text = await response.text()
-        const document = new DOMParser().parseFromString(text, 'text/html');
+        const htmlText = await response.text();
+        const { document }  = parseHTML(htmlText);
+        // const document = new DOMParser().parseFromString(htmlText, 'text/html')
 
         // After that, the hardest part is actually getting the order right.
         // First, we'll build a map of all elements that are "interesting", based on the registered handlers.
@@ -164,12 +280,14 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         // Because we've stored them in a hash map, this is now O(n)...
         const walker = document.createTreeWalker(document.documentElement, SHOW_ELEMENT + SHOW_TEXT + SHOW_COMMENT);
 
-        let { currentNode: node } = walker;
-        while (node) {
+        // We need to walk the entire tree ahead of time, otherwise we'll lose elements that have been deleted..
+        const nodes = [...treeWalkerToIter(walker)];
+
+        for (const node of nodes) {
           if (isElement(node)) {
             const handlers = elemMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(prepElem(node));
+              handler(new DumbHTMLRewriterElement(node, document) as unknown as Element);
             }
             for (const handler of htmlMap.get(node) ?? []) {
               // Not using .innerHTML here due to a bug in linkedom: 
@@ -180,22 +298,20 @@ export class DumbHTMLRewriter implements HTMLRewriter {
           else if (isText(node)) {
             const handlers = textMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(prepText(node, false))
+              handler(new DumbHTMLRewriterText(node, document) as unknown as Text);
             }
             if (!isText(node.nextSibling)) {
               for (const handler of handlers) {
-                handler(prepText(null, true))
+                handler(new DumbHTMLRewriterText(null, document, true) as unknown as Text);
               }
             }
           }
           else if (isComment(node)) {
             const handlers = commMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(prepComm(node))
+              handler(new DumbHTMLRewriterComment(node, document) as unknown as Text);
             }
           }
-
-          node = walker.nextNode();
         }
 
         return new TextEncoder().encode(document.toString());
@@ -203,6 +319,25 @@ export class DumbHTMLRewriter implements HTMLRewriter {
     })())), response);
   }
 }
+
+function* treeWalkerToIter(walker: TreeWalker): IterableIterator<Node> {
+  let { currentNode: node } = walker;
+  while (node) {
+    yield node;
+    // @ts-ignore
+    node = walker.nextNode();
+  }
+}
+
+// function* zip<X, Y>(xs: Iterable<X>, ys: Iterable<Y>): IterableIterator<[X, Y]> {
+//   const xit = xs[Symbol.iterator]();
+//   const yit = ys[Symbol.iterator]();
+//   while (true) {
+//     const [xr, yr] = [xit.next(), yit.next()];
+//     if (xr.done || yr.done) break;
+//     yield [xr.value, yr.value];
+//   }
+// }
 
 // /* Checks if this element or any of its parents matches a given `selector`. */
 // function matchesAncestors(el: Element | null, selector: string): Element | null {
