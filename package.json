@@ -21,9 +21,9 @@
   "author": "Florian Klampfer <mail@qwtel.com>",
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^2.1.0",
-    "@types/node": "^14.14.34",
-    "esbuild": "^0.9.2",
+    "@cloudflare/workers-types": "^2.2.1",
+    "@types/node": "^14.14.35",
+    "esbuild": "^0.9.4",
     "typescript": "^4.2.3"
   },
   "dependencies": {
@@ -34,7 +34,7 @@
     "@worker-tools/encrypted-cookie-store": "^0.1.5",
     "@worker-tools/html": "github:worker-tools/html",
     "@worker-tools/json-fetch": "^2.0.6",
-    "@worker-tools/location-polyfill": "^0.2.0",
+    "@worker-tools/location-polyfill": "^0.2.2",
     "@worker-tools/request-cookie-store": "^0.4.2",
     "@worker-tools/response-creators": "^1.0.8",
     "@worker-tools/signed-cookie-store": "^0.1.5",
@@ -43,7 +43,6 @@
     "base64-encoding": "^0.14.3",
     "date-fns": "^2.19.0",
     "event-target-polyfill": "file:../event-target-polyfill",
-    "jsdom": "^16.5.1",
     "kv-storage-polyfill": "^2.0.0",
     "linkedom": "^0.5.5",
     "msgpackr": "^1.2.7",
