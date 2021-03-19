@@ -1,12 +1,12 @@
 import { parseHTML } from 'linkedom'
 import { asyncIterableToStream } from 'whatwg-stream-to-async-iter';
 import { Awaitable } from './common-types';
-import { 
-  AppendMap, 
-  DumbHTMLRewriterComment, 
-  DumbHTMLRewriterElement, 
-  DumbHTMLRewriterText, 
-  promiseToAsyncIterable, 
+import {
+  AppendMap,
+  DumbHTMLRewriterComment,
+  DumbHTMLRewriterElement,
+  DumbHTMLRewriterText,
+  promiseToAsyncIterable,
   treeWalkerToIter,
 } from './dumb-html-rewriter-support';
 
@@ -45,7 +45,7 @@ function* findCommentNodes(el: Element, document: any): Iterable<Comment> {
   }
 }
 
-export type ExtElementHandler =  ElementHandler & {
+export type ExtElementHandler = ElementHandler & {
   innerHTML?(html: string): void | Promise<void>;
 }
 
@@ -83,7 +83,7 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         // This is where the "dumb" part comes in: We're not actually stream processing, 
         // instead we'll just build the DOM in memory and run the selectors.
         const htmlText = await response.text();
-        const { document }  = parseHTML(htmlText);
+        const { document } = parseHTML(htmlText);
         // const document = new DOMParser().parseFromString(htmlText, 'text/html')
 
         // After that, the hardest part is actually getting the order right.
@@ -135,9 +135,7 @@ export class DumbHTMLRewriter implements HTMLRewriter {
               handler(new DumbHTMLRewriterElement(node, document) as unknown as Element);
             }
             for (const handler of htmlMap.get(node) ?? []) {
-              // Not using .innerHTML here due to a bug in linkedom: 
-              // https://github.com/WebReflection/linkedom/issues/45
-              handler((<any>node.childNodes).join(''));
+              handler(node.innerHTML);
             }
           }
           else if (isText(node)) {
@@ -160,8 +158,8 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         }
 
         return new TextEncoder().encode(document.toString());
-      } catch (err) { 
-        console.error(err); 
+      } catch (err) {
+        console.error(err);
         throw err;
       }
     })())), response);
