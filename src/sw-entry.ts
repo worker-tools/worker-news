@@ -1,3 +1,4 @@
+import 'src/vendor/html-rewriter-polyfill';
 import './entry';
 
 self.addEventListener('install', () => {
@@ -5,7 +6,7 @@ self.addEventListener('install', () => {
   console.log('skipWaiting');
 });
 
-self.addEventListener('activate', event => {
-  (<any>event).waitUntil((<any>self).clients.claim());
+self.addEventListener('activate', (event: any) => {
+  event.waitUntil((<any>self).clients.claim());
   console.log('claim');
 });

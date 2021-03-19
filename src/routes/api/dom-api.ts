@@ -37,7 +37,7 @@ async function* stories(response: Response) {
       }
     })
     .on('.athing[id] .title a.storylink', {
-      element(link) { post.url = link?.getAttribute('href') || undefined; },
+      element(link) { post.url = link.getAttribute('href') || undefined; },
       text({ text }) { post.title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
@@ -82,7 +82,7 @@ async function comments(response: Response) {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
     .on('.fatitem .title a.storylink', {
-      element(link) { post.url = link?.getAttribute('href') || undefined; },
+      element(link) { post.url = link.getAttribute('href') || undefined; },
       text({ text }) { post.title += text },
     })
     // FIXME: concatenate text before parseInt jtbs..
