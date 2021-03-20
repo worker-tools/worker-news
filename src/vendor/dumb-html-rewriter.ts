@@ -2,7 +2,7 @@ import { parseHTML } from 'linkedom'
 import { asyncIterableToStream } from 'whatwg-stream-to-async-iter';
 import { Awaitable } from './common-types';
 import {
-  AppendMap,
+  PushMap,
   DumbHTMLRewriterComment,
   DumbHTMLRewriterElement,
   DumbHTMLRewriterText,
@@ -61,11 +61,11 @@ export type ExtElementHandler = ElementHandler & {
  * - document callback
  */
 export class DumbHTMLRewriter implements HTMLRewriter {
-  #onMap = new AppendMap<string, ExtElementHandler>();
+  #onMap = new PushMap<string, ExtElementHandler>();
   // #onDocument = new Array<DocumentHandler>();
 
   public on(selector: string, handlers: ExtElementHandler): HTMLRewriter {
-    this.#onMap.append(selector, handlers);
+    this.#onMap.push(selector, handlers);
     return this;
   }
 
@@ -89,32 +89,32 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         // After that, the hardest part is actually getting the order right.
         // First, we'll build a map of all elements that are "interesting", based on the registered handlers.
         // We take advantage of existing DOM APIs 
-        const elemMap = new AppendMap<Element, (el: Element) => Awaitable<void>>();
-        const htmlMap = new AppendMap<Element, (html: string) => Awaitable<void>>();
-        const textMap = new AppendMap<Text, (text: Text) => Awaitable<void>>();
-        const commMap = new AppendMap<Comment, (comment: Comment) => Awaitable<void>>();
+        const elemMap = new PushMap<Element, (el: Element) => Awaitable<void>>();
+        const htmlMap = new PushMap<Element, (html: string) => Awaitable<void>>();
+        const textMap = new PushMap<Text, (text: Text) => Awaitable<void>>();
+        const commMap = new PushMap<Comment, (comment: Comment) => Awaitable<void>>();
 
         for (const [selector, handlers] of this.#onMap) {
           for (const elem of document.querySelectorAll(selector)) {
             for (const handler of handlers) {
               if (handler.element) {
-                elemMap.append(elem, handler.element.bind(handler));
+                elemMap.push(elem, handler.element.bind(handler));
               }
 
               if (handler.innerHTML) {
-                htmlMap.append(elem, handler.innerHTML.bind(handler));
+                htmlMap.push(elem, handler.innerHTML.bind(handler));
               }
 
               // Non-element handlers are odd, in the sense that they run for _any_ children
               if (handler.text) {
                 for (const text of findTextNodes(elem, document)) {
-                  textMap.append(text, handler.text.bind(handler))
+                  textMap.push(text, handler.text.bind(handler))
                 }
               }
 
               if (handler.comments) {
                 for (const comm of findCommentNodes(elem, document)) {
-                  commMap.append(comm, handler.comments.bind(handler))
+                  commMap.push(comm, handler.comments.bind(handler))
                 }
               }
             }
@@ -125,7 +125,8 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         // Because we've stored them in a hash map, this is now O(n)...
         const walker = document.createTreeWalker(document.documentElement, SHOW_ELEMENT + SHOW_TEXT + SHOW_COMMENT);
 
-        // We need to walk the entire tree ahead of time, otherwise we'll lose elements that have been deleted..
+        // We need to walk the entire tree ahead of time,
+        // otherwise we'll miss elements that have been deleted by handlers.
         const nodes = [...treeWalkerToIter(walker)];
 
         for (const node of nodes) {
@@ -145,7 +146,7 @@ export class DumbHTMLRewriter implements HTMLRewriter {
             }
             if (!isText(node.nextSibling)) {
               for (const handler of handlers) {
-                handler(new DumbHTMLRewriterText(null, document, true) as unknown as Text);
+                handler(new DumbHTMLRewriterText(null, document) as unknown as Text);
               }
             }
           }

@@ -1,5 +1,5 @@
-export class AppendMap<K, V> extends Map<K, V[]> {
-  append(k: K, v: V) {
+export class PushMap<K, V> extends Map<K, V[]> {
+  push(k: K, v: V) {
     const list = this.get(k) ?? [];
     list.push(v);
     this.set(k, list);
@@ -127,10 +127,10 @@ export class DumbHTMLRewriterText extends DumbHTMLRewriterNode {
   #text: Text | null;
   #done: boolean;
 
-  constructor(text: Text | null, document: HTMLDocument, lastInTextNode = false) {
+  constructor(text: Text | null, document: HTMLDocument) {
     super(text, document);
     this.#text = text;
-    this.#done = lastInTextNode;
+    this.#done = text === null;
   }
   @enumerable() get text() { return this.#text?.textContent ?? '' }
   @enumerable() get lastInTextNode() { return this.#done }
