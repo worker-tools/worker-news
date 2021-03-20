@@ -2,12 +2,11 @@
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
 import { ParamsURL } from '@worker-tools/json-fetch';
-import { ExtElementHandler } from 'src/vendor/dumb-html-rewriter';
-import { eventTargetToAsyncGen } from 'src/vendor/event-target-to-async-gen';
+import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 
 // Sadly, `DumbHTMLRewriter` is necessary until Cloudflare's native HTMLRewrite supports the `innerHTML` handler.
 // Without this, it is (nearly?) impossible to read HTML content from an element.
-import { DumbHTMLRewriter as HTMLRewriter } from 'src/vendor/dumb-html-rewriter';
+import { DumbHTMLRewriter as HTMLRewriter, ExtElementHandler } from 'src/vendor/dumb-html-rewriter';
 
 import { Post, AComment, Quality } from './interface';
 import { aMap } from './iter';
@@ -30,7 +29,7 @@ async function* stories(response: Response) {
   let post!: Partial<Post>;
 
   const data = new EventTarget();
-  const iter = eventTargetToAsyncGen<CustomEvent<Post>>(data, 'data');
+  const iter = eventTargetToAsyncIter<CustomEvent<Post>>(data, 'data');
 
   consume(new HTMLRewriter()
     .on('.athing[id]', {
@@ -102,7 +101,7 @@ async function comments(response: Response) {
   let comment!: Partial<AComment> & _Stack;
 
   const data = new EventTarget();
-  const iter = eventTargetToAsyncGen<CustomEvent<AComment>>(data, 'data');
+  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data');
 
   // No `await` here, b/c we're yielding data as it streams in (via event target).
   consume(new HTMLRewriter()
