@@ -22,18 +22,25 @@
 type Resolver<T> = (value: T | PromiseLike<T>) => void;
 type Rejecter = (reason?: any) => void;
 
+function newAbortError() {
+  return new DOMException('eventTargetToAsyncGen was aborted via AbortSignal', 'AbortError');
+}
+
 /**
- * Taken from: https://github.com/nodejs/node/blob/master/lib/events.js
+ * Taken from: https://github.com/nodejs/node/blob/master/lib/events.js#L774
  * 
  * Changes:
  * - Changed to `EventTarget` only.
- * - Removed Abort support (temp)
  */
-export function eventTargetToAsyncGen<E extends Event>(target: EventTarget, event: string): AsyncGenerator<E, void, unknown> {
-  // const signal = options?.signal;
-  // validateAbortSignal(signal, 'options.signal');
-  // if (signal?.aborted)
-  //   throw new AbortError();
+export function eventTargetToAsyncGen<E extends Event>(
+  target: EventTarget, 
+  event: string, 
+  options?: { signal?: AbortSignal },
+): AsyncGenerator<E, void, unknown> {
+
+  const signal = options?.signal;
+  if (signal?.aborted)
+    throw newAbortError();
 
   const unconsumedEvents: E[] = [];
   const unconsumedPromises: { resolve: Resolver<IteratorResult<E, void>>, reject: Rejecter }[] = [];
@@ -73,13 +80,9 @@ export function eventTargetToAsyncGen<E extends Event>(target: EventTarget, even
       target.removeEventListener(event, eventHandler);
       target.removeEventListener('error', errorHandler);
 
-      // if (signal) {
-      //   eventTargetAgnosticRemoveListener(
-      //     signal,
-      //     'abort',
-      //     abortListener,
-      //     { once: true });
-      // }
+      if (signal) {
+        signal.removeEventListener('abort', abortListener);
+      }
 
       finished = true;
 
@@ -113,19 +116,15 @@ export function eventTargetToAsyncGen<E extends Event>(target: EventTarget, even
     target.addEventListener('error', errorHandler);
   }
 
-  // if (signal) {
-  //   eventTargetAgnosticAddListener(
-  //     signal,
-  //     'abort',
-  //     abortListener,
-  //     { once: true });
-  // }
+  if (signal) {
+    signal.addEventListener('abort', abortListener, { once: true });
+  }
 
   return iterator;
 
-  // function abortListener() {
-  //   errorHandler(new AbortError());
-  // }
+  function abortListener() {
+    errorHandler(newAbortError());
+  }
 
   function eventHandler(ev: Event) {
     const promise = unconsumedPromises.shift();
