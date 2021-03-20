@@ -53,7 +53,7 @@ export type ParseElementHandler = ElementHandler & {
  * A DOM-based implementation of Cloudflare's `HTMLRewriter`.
  * 
  * Unlike the original, this implementation dumps the entire document in memory, 
- * parses it via a `DOMParser` (provided by `linkedom`),
+ * parses it via `parseHTML` (provided by `linkedom`),
  * and runs selectors against this representation.
  * As a result, it is much slower and more memory intensive, and can't process streaming data.
  * 
@@ -141,27 +141,27 @@ export class ParseHTMLRewriter implements HTMLRewriter {
           if (isElement(node)) {
             const handlers = elemMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(new ParseHTMLRewriterElement(node, document) as unknown as Element);
+              await handler(new ParseHTMLRewriterElement(node, document) as unknown as Element);
             }
             for (const handler of htmlMap.get(node) ?? []) {
-              handler(node.innerHTML);
+              await handler(node.innerHTML);
             }
           }
           else if (isText(node)) {
             const handlers = textMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(new ParseHTMLRewriterText(node, document) as unknown as Text);
+              await handler(new ParseHTMLRewriterText(node, document) as unknown as Text);
             }
             if (!isText(node.nextSibling)) {
               for (const handler of handlers) {
-                handler(new ParseHTMLRewriterText(null, document) as unknown as Text);
+                await handler(new ParseHTMLRewriterText(null, document) as unknown as Text);
               }
             }
           }
           else if (isComment(node)) {
             const handlers = commMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(new ParseHTMLRewriterComment(node, document) as unknown as Text);
+              await handler(new ParseHTMLRewriterComment(node, document) as unknown as Text);
             }
           }
         }
