@@ -4,9 +4,9 @@
 import { ParamsURL } from '@worker-tools/json-fetch';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 
-// Sadly, `DumbHTMLRewriter` is necessary until Cloudflare's native HTMLRewrite supports the `innerHTML` handler.
-// Without this, it is (nearly?) impossible to read HTML content from an element.
-import { DumbHTMLRewriter as HTMLRewriter, ExtElementHandler } from 'src/vendor/dumb-html-rewriter';
+// Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
+// Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
+import { ParseHTMLRewriter as HTMLRewriter, ParseElementHandler } from 'src/vendor/parse-html-rewriter';
 
 import { Post, AComment, Quality } from './interface';
 import { aMap } from './iter';
@@ -125,7 +125,7 @@ async function comments(response: Response) {
     .on('.comment-tree .athing.comtr[id] .age', {
       text({ text }) { comment.timeAgo += text }
     })
-    .on('.comment-tree .athing.comtr[id] .commtext', <ExtElementHandler>{
+    .on('.comment-tree .athing.comtr[id] .commtext', <ParseElementHandler>{
       // text({ text }) { comment.text += text },
       element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
       innerHTML(text) { comment.text += text }

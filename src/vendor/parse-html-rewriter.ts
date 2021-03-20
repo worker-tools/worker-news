@@ -3,12 +3,12 @@ import { asyncIterableToStream } from 'whatwg-stream-to-async-iter';
 import { Awaitable } from './common-types';
 import {
   PushMap,
-  DumbHTMLRewriterComment,
-  DumbHTMLRewriterElement,
-  DumbHTMLRewriterText,
+  ParseHTMLRewriterElement,
+  ParseHTMLRewriterText,
+  ParseHTMLRewriterComment,
   promiseToAsyncIterable,
   treeWalkerToIter,
-} from './dumb-html-rewriter-support';
+} from './parse-html-rewriter-support';
 
 const NODE_END = -1;
 const ELEMENT_NODE = 1;
@@ -45,26 +45,33 @@ function* findCommentNodes(el: Element, document: any): Iterable<Comment> {
   }
 }
 
-export type ExtElementHandler = ElementHandler & {
+export type ParseElementHandler = ElementHandler & {
   innerHTML?(html: string): void | Promise<void>;
 }
 
 /**
- * A dumb implementation of Cloudflare's HTMLRewriter in pure JavaScript.
+ * A DOM-based implementation of Cloudflare's `HTMLRewriter`.
  * 
  * Unlike the original, this implementation dumps the entire document in memory, 
  * parses it via a `DOMParser` (provided by `linkedom`),
  * and runs selectors against this representation.
- * As a result, it is several orders of magnitude slower and memory intensive!
+ * As a result, it is much slower and more memory intensive, and can't process streaming data.
+ * 
+ * However, it should run in most JS contexts (including Web Workers, Service Workers and Deno) without modification.
+ * 
+ * It is mainly intended for Workers development and allowing CF Workers to run in other JS contexts such as Deno..
  * 
  * TODO:
- * - document callback
+ * - Implement `onDocument` 
+ * 
+ * WANTED:
+ * - A HTMLRewriter implementation using `lol-html` compiled to WebAssembly..
  */
-export class DumbHTMLRewriter implements HTMLRewriter {
-  #onMap = new PushMap<string, ExtElementHandler>();
+export class ParseHTMLRewriter implements HTMLRewriter {
+  #onMap = new PushMap<string, ParseElementHandler>();
   // #onDocument = new Array<DocumentHandler>();
 
-  public on(selector: string, handlers: ExtElementHandler): HTMLRewriter {
+  public on(selector: string, handlers: ParseElementHandler): HTMLRewriter {
     this.#onMap.push(selector, handlers);
     return this;
   }
@@ -76,19 +83,20 @@ export class DumbHTMLRewriter implements HTMLRewriter {
   }
 
   public transform(response: Response): Response {
-    // Kinda hard to explain... Check the type signatures of `Response.constructor` and `transform` 
-    // to see why this dance is necessary...
+    // This dance (promise => async gen => stream) is necessary because 
+    // a) the `Response` constructor doesn't accept async data, except via (byte) streams, and
+    // b) `HTMLRewriter.transform` is not an async function.
     return new Response(asyncIterableToStream(promiseToAsyncIterable((async () => {
       try {
-        // This is where the "dumb" part comes in: We're not actually stream processing, 
+        // This is where the "parse" part comes in: We're not actually stream processing, 
         // instead we'll just build the DOM in memory and run the selectors.
         const htmlText = await response.text();
         const { document } = parseHTML(htmlText);
         // const document = new DOMParser().parseFromString(htmlText, 'text/html')
 
-        // After that, the hardest part is actually getting the order right.
+        // After that, the hardest part is getting the order right.
         // First, we'll build a map of all elements that are "interesting", based on the registered handlers.
-        // We take advantage of existing DOM APIs 
+        // We take advantage of existing DOM APIs:
         const elemMap = new PushMap<Element, (el: Element) => Awaitable<void>>();
         const htmlMap = new PushMap<Element, (html: string) => Awaitable<void>>();
         const textMap = new PushMap<Text, (text: Text) => Awaitable<void>>();
@@ -122,7 +130,7 @@ export class DumbHTMLRewriter implements HTMLRewriter {
         }
 
         // We'll then walk the DOM and run the registered handlers each time we encounter an "interesting" node.
-        // Because we've stored them in a hash map, this is now O(n)...
+        // Because we've stored them in a hash map, and can retrieve them via object identity, this is now O(n)...
         const walker = document.createTreeWalker(document.documentElement, SHOW_ELEMENT + SHOW_TEXT + SHOW_COMMENT);
 
         // We need to walk the entire tree ahead of time,
@@ -133,7 +141,7 @@ export class DumbHTMLRewriter implements HTMLRewriter {
           if (isElement(node)) {
             const handlers = elemMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(new DumbHTMLRewriterElement(node, document) as unknown as Element);
+              handler(new ParseHTMLRewriterElement(node, document) as unknown as Element);
             }
             for (const handler of htmlMap.get(node) ?? []) {
               handler(node.innerHTML);
@@ -142,18 +150,18 @@ export class DumbHTMLRewriter implements HTMLRewriter {
           else if (isText(node)) {
             const handlers = textMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(new DumbHTMLRewriterText(node, document) as unknown as Text);
+              handler(new ParseHTMLRewriterText(node, document) as unknown as Text);
             }
             if (!isText(node.nextSibling)) {
               for (const handler of handlers) {
-                handler(new DumbHTMLRewriterText(null, document) as unknown as Text);
+                handler(new ParseHTMLRewriterText(null, document) as unknown as Text);
               }
             }
           }
           else if (isComment(node)) {
             const handlers = commMap.get(node) ?? [];
             for (const handler of handlers) {
-              handler(new DumbHTMLRewriterComment(node, document) as unknown as Text);
+              handler(new ParseHTMLRewriterComment(node, document) as unknown as Text);
             }
           }
         }

@@ -1,3 +1,4 @@
+/** A map implementation that supports multiple values per key (as array) */
 export class PushMap<K, V> extends Map<K, V[]> {
   push(k: K, v: V) {
     const list = this.get(k) ?? [];
@@ -33,7 +34,7 @@ function fragmentFromString(document: HTMLDocument, html: string) {
   return temp.content;
 }
 
-export abstract class DumbHTMLRewriterNode {
+export abstract class ParseHTMLRewriterNode {
   #node: Element | Text | Comment | null;
   #doc: HTMLDocument;
   constructor(node: Element | Text | Comment | null, document: HTMLDocument) {
@@ -74,7 +75,7 @@ export abstract class DumbHTMLRewriterNode {
   }
 }
 
-export class DumbHTMLRewriterElement extends DumbHTMLRewriterNode {
+export class ParseHTMLRewriterElement extends ParseHTMLRewriterNode {
   #node: Element;
   #attributes: [string, string][];
   constructor(node: Element, document: HTMLDocument) {
@@ -123,7 +124,7 @@ export class DumbHTMLRewriterElement extends DumbHTMLRewriterNode {
   }
 }
 
-export class DumbHTMLRewriterText extends DumbHTMLRewriterNode {
+export class ParseHTMLRewriterText extends ParseHTMLRewriterNode {
   #text: Text | null;
   #done: boolean;
 
@@ -136,7 +137,7 @@ export class DumbHTMLRewriterText extends DumbHTMLRewriterNode {
   @enumerable() get lastInTextNode() { return this.#done }
 }
 
-export class DumbHTMLRewriterComment extends DumbHTMLRewriterNode {
+export class ParseHTMLRewriterComment extends ParseHTMLRewriterNode {
   #comm: Comment;
   constructor(comm: Comment, document: HTMLDocument) {
     super(comm, document);
