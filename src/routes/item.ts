@@ -16,7 +16,7 @@ const blockquotify = (text: string) => {
   for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
     if (p.textContent?.startsWith('>')) {
       const bq = doc.createElement('blockquote')
-      bq.textContent = p.innerHTML.substr(1);
+      bq.innerHTML = p.innerHTML.substr(1);
       p.outerHTML = bq.outerHTML;
     }
   }

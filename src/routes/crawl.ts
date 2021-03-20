@@ -15,7 +15,6 @@ router.get('/__rewrite', async () => {
     })
     .on('a[href]', {
       element(el) { 
-        console.log('hello?')
         el.prepend('<span>Hello </span>', { html: true })
         // el.append('<span> World</span>', { html: true })
         // el.removeAndKeepContent();
