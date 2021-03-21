@@ -37,6 +37,7 @@
     "@worker-tools/html": "github:worker-tools/html",
     "@worker-tools/json-fetch": "^2.0.6",
     "@worker-tools/location-polyfill": "^0.2.2",
+    "@worker-tools/parsed-html-rewriter": "file:../worker-tools/parsed-html-rewriter",
     "@worker-tools/request-cookie-store": "^0.4.2",
     "@worker-tools/response-creators": "^1.0.8",
     "@worker-tools/signed-cookie-store": "^0.1.5",

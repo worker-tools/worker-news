@@ -6,7 +6,7 @@ import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 
 // Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
-import { ParseHTMLRewriter as HTMLRewriter, ParseElementHandler } from 'src/vendor/parse-html-rewriter';
+import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 
 import { Post, AComment, Quality } from './interface';
 import { aMap } from './iter';
@@ -116,8 +116,10 @@ async function comments(response: Response) {
         comment = { id, type: 'comment', by: '', timeAgo: '', text: '<p>', _stack: ['p'] };
       },
     })
-    .on('.comment-tree .athing.comtr[id] img[src*="s.gif"][width]', {
-      element(el) { comment.level = Number(el.getAttribute('width')) / 40 }
+    .on('.comment-tree .athing.comtr[id] .ind > img[src="s.gif"][width]', {
+      element(el) { 
+        comment.level = Number(el.getAttribute('width')) / 40 
+      }
     })
     .on('.comment-tree .athing.comtr[id] .hnuser', {
       text({ text }) { comment.by += text }
@@ -125,11 +127,11 @@ async function comments(response: Response) {
     .on('.comment-tree .athing.comtr[id] .age', {
       text({ text }) { comment.timeAgo += text }
     })
-    .on('.comment-tree .athing.comtr[id] .commtext', <ParseElementHandler>{
-      // text({ text }) { comment.text += text },
-      element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
+    .on('.comment-tree .athing.comtr[id] .commtext', <ParsedElementHandler>{
+      element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality; },
       innerHTML(text) { comment.text += text }
     })
+    .on('.comment-tree .athing.comtr[id] .comment .reply', { element(el) { el.remove() }})
     .transform(response)).then(() => {
       if (comment) {
         delete comment._stack;
@@ -150,8 +152,14 @@ async function comments(response: Response) {
     //   }
     // })
 
-  // FIXME
-  post.kids = aMap(iter, e => e.detail);
+  post.kids = aMap(iter, e => {
+    const comment = e.detail;
+    if (comment.text === '<p>') {
+      comment.deleted = true;
+      comment.text = ' [flagged] ';
+    }
+    return comment;
+  });
 
   return post as Post;
 };

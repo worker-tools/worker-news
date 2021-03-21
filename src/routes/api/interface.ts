@@ -14,6 +14,7 @@ export interface AComment extends AThing {
   text: string,
   quality: Quality,
   parent: number,
+  deleted?: boolean,
 }
 
 export interface Poll {

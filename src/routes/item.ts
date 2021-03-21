@@ -35,7 +35,7 @@ const blockquotify = (text: string) => {
   return doc.toString();
 }
 
-const commentEl = ({ id, level, by, text, timeAgo, quality }: AComment) => {
+const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment) => {
   return html`<tr class="athing comtr" id="${id}">
     <td>
       <table border="0">
@@ -43,10 +43,12 @@ const commentEl = ({ id, level, by, text, timeAgo, quality }: AComment) => {
           <tr>
             <td class="ind"><img src="s.gif" height="1" width="${level * 40}"></td>
             <td valign="top" class="votelinks">
-              <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
+              <center>${deleted 
+                ? html`<img src="s.gif" height="1" width="14">`
+                : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
                   href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D26443768#26444290">
                   <div class="votearrow" title="upvote"></div>
-                </a></center>
+                </a>`}</center>
             </td>
             <td class="default">
               <div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
@@ -57,14 +59,14 @@ const commentEl = ({ id, level, by, text, timeAgo, quality }: AComment) => {
                 </span></div><br>
               <div class="comment">
                 <span class="commtext ${quality}">
-                  ${text ? unsafeHTML(blockquotify(text)) : ' '}
-                  <div class="reply">
+                  ${deleted ? '[flagged]' : text ? unsafeHTML(blockquotify(text)) : ' '}
+                  ${deleted ? '' : html`<div class="reply">
                     <p>
                       <font size="1">
                         <u><a href="reply?id=${id}&amp;goto=item%3Fid%3D26443768%2326444290">reply</a></u>
                       </font>
                     </p>
-                  </div>
+                  </div>`}
                 </span>
               </div>
             </td>

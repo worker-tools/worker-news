@@ -1,4 +1,4 @@
-import 'src/vendor/html-rewriter-polyfill';
+import '@worker-tools/parsed-html-rewriter/polyfill';
 import './entry';
 
 self.addEventListener('install', () => {
