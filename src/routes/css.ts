@@ -3,6 +3,8 @@ import { router } from "../router";
 
 router.get('/news.css', () => {
   const response = new HTMLResponse(css`
+    /* .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip: rect(0,0,0,0); border: 0; } */
+
     :root {
       --blue-h: 227;
       --blue-s: 10%;
@@ -125,7 +127,7 @@ router.get('/news.css', () => {
     .hnmore a:link, a:visited { color:var(--text); }
     .hnmore { text-decoration:underline; }
 
-    .default p, .default blockquote { margin-top: 8px; margin-bottom: 0px; }
+    .default p, .default li, .default blockquote { margin-top: 8px; margin-bottom: 0px; }
     .commtext > :first-child { margin-top: 0 };
 
     .pagebreak {page-break-before:always}
@@ -156,7 +158,7 @@ router.get('/news.css', () => {
       .votearrow { background-size: 10px; background-image: url("https://jgthms.com/hacker-news-dark-mode/images/grayarrow2x.gif"); }
     }
     @media only screen and (-webkit-min-device-pixel-ratio: 2) and (prefers-color-scheme: dark), only screen and (min-device-pixel-ratio: 2) and (prefers-color-scheme: dark) {
-      :root .votearrow { background-image: url("https://jgthms.com/hacker-news-dark-mode/images/darkbluearrow@2x.png"); }
+      :root .votearrow { background-image: url("https://jgthms.com/hacker-news-dark-mode/images/darkbluearrow2x.png"); }
     }
 
 

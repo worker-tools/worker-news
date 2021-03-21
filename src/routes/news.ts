@@ -62,7 +62,7 @@ const stripWWW = (url?: string) => {
 //     <tr class="spacer" style="height:5px"></tr>`;
 // }
 
-export const aThing = ({ id, url, title }: Post, index = 0) => {
+export const aThing = ({ id, url, title }: Post, index?: number) => {
   const uRL = tryURL(url);
   return html`
     <tr class="athing" id="${id}">

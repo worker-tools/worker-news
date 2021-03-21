@@ -19,6 +19,12 @@ const blockquotify = (text: string) => {
       bq.innerHTML = p.innerHTML.substr(1);
       p.outerHTML = bq.outerHTML;
     }
+    // Test: item?id=26514612
+    // if (p.textContent?.startsWith('-') || p.textContent?.startsWith('*')) {
+    //   const li = doc.createElement('li')
+    //   li.innerHTML = p.innerHTML.substr(1);
+    //   p.outerHTML = li.outerHTML;
+    // }
   }
   for (const a of doc.querySelectorAll('a[href*="news.ycombinator.com/item"]') as HTMLAnchorElement[]) {
     const url = new URL(a.href);
@@ -30,12 +36,12 @@ const blockquotify = (text: string) => {
 }
 
 const commentEl = ({ id, level, by, text, timeAgo, quality }: AComment) => {
-  return html`<tr class="athing comtr " id="${id}">
+  return html`<tr class="athing comtr" id="${id}">
     <td>
       <table border="0">
         <tbody>
           <tr>
-            <td class="ind"><img src="https://news.ycombinator.com/s.gif" height="1" width="${level * 40}"></td>
+            <td class="ind"><img src="s.gif" height="1" width="${level * 40}"></td>
             <td valign="top" class="votelinks">
               <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
                   href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D26443768#26444290">
@@ -47,7 +53,7 @@ const commentEl = ({ id, level, by, text, timeAgo, quality }: AComment) => {
                   <a href="user?id=${by}" class="hnuser">${by}</a> <span class="age"><a
                       href="item?id=${id}">${timeAgo}</a></span> <span id="unv_${id}"></span><span
                     class="par"></span> <a class="togg" n="1" href="javascript:void(0)"
-                    onclick="return toggle(event, ${id})"></a> <span class="storyon"></span>
+                    onclick="return toggle(event, ${id})">[–]</a> <span class="storyon"></span>
                 </span></div><br>
               <div class="comment">
                 <span class="commtext ${quality}">
