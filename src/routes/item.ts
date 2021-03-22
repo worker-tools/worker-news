@@ -90,7 +90,7 @@ function getItem({ searchParams }: RouteArgs)  {
 
   return new HTMLResponse(page({ title: 'Loading...', op: 'item' })(async () => {
     const post = await apiComments(id);
-    const { title, score, descendants, by, timeAgo, kids, text } = post;
+    const { title, score, descendants, by, timeAgo, kids } = post;
     return html`
       ${title 
         ? html` <script>document.title=decodeURIComponent("${unsafeHTML(encodeURIComponent(title))}")</script>` 
@@ -114,7 +114,6 @@ function getItem({ searchParams }: RouteArgs)  {
                   | <a href="item?id=${id}">${descendants}&nbsp;comments</a>
                 </td>
               </tr>
-              ${text ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(blockquotify(text))}</td></tr>` : ''}
               <tr style="height:10px"></tr>
               <tr>
                 <td colspan="2"></td>

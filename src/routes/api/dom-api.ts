@@ -79,7 +79,8 @@ export { getComments as comments }
 type _Stack = { _stack?: string[] };
 
 async function comments(response: Response) {
-  const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '<p>' }
+  const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0 }
+
   await consume(new HTMLRewriter()
     .on('.fatitem .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
@@ -93,7 +94,6 @@ async function comments(response: Response) {
     .on('.fatitem .subtext > .hnuser', { text({ text }) { post.by += text } })
     .on('.fatitem .subtext > .age', { text({ text }) { post.timeAgo += text } })
     .on('.fatitem .subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) } })
-    .on('.fatitem > tr[style="height:2px"] + tr > td:nth-child(2)', <ParsedElementHandler>{ innerHTML(html) { post.text += html } })
     .transform(response.clone())
   );
 
@@ -151,10 +151,6 @@ async function comments(response: Response) {
     //     }
     //   }
     // })
-
-  if (post.text === '<p>') {
-    delete post.text;
-  }
 
   post.kids = aMap(iter, e => {
     const comment = e.detail;
