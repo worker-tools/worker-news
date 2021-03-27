@@ -11,6 +11,7 @@ import { page } from './components';
 import { aThing } from './news';
 
 // Primitive support for 
+// Problem: item?id=26520957
 const blockquotify = (text: string) => {
   const doc = new DOMParser().parseFromString(text, 'text/html')
   for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
@@ -19,7 +20,7 @@ const blockquotify = (text: string) => {
       bq.innerHTML = p.innerHTML.substr(1);
       p.outerHTML = bq.outerHTML;
     }
-    // Test: item?id=26514612
+    // Test: item?id=26514612, item?id=26545082
     // if (p.textContent?.startsWith('-') || p.textContent?.startsWith('*')) {
     //   const li = doc.createElement('li')
     //   li.innerHTML = p.innerHTML.substr(1);

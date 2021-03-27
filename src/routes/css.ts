@@ -82,7 +82,7 @@ router.get('/news.css', () => {
     input    { font-family:monospace; font-size:10pt; }
     input[type="submit"] { font-family:var(--font); }
     textarea { font-family:monospace; font-size:10pt; }
-    blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); padding-left: 10px; }
+    blockquote { border-left: 3px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 10px; }
     
     a:link    { color:var(--text-strong); text-decoration:none; }
     a:visited { color:var(--text); text-decoration:none; }

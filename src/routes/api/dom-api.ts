@@ -76,8 +76,6 @@ async function getComments(id: number): Promise<Post> {
 
 export { getComments as comments }
 
-type _Stack = { _stack?: string[] };
-
 async function comments(response: Response) {
   const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0 }
 
@@ -98,7 +96,7 @@ async function comments(response: Response) {
   );
 
   // Crawl comment tree (well, technically it's just table rows...)
-  let comment!: Partial<AComment> & _Stack;
+  let comment!: Partial<AComment>;
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data');
@@ -108,12 +106,11 @@ async function comments(response: Response) {
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
         if (comment) {
-          delete comment._stack;
           data.dispatchEvent(new CustomEvent('data', { detail: comment }))
         }
 
         const id = Number(thing.getAttribute('id'))
-        comment = { id, type: 'comment', by: '', timeAgo: '', text: '<p>', _stack: ['p'] };
+        comment = { id, type: 'comment', by: '', timeAgo: '', text: '<p>' };
       },
     })
     .on('.comment-tree .athing.comtr[id] .ind > img[src="s.gif"][width]', {
@@ -134,7 +131,6 @@ async function comments(response: Response) {
     .on('.comment-tree .athing.comtr[id] .comment .reply', { element(el) { el.remove() }})
     .transform(response)).then(() => {
       if (comment) {
-        delete comment._stack;
         data.dispatchEvent(new CustomEvent('data', { detail: comment }))
       }
       iter.return();
