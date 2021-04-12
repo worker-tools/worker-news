@@ -63,21 +63,25 @@ const stripWWW = (url?: string) => {
 // }
 
 export const aThing = ({ id, url, title }: Post, index?: number) => {
-  const uRL = tryURL(url);
-  return html`
-    <tr class="athing" id="${id}">
-      <td align="right" valign="top" class="title"><span class="rank">${index != null ? `${index + 1}.` : ''}</span></td>
-      <td valign="top" class="votelinks">
-        <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-            href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=news">
-            <div class="votearrow" title="upvote"></div>
-          </a></center>
-      </td>
-      <td class="title"><a href="${url}"
-          class="storylink">${title}</a>${uRL?.host === self.location.host ? '' : html`<span
-          class="sitebit comhead"> (<a href="from?site=${uRL?.hostname}"><span
-              class="sitestr">${stripWWW(uRL?.hostname)}</span></a>)</span>`}</td>
-    </tr>`;
+  try {
+    const uRL = tryURL(url);
+    return html`
+      <tr class="athing" id="${id}">
+        <td align="right" valign="top" class="title"><span class="rank">${index != null ? `${index + 1}.` : ''}</span></td>
+        <td valign="top" class="votelinks">
+          <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
+              href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=news">
+              <div class="votearrow" title="upvote"></div>
+            </a></center>
+        </td>
+        <td class="title"><a href="${url}"
+            class="storylink">${title}</a>${uRL?.host === self.location.host ? '' : html`<span
+            class="sitebit comhead"> (<a href="from?site=${uRL?.hostname}"><span
+                class="sitestr">${stripWWW(uRL?.hostname)}</span></a>)</span>`}</td>
+      </tr>`;
+  } catch (err) {
+    throw html`<tr><td>Something went wrong</td><td>${err.message}</td></tr>`
+  }
 }
 
 const subtext = ({ id, timeAgo: time_ago, score, by, descendants }: Post) => {

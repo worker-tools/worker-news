@@ -15,7 +15,7 @@
  * It also works in a Service Worker, but due to the limit of 4 (?) open connections per page, it's noticeably slower.
  */
 
-import { Post, AComment } from './interface';
+import { Post, AComment, Stories } from './interface';
 import { default as PQueue } from 'p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
@@ -31,15 +31,18 @@ export const api = async <T>(path: string, useCache = true): Promise<T> => {
 
 const PAGE = 30;
 
-export async function* stories(page = 1): AsyncIterableIterator<Post> {
+export async function* stories(page = 1, type = Stories.TOP): AsyncIterableIterator<Post> {
   const ids: number[] = await api(`/v0/topstories.json`);
   const ps = ids
     .slice(PAGE * (page - 1), PAGE * page)
     .map(id => api<RESTPost>(`/v0/item/${id}.json`));
-  for await (const { kids: _, ...p } of ps) yield {
-    ...p,
-    timeAgo: formatDistanceToNowStrict(p.time * 1000, { addSuffix: true }),
-  };
+
+  for await (const { kids, ...p } of ps) {
+    yield {
+      ...p,
+      timeAgo: formatDistanceToNowStrict(p.time * 1000, { addSuffix: true }),
+    };
+  }
 }
 
 type RESTPost = Omit<Post, 'kids'> & { kids: number[], time: number }

@@ -8,24 +8,22 @@ import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
 import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 
-import { Post, AComment, Quality } from './interface';
+import { Post, AComment, Quality, Stories } from './interface';
 import { aMap } from './iter';
 
 const API = 'https://news.ycombinator.com'
 
-async function* getStories(p = 1) {
+export async function* stories(p = 1, type = Stories.TOP) {
   try {
     const url = new ParamsURL('/news', { p }, API).href;
-    yield* stories(await fetch(url));
+    yield* storiesInner(await fetch(url));
   } catch (err) {
     console.error(err)
     throw err;
   }
 }
 
-export { getStories as stories }
-
-async function* stories(response: Response) {
+async function* storiesInner(response: Response) {
   let post!: Partial<Post>;
 
   const data = new EventTarget();

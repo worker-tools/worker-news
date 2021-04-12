@@ -7,6 +7,18 @@ import { API, api } from './api/_old/api';
 
 const storage = new StorageArea('hn-cache');
 
+router.get('/__headers1', ({ event }) => {
+  event.respondWith(new Response('foo', { 
+    headers: [['set-cookie', 'foo=bar'], ['set-cookie', 'fizz=buzz']]
+  }))
+  throw Error();
+})
+
+router.get('/__headers2', () => {
+  const headers = new Headers([['set-cookie', 'foo=bar'], ['set-cookie', 'fizz=buzz']]);
+  return new Response('foo', { headers });
+})
+
 router.get('/__rewrite', async () => {
   const text = await new HTMLRewriter() 
     .on('#delete-me', {

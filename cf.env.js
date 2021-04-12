@@ -1,0 +1,2 @@
+self.WORKER_LOCATION = 'http://localhost:8787';
+self.CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE';
