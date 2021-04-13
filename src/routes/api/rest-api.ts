@@ -44,10 +44,11 @@ export async function* stories(page = 1, type = Stories.TOP): AsyncIterableItera
     .slice(PAGE * (page - 1), PAGE * page)
     .map(id => api<RESTPost>(`/v0/item/${id}.json`));
 
-  for await (const { kids, ...p } of ps) {
+  for await (const { kids, url, ...p } of ps) {
     yield {
       ...p,
       timeAgo: formatDistanceToNowStrict(p.time * 1000, { addSuffix: true }),
+      url: p.text != null ? `item?id=${p.id}` : url, 
     };
   }
 }

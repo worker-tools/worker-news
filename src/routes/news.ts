@@ -1,4 +1,4 @@
-import { html, HTMLResponse } from "@worker-tools/html";
+import { html, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
 
@@ -16,18 +16,18 @@ const stripWWW = (url?: string) => {
   return url;
 }
 
-export const aThing = ({ id, url, title }: Post, index?: number, type?: Stories) => {
+export const aThing = ({ type, id, url, title }: Post, index?: number, op?: Stories) => {
   try {
     const uRL = tryURL(url);
     return html`
       <tr class="athing" id="${id}">
         <td align="right" valign="top" class="title"><span class="rank">${index != null ? `${index + 1}.` : ''}</span></td>
-        <td valign="top" class="votelinks">
-          <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-              href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=${type}">
+        <td valign="top" class="votelinks"><center>${type === 'job'
+          ? html`<img src="s.gif" height="1" width="14">`
+          : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
+              href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=${op}">
               <div class="votearrow" title="upvote"></div>
-            </a></center>
-        </td>
+            </a>`}</center></td>
         <td class="title"><a href="${url}"
             class="storylink">${title}</a>${uRL?.host === self.location.host ? '' : html`<span
             class="sitebit comhead"> (<a href="from?site=${uRL?.hostname}"><span
@@ -38,24 +38,28 @@ export const aThing = ({ id, url, title }: Post, index?: number, type?: Stories)
   }
 }
 
-const subtext = ({ id, timeAgo: time_ago, score, by, descendants }: Post, _index?: number, type?: Stories) => {
+const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants }: Post, _index?: number, op?: Stories) => {
   return html`
     <tr>
       <td colspan="2"></td>
       <td class="subtext">
-        <span class="score" id="score_${id}">${score} points</span> by <a
-          href="user?id=${by}" class="hnuser">${by}</a> <span class="age"><a
-            href="item?id=${id}">${time_ago}</a></span>
+        ${type !== 'job' 
+          ? html`<span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}" class="hnuser">${by}</a>`
+          : ''}
+        <span class="age"><a href="item?id=${id}">${time_ago}</a></span>
         <span id="unv_${id}"></span>
-        | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=${type}" onclick="return hidestory(event, this, ${id})">hide</a> 
-        | <a href="item?id=${id}">${descendants}&nbsp;comments</a></td>
+        | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=${op}" onclick="return hidestory(event, this, ${id})">hide</a> 
+        ${type !== 'job' 
+          ? html`| <a href="item?id=${id}">${descendants === 0 
+            ? 'discuss' 
+            : unsafeHTML(`${descendants}&nbsp;comments`)}</a></td>`
+          : ''}
     </tr>
   `;
 }
 
 const rowEl = (arg: Post, i: number, type: Stories) => {
   // FIXME: support other types
-  if (arg.type !== 'story') return;
   return html`
     ${aThing(arg, i, type)}
     ${subtext(arg, i, type)}
