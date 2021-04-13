@@ -1,6 +1,11 @@
 import { html, HTMLContent } from "@worker-tools/html";
+import { Stories } from "./api/interface";
 
-export const headerEl = () => html`
+const topSel = (wrap: boolean, content: HTMLContent) => wrap
+  ? html`<span class="topsel">${content}</span>`
+  : content
+
+export const headerEl = ({ op }: { op: Stories | 'item' }) => html`
   <tr>
     <td id="header" bgcolor="#ff6600">
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
@@ -11,19 +16,20 @@ export const headerEl = () => html`
                   style="border:1px white solid;"></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a
                     href="news">Edge HN</a></b>
-                ${/*<!-- <a href="newest">new</a>
-                | <a href="threads?id=USER">threads</a>
-                | <a href="front">past</a>
-                | <a href="newcomments">comments</a>
-                | <a href="ask">ask</a>
-                | <a href="show">show</a>
-                | <a href="jobs">jobs</a>
-                | <a href="submit">submit</a> -->*/''}
+                ${topSel(op === Stories.NEW, html`<a href="newest">new</a>`)}
+                <!-- | <a href="threads?id=USER">threads</a> -->
+                <!-- | <a href="front">past</a> -->
+                <!-- | <a href="newcomments">comments</a> -->
+                | ${topSel(op === Stories.ASK, html`<a href="ask">ask</a>`)}
+                | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
+                <!-- | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)} -->
+                <!-- | <a href="submit">submit</a> -->
+                | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
                 ${/*<!-- <a id="me" href="user?id=USER">USER</a> (15) |
                 <a id="logout"
-                  href="logout?auth=9de03ab6010662d3c466871fadfcf5cf261698cc&amp;goto=news">logout</a> -->*/''}
+                  href="logout?auth=${'TODO'}&amp;goto=news">logout</a> -->*/''}
             </span></td>
           </tr>
         </tbody>
@@ -61,7 +67,7 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const page = ({ title, op }: { title?: string, op: string }) => (content: HTMLContent) => html`
+export const page = ({ title, op }: { title?: string, op: Stories | 'item' }) => (content: HTMLContent) => html`
   <html lang="en" op="${op}">
   <head>
     <meta name="referrer" content="origin">
@@ -75,7 +81,7 @@ export const page = ({ title, op }: { title?: string, op: string }) => (content:
     <center>
       <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
         <tbody>
-          ${headerEl()}
+          ${headerEl({ op })}
           ${content}
           ${footerEl()}
         </tbody>

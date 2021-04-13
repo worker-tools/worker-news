@@ -1,68 +1,22 @@
 import { html, HTMLResponse } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
-import { formatDistanceToNowStrict } from 'date-fns';
+// import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
 import { page } from './components';
 
-import { stories, Post } from './api/provider'
+import { stories, Post, Stories } from './api/provider'
 
 const tryURL = (url: string): URL | null => {
-  try {
-    return new URL(url, self.location.origin);
-  } catch {
-    return null;
-  }
+  try { return new URL(url, self.location.origin); } catch { return null }
 }
 
 const stripWWW = (url?: string) => {
-  if (url?.startsWith('www')) return url.substr(4);
-  else return url;
+  if (url?.substr(0, 4) === 'www.') return url.substr(4);
+  return url;
 }
 
-// export const aThing = ({ id, type, title, time, score, url, by, descendants, index }: any) => {
-//   return html`
-//     <tr class="athing" id="${id}">
-//       <td align="right" valign="top" class="title"><span class="rank">${index != null ? `${index + 1}.` : ''}</span></td>
-//       <td valign="top" class="votelinks">
-//         <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-//             href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=news">
-//             <div class="votearrow" title="upvote"></div>
-//           </a></center>
-//       </td>
-//       <td class="title"><a href="${url}"
-//           class="storylink">${title}</a><span
-//           class="sitebit comhead"> (<a href="from?site=${tryURL(url)?.hostname}"><span
-//               class="sitestr">${stripWWW(tryURL(url)?.hostname)}</span></a>)</span></td>
-//     </tr>`;
-// }
-
-// const colSpan2 = ({ id, type, title, time, score, url, by, descendants, index }: any) => {
-//   const date = new Date(time * 1000);
-//   return html`
-//     <tr>
-//       <td colspan="2"></td>
-//       <td class="subtext">
-//         <span class="score" id="score_${id}">${score} points</span> by <a
-//           href="user?id=${by}" class="hnuser">${by}</a> <span class="age"><a
-//             href="item?id=${id}">${formatDistanceToNowStrict(date, { addSuffix: true })}</a></span>
-//         <span id="unv_${id}"></span>
-//         | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=news" onclick="return hidestory(event, this, ${id})">hide</a> 
-//         | <a href="item?id=${id}">${descendants}&nbsp;comments</a></td>
-//     </tr>
-//   `;
-// }
-
-// const rowEl = (arg: any) => {
-//   // FIXME: support other types
-//   if (arg.type !== 'story') return;
-//   return html`
-//     ${aThing(arg)}
-//     ${colSpan2(arg)}
-//     <tr class="spacer" style="height:5px"></tr>`;
-// }
-
-export const aThing = ({ id, url, title }: Post, index?: number) => {
+export const aThing = ({ id, url, title }: Post, index?: number, type?: Stories) => {
   try {
     const uRL = tryURL(url);
     return html`
@@ -70,7 +24,7 @@ export const aThing = ({ id, url, title }: Post, index?: number) => {
         <td align="right" valign="top" class="title"><span class="rank">${index != null ? `${index + 1}.` : ''}</span></td>
         <td valign="top" class="votelinks">
           <center><a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-              href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=news">
+              href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=${type}">
               <div class="votearrow" title="upvote"></div>
             </a></center>
         </td>
@@ -84,7 +38,7 @@ export const aThing = ({ id, url, title }: Post, index?: number) => {
   }
 }
 
-const subtext = ({ id, timeAgo: time_ago, score, by, descendants }: Post) => {
+const subtext = ({ id, timeAgo: time_ago, score, by, descendants }: Post, _index?: number, type?: Stories) => {
   return html`
     <tr>
       <td colspan="2"></td>
@@ -93,26 +47,26 @@ const subtext = ({ id, timeAgo: time_ago, score, by, descendants }: Post) => {
           href="user?id=${by}" class="hnuser">${by}</a> <span class="age"><a
             href="item?id=${id}">${time_ago}</a></span>
         <span id="unv_${id}"></span>
-        | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=news" onclick="return hidestory(event, this, ${id})">hide</a> 
+        | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=${type}" onclick="return hidestory(event, this, ${id})">hide</a> 
         | <a href="item?id=${id}">${descendants}&nbsp;comments</a></td>
     </tr>
   `;
 }
 
-const rowEl2 = (arg: Post, i: number) => {
+const rowEl = (arg: Post, i: number, type: Stories) => {
   // FIXME: support other types
   if (arg.type !== 'story') return;
   return html`
-    ${aThing(arg, i)}
-    ${subtext(arg)}
+    ${aThing(arg, i, type)}
+    ${subtext(arg, i, type)}
     <tr class="spacer" style="height:5px"></tr>`;
 }
 
-export function news({ searchParams }: RouteArgs) {
+const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Edge HN');
 
-  return new HTMLResponse(page({ op: 'news' })(html`
+  return new HTMLResponse(page({ op: type })(html`
     <tr id="pagespace" title="" style="height:10px"></tr>
     <tr>
       <td>
@@ -120,17 +74,29 @@ export function news({ searchParams }: RouteArgs) {
           <tbody>
             ${async function* () {
               let i = (p - 1) * 30;
-              for await (const post of stories(p)) yield rowEl2(post, i++);
+              for await (const post of stories(p, type)) yield rowEl(post, i++, type);
             }}
             <tr class="morespace" style="height:10px"></tr>
             <tr>
               <td colspan="2"></td>
-              <td class="title"><a href="news?p=${p + 1}" class="morelink" rel="next">More</a></td>
+              <td class="title"><a href="${type}?p=${p + 1}" class="morelink" rel="next">More</a></td>
             </tr>
           </tbody>
         </table>
       </td>
     </tr>`));
-}
+};
+
+export const news = mkStories(Stories.TOP)
+export const newest = mkStories(Stories.NEW)
+export const best = mkStories(Stories.BEST)
+export const show = mkStories(Stories.SHOW)
+export const ask = mkStories(Stories.ASK)
+// export const jobs = mkStories(Stories.JOB)
 
 router.get('/news', news);
+router.get('/newest', newest);
+router.get('/best', best);
+router.get('/show', show);
+router.get('/ask', ask);
+// router.get('/jobs', jobs);

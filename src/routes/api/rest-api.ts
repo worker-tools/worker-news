@@ -32,8 +32,15 @@ export const api = async <T>(path: string, useCache = true): Promise<T> => {
 const PAGE = 30;
 
 export async function* stories(page = 1, type = Stories.TOP): AsyncIterableIterator<Post> {
-  const ids: number[] = await api(`/v0/topstories.json`);
-  const ps = ids
+  const href: string = type === Stories.TOP ? `/v0/topstories.json`
+    : type === Stories.NEW ? '/v0/newstories.json'
+    : type === Stories.BEST ? '/v0/beststories.json'
+    : type === Stories.SHOW ? '/v0/showstories.json'
+    : type === Stories.ASK ? '/v0/askstories.json'
+    : type === Stories.JOB ? '/v0/jobstories.json'
+    : (() => { throw new Error() })();
+
+  const ps = (await api<number[]>(href))
     .slice(PAGE * (page - 1), PAGE * page)
     .map(id => api<RESTPost>(`/v0/item/${id}.json`));
 
@@ -81,7 +88,6 @@ export async function comments(id: number): Promise<Post> {
   const kids = post.kids ?? [];
   const dict = new Map(kids.map(id => [id, resolvablePromise<RESTComment>()]));
   queue.addAll(kids.map(id => () => commentTask(id, queue, dict)));
-  // queue.clear();
   return { 
     ...post, 
     timeAgo: formatDistanceToNowStrict(post.time * 1000, { addSuffix: true }),

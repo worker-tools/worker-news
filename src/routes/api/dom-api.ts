@@ -15,15 +15,23 @@ const API = 'https://news.ycombinator.com'
 
 export async function* stories(p = 1, type = Stories.TOP) {
   try {
-    const url = new ParamsURL('/news', { p }, API).href;
-    yield* storiesInner(await fetch(url));
+    const pathname = type === Stories.TOP ? '/news'
+      : type === Stories.NEW ? '/newest'
+      : type === Stories.BEST ? '/best'
+      : type === Stories.SHOW ? '/show'
+      : type === Stories.ASK ? '/ask'
+      : type === Stories.JOB ? '/jobs'
+      : (() => { throw new Error() })();
+
+    const url = new ParamsURL(pathname, { p }, API);
+    yield* storiesGenerator(await fetch(url.href));
   } catch (err) {
     console.error(err)
     throw err;
   }
 }
 
-async function* storiesInner(response: Response) {
+async function* storiesGenerator(response: Response) {
   let post!: Partial<Post>;
 
   const data = new EventTarget();

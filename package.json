@@ -47,7 +47,7 @@
     "date-fns": "^2.20.1",
     "event-target-to-async-iter": "github:qwtel/event-target-to-async-iter",
     "kv-storage-polyfill": "^2.0.0",
-    "linkedom": "^0.7.1",
+    "linkedom": "^0.6.2",
     "msgpackr": "^1.2.7",
     "negotiated": "^1.0.2",
     "p-queue-browser": "github:qwtel/p-queue-browser",

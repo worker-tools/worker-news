@@ -1,7 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
-// import { DOMParser } from 'linkedom';
+import { DOMParser } from 'linkedom';
 
 import { RouteArgs, router } from "../router";
 
@@ -13,31 +13,31 @@ import { aThing } from './news';
 // Primitive support for 
 // Problem: item?id=26520957
 const blockquotify = (text: string) => {
-  // const doc = new DOMParser().parseFromString(text, 'text/html')
-  // for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
-  //   if (p.textContent?.startsWith('>')) {
-  //     const bq = doc.createElement('blockquote')
-  //     bq.innerHTML = p.innerHTML.substr(1);
-  //     p.outerHTML = bq.outerHTML;
-  //   }
-  //   // Test: item?id=26514612, item?id=26545082
-  //   // if (p.textContent?.startsWith('-') || p.textContent?.startsWith('*')) {
-  //   //   const li = doc.createElement('li')
-  //   //   li.innerHTML = p.innerHTML.substr(1);
-  //   //   p.outerHTML = li.outerHTML;
-  //   // }
-  // }
-  // for (const a of doc.querySelectorAll('a[href*="news.ycombinator.com/item"]') as HTMLAnchorElement[]) {
-  //   const url = new URL(a.href);
-  //   url.host = self.location.host;
-  //   url.protocol = self.location.protocol;
-  //   a.setAttribute('href', url.href);
-  // }
-  // return doc.toString();
-  return text;
+  const doc = new DOMParser().parseFromString(text, 'text/html')
+  for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
+    if (p.textContent?.startsWith('>')) {
+      const bq = doc.createElement('blockquote')
+      bq.innerHTML = p.innerHTML.substr(1);
+      p.outerHTML = bq.outerHTML;
+    }
+    // Test: item?id=26514612, item?id=26545082
+    // if (p.textContent?.startsWith('-') || p.textContent?.startsWith('*')) {
+    //   const li = doc.createElement('li')
+    //   li.innerHTML = p.innerHTML.substr(1);
+    //   p.outerHTML = li.outerHTML;
+    // }
+  }
+  for (const a of doc.querySelectorAll('a[href*="news.ycombinator.com"]') as HTMLAnchorElement[]) {
+    const url = new URL(a.href);
+    url.host = self.location.host;
+    url.protocol = self.location.protocol;
+    a.setAttribute('href', url.href);
+  }
+  return doc.toString();
+  // return text;
 }
 
-const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment) => {
+const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment, itemId: number) => {
   return html`<tr class="athing comtr" id="${id}">
     <td>
       <table border="0">
@@ -45,12 +45,13 @@ const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment)
           <tr>
             <td class="ind"><img src="s.gif" height="1" width="${level * 40}"></td>
             <td valign="top" class="votelinks">
-              <center>${deleted 
+              <center><img src="s.gif" height="1" width="14"></center>
+              ${/*<center>${deleted 
                 ? html`<img src="s.gif" height="1" width="14">`
                 : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
                   href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D26443768#26444290">
                   <div class="votearrow" title="upvote"></div>
-                </a>`}</center>
+                </a>`}</center>*/''}
             </td>
             <td class="default">
               <div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
@@ -65,7 +66,7 @@ const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment)
                   ${deleted ? '' : html`<div class="reply">
                     <p>
                       <font size="1">
-                        <u><a href="reply?id=${id}&amp;goto=item%3Fid%3D26443768%2326444290">reply</a></u>
+                        <u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${itemId}%23${id}">reply</a></u>
                       </font>
                     </p>
                   </div>`}
@@ -79,10 +80,10 @@ const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment)
   </tr>`;
 }
 
-async function* commentTree(kids: AsyncIterable<AComment>): AsyncGenerator<HTML> {
+async function* commentTree(kids: AsyncIterable<AComment>, itemId: number): AsyncGenerator<HTML> {
   for await (const item of kids) {
-    yield commentEl(item);
-    if (item.kids) yield* commentTree(item.kids);
+    yield commentEl(item, itemId);
+    if (item.kids) yield* commentTree(item.kids, itemId);
   }
 }
 
@@ -109,9 +110,8 @@ function getItem({ searchParams }: RouteArgs)  {
                   <span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}"
                     class="hnuser">${by}</a> <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
                   <span id="unv_${id}"></span> 
-                  | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D26443768">hide</a>
-                  | <a href="https://hn.algolia.com/?query=Speed%20of%20Rust%20vs.%20C&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0"
-                    class="hnpast">past</a> 
+                  | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${post.id}">hide</a>
+                  | <a href="https://hn.algolia.com/?query=Speed%20of%20Rust%20vs.%20C&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a> 
                   | <a href="fave?id=${id}&amp;auth=${'TODO'}">favorite</a> 
                   | <a href="item?id=${id}">${descendants}&nbsp;comments</a>
                 </td>
@@ -122,7 +122,7 @@ function getItem({ searchParams }: RouteArgs)  {
                 <td>
                   <form method="post" action="comment"><input type="hidden" name="parent" value="${id}"><input
                       type="hidden" name="goto" value="item?id=${id}"><input type="hidden" name="hmac"
-                      value="8af18e7b0722de602e6630756ea267f0f8fb60c5"><textarea name="text" rows="6"
+                      value="${'TODO'}"><textarea name="text" rows="6"
                       cols="60" disabled></textarea>
                     <br><br><input type="submit" value="add comment" disabled>
                   </form>
@@ -132,7 +132,7 @@ function getItem({ searchParams }: RouteArgs)  {
           </table><br><br>
           <table border="0" class="comment-tree">
             <tbody>
-              ${kids && commentTree(kids)}
+              ${kids && commentTree(kids, post.id)}
             </tbody>
           </table>
           <br><br>

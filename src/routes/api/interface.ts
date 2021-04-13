@@ -1,7 +1,10 @@
 export enum Stories {
-  TOP,
-  NEWEST,
-  BEST,
+  TOP = 'news',
+  NEW = 'newest',
+  BEST = 'best',
+  ASK = 'ask',
+  SHOW = 'show',
+  JOB = 'job',
 }
 
 export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
