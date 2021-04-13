@@ -2,16 +2,20 @@ import { seeOther } from "@worker-tools/response-creators";
 import { router } from "../router";
 
 import { news } from './news';
-
 import './item';
 import './css';
-import './crawl';
+// import './crawl';
 
+router.get('/favicon.ico', () => fetch('https://news.ycombinator.com/favicon.ico'))
 router.get('/s.gif', () => fetch('https://news.ycombinator.com/s.gif'))
+router.get('/y18.gif', () => fetch('https://news.ycombinator.com/y18.gif'))
 router.get('/grayarrow.gif', () => fetch('https://news.ycombinator.com/grayarrow.gif'))
 router.get('/grayarrow2x.gif', () => fetch('https://news.ycombinator.com/grayarrow2x.gif'))
-router.get('/newsfaq.html', () => seeOther('https://news.ycombinator.com/newsfaq.html'))
-router.get('/newsguidelines.html', () => seeOther('https://news.ycombinator.com/newsguidelines.html'))
-router.get('/showhn.html', () => seeOther('https://news.ycombinator.com/showhn.html'))
-router.get('/security.html', () => seeOther('https://news.ycombinator.com/security.html'))
+router.get('/hn.js', () => fetch('https://news.ycombinator.com/hn.js'))
+router.get('/yc.css', () => fetch('https://news.ycombinator.com/yc.css'))
+router.get('/yc500.gif', () => fetch('https://news.ycombinator.com/yc500.gif'))
+router.get('/newsfaq.html', () => fetch('https://news.ycombinator.com/newsfaq.html'))
+router.get('/newsguidelines.html', () => fetch('https://news.ycombinator.com/newsguidelines.html'))
+router.get('/showhn.html', () => fetch('https://news.ycombinator.com/showhn.html'))
+router.get('/security.html', () => fetch('https://news.ycombinator.com/security.html'))
 router.get('/', news);

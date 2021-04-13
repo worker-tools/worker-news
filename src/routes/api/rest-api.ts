@@ -94,7 +94,9 @@ export async function comments(id: number): Promise<Post> {
   return { 
     ...post, 
     timeAgo: formatDistanceToNowStrict(post.time * 1000, { addSuffix: true }),
-    text: post.text != null ? blockquotify(post.text) : null,
+    title: post.title || (post.text ? post.text.split(' ').splice(0, 11).join(' ') + ' ...' : ''),
+    text: post.text != null ? blockquotify('<p>' + post.text) : null,
+    quality: 'c00', // REST API doesn't support quality..
     url: post.text != null ? `item?id=${post.id}`: post.url,
     kids: crawlCommentTree(kids, dict),
   };

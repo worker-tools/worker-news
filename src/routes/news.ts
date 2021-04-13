@@ -5,7 +5,7 @@ import { notFound } from "@worker-tools/response-creators";
 import { RouteArgs, router } from "../router";
 import { page } from './components';
 
-import { stories, Post, Stories } from './api/provider'
+import { stories, Post, Stories, AComment } from './api/provider'
 
 const tryURL = (url: string): URL | null => {
   try { return new URL(url, self.location.origin); } catch { return null }
@@ -13,7 +13,9 @@ const tryURL = (url: string): URL | null => {
 
 const stripWWW = (url?: URL | null) => {
   if (!url) return '';
-  if (url.hostname.substr(0, 4) === 'www.') url.hostname = url.hostname.substr(4);
+  if (url.hostname.substr(0, 4) === 'www.') {
+    url.hostname = url.hostname.substr(4);
+  }
   if (['github.com', 'gitlab.com'].includes(url.hostname)) {
     const p = url.pathname.substr(1).replace(/\/+/g, '/').split('/');
     return url.hostname + '/' + p[0];
@@ -74,6 +76,15 @@ const rowEl = (arg: Post, i: number, type: Stories) => {
     <tr class="spacer" style="height:5px"></tr>`;
 }
 
+const x = {
+  [Stories.TOP]: '',
+  [Stories.JOB]: 'jobs', // sic!
+  [Stories.ASK]: 'Ask',
+  [Stories.BEST]: 'Top Links',
+  [Stories.NEW]: 'New Links',
+  [Stories.SHOW]: 'Show',
+}
+
 const messageEl = (message: HTMLContent, marginBottom = 12) => html`
   <tr style="height:6px"></tr>
   <tr><td colspan="2"></td><td>${message}</td></tr>
@@ -83,8 +94,8 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Edge HN');
 
-  return new HTMLResponse(page({ op: type })(html`
-    <tr id="pagespace" title="" style="height:10px"></tr>
+  return new HTMLResponse(page({ op: type, title: x[type] })(html`
+    <tr id="pagespace" title="${x[type]}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">

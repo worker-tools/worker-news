@@ -65,7 +65,7 @@ async function* storiesGenerator(response: Response) {
     });
 
   for await (const { detail: post } of iter) {
-    post.type = 'story';
+    post.type = post.type || 'story';
     if (!post.by) { // No users post this = job ads
       post.type = 'job';
     }
@@ -73,23 +73,24 @@ async function* storiesGenerator(response: Response) {
   }
 }
 
-async function getComments(id: number): Promise<Post> {
+export async function comments(id: number): Promise<Post> {
   const url = new ParamsURL('/item', { id }, API).href;
   const body = await fetch(url)
-  return comments(body);
+  return commentsGenerator(body);
 }
 
-export { getComments as comments }
+async function commentsGenerator(response: Response) {
+  const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '' }
 
-async function comments(response: Response) {
-  const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '<p>' }
   await consume(new HTMLRewriter()
+    .on('#pagespace', { 
+      element(el) { post.title = el.getAttribute('title') as string }
+    })
     .on('.fatitem .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
     .on('.fatitem .title a.storylink', {
       element(link) { post.url = link.getAttribute('href') || undefined; },
-      text({ text }) { post.title += text },
     })
     // FIXME: concatenate text before parseInt jtbs..
     .on('.fatitem .subtext > .score', { 
@@ -105,6 +106,19 @@ async function comments(response: Response) {
       text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
     .on('.fatitem > tr[style="height:2px"] + tr > td:nth-child(2)', <ParsedElementHandler>{ 
+      innerHTML(html) { post.text += html }
+    })
+    .on('.fatitem .athing[id] .hnuser', {
+      text({ text }) { post.by += text }
+    })
+    .on('.fatitem .athing[id] .age', {
+      text({ text }) { post.timeAgo += text }
+    })
+    .on('.fatitem .athing[id] .commtext', <ParsedElementHandler>{
+      element(el) { 
+        post.type = 'comment'; 
+        post.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality; 
+      },
       innerHTML(html) { post.text += html }
     })
     .transform(response.clone())
@@ -123,7 +137,7 @@ async function comments(response: Response) {
         if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
 
         const id = Number(thing.getAttribute('id'))
-        comment = { id, type: 'comment', by: '', timeAgo: '', text: '<p>' };
+        comment = { id, type: 'comment', by: '', timeAgo: '', text: '' };
       },
     })
     .on('.comment-tree .athing.comtr[id] .ind > img[src="s.gif"][width]', {
@@ -138,8 +152,8 @@ async function comments(response: Response) {
       text({ text }) { comment.timeAgo += text }
     })
     .on('.comment-tree .athing.comtr[id] .commtext', <ParsedElementHandler>{
-      element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality; },
-      innerHTML(text) { comment.text += text }
+      element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
+      innerHTML(html) { comment.text += html }
     })
     .on('.comment-tree .athing.comtr[id] .comment .reply', { element(el) { el.remove() }})
     .transform(response)).then(() => {
@@ -147,22 +161,22 @@ async function comments(response: Response) {
       iter.return();
     });
 
-  if (post.text === '<p>') {
-    delete post.text;
-  } else if (post.text) {
-    post.text = blockquotify(post.text)
+  if (post.text) {
+    post.text = blockquotify('<p>' + post.text)
   }
 
-  post.kids = aMap(iter, e => {
-    const comment = e.detail;
-    if (comment.text === '<p>') {
+  post.kids = aMap(iter, ({ detail: comment }) => {
+    if (comment.text) {
+      comment.text = blockquotify('<p>' + comment.text)
+    } else {
+      // ??
       comment.deleted = true;
       comment.text = ' [flagged] ';
-    } else if (comment.text) {
-      comment.text = blockquotify(comment.text)
     }
     return comment;
   });
+
+  console.log(post)
 
   return post as Post;
 };

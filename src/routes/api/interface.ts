@@ -39,6 +39,7 @@ export interface Post extends AThing {
   timeAgo: string | null,
   descendants: number | null,
   text: string | null
+  quality: Quality,
   poll?: Poll[] | null,
   more_comments_id?: string | null;
 }

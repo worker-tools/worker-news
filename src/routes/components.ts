@@ -12,7 +12,7 @@ export const headerEl = ({ op }: { op: Stories | 'item' }) => html`
         <tbody>
           <tr>
             <td style="width:18px;padding-right:4px"><a href="/"><img
-                  src="https://news.ycombinator.com/y18.gif" width="18" height="18"
+                  src="y18.gif" width="18" height="18"
                   style="border:1px white solid;"></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a
                     href="news">Edge HN</a></b>
@@ -40,7 +40,7 @@ export const headerEl = ({ op }: { op: Stories | 'item' }) => html`
 
 export const footerEl = () => html`
   <tr>
-    <td><img src="https://news.ycombinator.com/s.gif" height="10" width="0">
+    <td><img src="s.gif" height="10" width="0">
       <table width="100%" cellspacing="0" cellpadding="1">
         <tbody>
           <tr>
@@ -53,7 +53,7 @@ export const footerEl = () => html`
           href="https://workers.cloudflare.com">Cloudflare Workers</a>.</center><br>
       <center><span class="yclinks"><a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>
-          | <a href="lists">Lists</a>
+          <!-- | <a href="lists">Lists</a> -->
           | <a href="https://github.com/HackerNews/API">API</a>
           | <a href="security.html">Security</a>
           | <a href="https://www.ycombinator.com/legal/">Legal</a>
@@ -73,7 +73,7 @@ export const page = ({ title, op }: { title?: string, op: Stories | 'item' }) =>
     <meta name="referrer" content="origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="news.css">
-    <link rel="shortcut icon" href="https://news.ycombinator.com/favicon.ico">
+    <link rel="shortcut icon" href="favicon.ico">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Edge HN` : 'Edge HN'}</title>
   </head>
@@ -87,6 +87,6 @@ export const page = ({ title, op }: { title?: string, op: Stories | 'item' }) =>
         </tbody>
       </table>
     </center>
-    <script type="text/javascript" src="https://news.ycombinator.com/hn.js"></script>
+    <script type="text/javascript" src="hn.js"></script>
   </body>
   </html>`;

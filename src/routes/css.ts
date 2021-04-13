@@ -1,10 +1,8 @@
-import { html, css, HTMLResponse } from "@worker-tools/html";
+import { css, HTMLResponse } from "@worker-tools/html";
 import { router } from "../router";
 
 router.get('/news.css', () => {
   const response = new HTMLResponse(css`
-    /* .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; clip: rect(0,0,0,0); border: 0; } */
-
     :root {
       --font: Verdana, Geneva, sans-serif;
       --blue-h: 227;
@@ -80,9 +78,9 @@ router.get('/news.css', () => {
     .subtext td { font-family:var(--font); font-size:  7pt; color:var(--text); }
     
     input    { font-family:monospace; font-size:10pt; }
-    input[type="submit"] { font-family:var(--font); }
+    input[type=\\"submit\\"] { font-family:var(--font); }
     textarea { font-family:monospace; font-size:10pt; }
-    blockquote { border-left: 3px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 10px; }
+    blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 9px; }
     
     a:link    { color:var(--text-strong); text-decoration:none; }
     a:visited { color:var(--text); text-decoration:none; }
