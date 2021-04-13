@@ -5,7 +5,7 @@ import { DOMParser } from 'linkedom';
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, AComment } from "./api/provider";
+import { comments as apiComments, AComment, Post } from "./api/provider";
 
 import { page } from './components';
 import { aThing } from './news';
@@ -87,13 +87,26 @@ async function* commentTree(kids: AsyncIterable<AComment>, itemId: number): Asyn
   }
 }
 
+const itemSubtext = ({ id, title, score, by, timeAgo, descendants }: Post) => html`<tr>
+  <td colspan="2"></td>
+  <td class="subtext">
+    <span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}"
+      class="hnuser">${by}</a> <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
+    <span id="unv_${id}"></span> 
+    | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${id}">hide</a>
+    | <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a> 
+    | <a href="fave?id=${id}&amp;auth=${'TODO'}">favorite</a> 
+    | <a href="item?id=${id}">${descendants}&nbsp;comments</a>
+  </td>
+</tr>`;
+
 function getItem({ searchParams }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
 
   return new HTMLResponse(page({ title: 'Loading...', op: 'item' })(async () => {
     const post = await apiComments(id);
-    const { title, score, descendants, by, timeAgo, kids } = post;
+    const { title, text, kids } = post;
     return html`
       ${title 
         ? html` <script>document.title=decodeURIComponent("${unsafeHTML(encodeURIComponent(title))}")</script>` 
@@ -104,18 +117,10 @@ function getItem({ searchParams }: RouteArgs)  {
           <table class="fatitem" border="0">
             <tbody>
               ${aThing(post)}
-              <tr>
-                <td colspan="2"></td>
-                <td class="subtext">
-                  <span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}"
-                    class="hnuser">${by}</a> <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
-                  <span id="unv_${id}"></span> 
-                  | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${post.id}">hide</a>
-                  | <a href="https://hn.algolia.com/?query=Speed%20of%20Rust%20vs.%20C&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a> 
-                  | <a href="fave?id=${id}&amp;auth=${'TODO'}">favorite</a> 
-                  | <a href="item?id=${id}">${descendants}&nbsp;comments</a>
-                </td>
-              </tr>
+              ${itemSubtext(post)}
+              ${text != null 
+                ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(blockquotify(text))}</td></tr>`
+                : ''}
               <tr style="height:10px"></tr>
               <tr>
                 <td colspan="2"></td>

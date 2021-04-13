@@ -92,5 +92,7 @@ export async function comments(id: number): Promise<Post> {
   return { 
     ...post, 
     timeAgo: formatDistanceToNowStrict(post.time * 1000, { addSuffix: true }),
-    kids: crawlCommentTree(kids, dict) };
+    url: post.text != null ? `item?id=${post.id}`: post.url,
+    kids: crawlCommentTree(kids, dict),
+  };
 }
