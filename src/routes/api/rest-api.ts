@@ -19,6 +19,7 @@ import { Post, AComment, Stories } from './interface';
 import { default as PQueue } from 'p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
+import { blockquotify } from './util';
 
 const CONCURRENCY = 128;
 
@@ -44,11 +45,12 @@ export async function* stories(page = 1, type = Stories.TOP): AsyncIterableItera
     .slice(PAGE * (page - 1), PAGE * page)
     .map(id => api<RESTPost>(`/v0/item/${id}.json`));
 
-  for await (const { kids, url, ...p } of ps) {
+  for await (const { kids, text, url, ...p } of ps) {
     yield {
       ...p,
       timeAgo: formatDistanceToNowStrict(p.time * 1000, { addSuffix: true }),
-      url: p.text != null ? `item?id=${p.id}` : url, 
+      text: text != null ? blockquotify(text) : null,
+      url: text != null ? `item?id=${p.id}` : url, 
     };
   }
 }
@@ -75,7 +77,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
         ...rest, 
         level, 
         quality: 'c00', // REST API doesn't support quality..
-        text: text && '<p>' + text,
+        text: text && blockquotify('<p>' + text),
         timeAgo: formatDistanceToNowStrict(item.time * 1000, { addSuffix: true }),
         kids: crawlCommentTree(kids || [], dict, level + 1),
       };
@@ -92,6 +94,7 @@ export async function comments(id: number): Promise<Post> {
   return { 
     ...post, 
     timeAgo: formatDistanceToNowStrict(post.time * 1000, { addSuffix: true }),
+    text: post.text != null ? blockquotify(post.text) : null,
     url: post.text != null ? `item?id=${post.id}`: post.url,
     kids: crawlCommentTree(kids, dict),
   };

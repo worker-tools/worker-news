@@ -22,7 +22,7 @@ export const headerEl = ({ op }: { op: Stories | 'item' }) => html`
                 <!-- | <a href="newcomments">comments</a> -->
                 | ${topSel(op === Stories.ASK, html`<a href="ask">ask</a>`)}
                 | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
-                <!-- | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)} -->
+                | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)}
                 <!-- | <a href="submit">submit</a> -->
                 | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
               </span></td>

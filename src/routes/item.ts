@@ -1,7 +1,6 @@
 import { html, unsafeHTML, HTMLResponse, HTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
-import { DOMParser } from 'linkedom';
 
 import { RouteArgs, router } from "../router";
 
@@ -9,33 +8,6 @@ import { comments as apiComments, AComment, Post } from "./api/provider";
 
 import { page } from './components';
 import { aThing } from './news';
-
-// Primitive support for 
-// Problem: item?id=26520957
-const blockquotify = (text: string) => {
-  const doc = new DOMParser().parseFromString(text, 'text/html')
-  for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
-    if (p.textContent?.startsWith('>')) {
-      const bq = doc.createElement('blockquote')
-      bq.innerHTML = p.innerHTML.substr(1);
-      p.outerHTML = bq.outerHTML;
-    }
-    // Test: item?id=26514612, item?id=26545082
-    // if (p.textContent?.startsWith('-') || p.textContent?.startsWith('*')) {
-    //   const li = doc.createElement('li')
-    //   li.innerHTML = p.innerHTML.substr(1);
-    //   p.outerHTML = li.outerHTML;
-    // }
-  }
-  for (const a of doc.querySelectorAll('a[href*="news.ycombinator.com"]') as HTMLAnchorElement[]) {
-    const url = new URL(a.href);
-    url.host = self.location.host;
-    url.protocol = self.location.protocol;
-    a.setAttribute('href', url.href);
-  }
-  return doc.toString();
-  // return text;
-}
 
 const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment, itemId: number) => {
   return html`<tr class="athing comtr" id="${id}">
@@ -62,7 +34,7 @@ const commentEl = ({ id, level, by, text, timeAgo, quality, deleted }: AComment,
                 </span></div><br>
               <div class="comment">
                 <span class="commtext ${quality}">
-                  ${deleted ? '[flagged]' : text ? unsafeHTML(blockquotify(text)) : ' '}
+                  ${deleted ? '[flagged]' : text ? unsafeHTML(text) : ' '}
                   ${deleted ? '' : html`<div class="reply">
                     <p>
                       <font size="1">
@@ -93,7 +65,7 @@ const itemSubtext = ({ id, title, score, by, timeAgo, descendants }: Post) => ht
     <span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}"
       class="hnuser">${by}</a> <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
     <span id="unv_${id}"></span> 
-    | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${id}">hide</a>
+    <!-- | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${id}">hide</a> -->
     | <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a> 
     | <a href="fave?id=${id}&amp;auth=${'TODO'}">favorite</a> 
     | <a href="item?id=${id}">${descendants}&nbsp;comments</a>
@@ -119,7 +91,7 @@ function getItem({ searchParams }: RouteArgs)  {
               ${aThing(post)}
               ${itemSubtext(post)}
               ${text != null 
-                ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(blockquotify(text))}</td></tr>`
+                ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(text)}</td></tr>`
                 : ''}
               <tr style="height:10px"></tr>
               <tr>

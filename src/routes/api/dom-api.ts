@@ -10,25 +10,21 @@ import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worke
 
 import { Post, AComment, Quality, Stories } from './interface';
 import { aMap } from './iter';
+import { blockquotify } from './util';
 
 const API = 'https://news.ycombinator.com'
 
 export async function* stories(p = 1, type = Stories.TOP) {
-  try {
-    const pathname = type === Stories.TOP ? '/news'
-      : type === Stories.NEW ? '/newest'
-      : type === Stories.BEST ? '/best'
-      : type === Stories.SHOW ? '/show'
-      : type === Stories.ASK ? '/ask'
-      : type === Stories.JOB ? '/jobs'
-      : (() => { throw new Error() })();
+  const pathname = type === Stories.TOP ? '/news'
+    : type === Stories.NEW ? '/newest'
+    : type === Stories.BEST ? '/best'
+    : type === Stories.SHOW ? '/show'
+    : type === Stories.ASK ? '/ask'
+    : type === Stories.JOB ? '/jobs'
+    : (() => { throw new Error() })();
 
-    const url = new ParamsURL(pathname, { p }, API);
-    yield* storiesGenerator(await fetch(url.href));
-  } catch (err) {
-    console.error(err)
-    throw err;
-  }
+  const url = new ParamsURL(pathname, { p }, API);
+  yield* storiesGenerator(await fetch(url.href));
 }
 
 async function* storiesGenerator(response: Response) {
@@ -51,12 +47,20 @@ async function* storiesGenerator(response: Response) {
       text({ text }) { post.title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
-    .on('.subtext > .score', { text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) } })
-    .on('.subtext > .hnuser', { text({ text }) { post.by += text } })
-    .on('.subtext > .age', { text({ text }) { post.timeAgo += text } })
-    .on('.subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) } })
+    .on('.subtext > .score', {
+      text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) }
+    })
+    .on('.subtext > .hnuser', {
+      text({ text }) { post.by += text }
+    })
+    .on('.subtext > .age', {
+      text({ text }) { post.timeAgo += text }
+    })
+    .on('.subtext > a[href^=item]', {
+      text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) }
+    })
     .transform(response)).then(() => {
-      data.dispatchEvent(new CustomEvent('data', { detail: post }))
+      if (post) data.dispatchEvent(new CustomEvent('data', { detail: post }))
       iter.return();
     });
 
@@ -70,14 +74,9 @@ async function* storiesGenerator(response: Response) {
 }
 
 async function getComments(id: number): Promise<Post> {
-  try {
-    const url = new ParamsURL('/item', { id }, API).href;
-    const body = await fetch(url)
-    return comments(body);
-  } catch (err) {
-    console.error(err)
-    throw err;
-  }
+  const url = new ParamsURL('/item', { id }, API).href;
+  const body = await fetch(url)
+  return comments(body);
 }
 
 export { getComments as comments }
@@ -93,11 +92,21 @@ async function comments(response: Response) {
       text({ text }) { post.title += text },
     })
     // FIXME: concatenate text before parseInt jtbs..
-    .on('.fatitem .subtext > .score', { text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) } })
-    .on('.fatitem .subtext > .hnuser', { text({ text }) { post.by += text } })
-    .on('.fatitem .subtext > .age', { text({ text }) { post.timeAgo += text } })
-    .on('.fatitem .subtext > a[href^=item]', { text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) } })
-    .on('.fatitem > tr[style="height:2px"] + tr > td:nth-child(2)', <ParsedElementHandler>{ innerHTML(html) { post.text += html } })
+    .on('.fatitem .subtext > .score', { 
+      text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) }
+    })
+    .on('.fatitem .subtext > .hnuser', { 
+      text({ text }) { post.by += text }
+    })
+    .on('.fatitem .subtext > .age', { 
+      text({ text }) { post.timeAgo += text }
+    })
+    .on('.fatitem .subtext > a[href^=item]', { 
+      text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) }
+    })
+    .on('.fatitem > tr[style="height:2px"] + tr > td:nth-child(2)', <ParsedElementHandler>{ 
+      innerHTML(html) { post.text += html }
+    })
     .transform(response.clone())
   );
 
@@ -111,9 +120,7 @@ async function comments(response: Response) {
   consume(new HTMLRewriter()
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
-        if (comment) {
-          data.dispatchEvent(new CustomEvent('data', { detail: comment }))
-        }
+        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
 
         const id = Number(thing.getAttribute('id'))
         comment = { id, type: 'comment', by: '', timeAgo: '', text: '<p>' };
@@ -136,26 +143,14 @@ async function comments(response: Response) {
     })
     .on('.comment-tree .athing.comtr[id] .comment .reply', { element(el) { el.remove() }})
     .transform(response)).then(() => {
-      if (comment) {
-        data.dispatchEvent(new CustomEvent('data', { detail: comment }))
-      }
+      if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
       iter.return();
-    })
-    // .on('.comment-tree .athing.comtr[id] .commtext *', {
-    //   element(el: Element) {
-    //     const attrs = [...(<any>el).attributes].map(([n, v]) => `${n}="${v}"`).join(' ');
-    //     comment.text += `<${el.tagName}${attrs ? ' ' + attrs : ''}>`;
-    //     comment._stack?.unshift(el.tagName)
-    //   },
-    //   text({ lastInTextNode }) {
-    //     let pop: string | undefined; if (lastInTextNode && (pop = comment._stack?.shift())) {
-    //       comment.text += `</${pop}>`;
-    //     }
-    //   }
-    // })
+    });
 
   if (post.text === '<p>') {
     delete post.text;
+  } else if (post.text) {
+    post.text = blockquotify(post.text)
   }
 
   post.kids = aMap(iter, e => {
@@ -163,6 +158,8 @@ async function comments(response: Response) {
     if (comment.text === '<p>') {
       comment.deleted = true;
       comment.text = ' [flagged] ';
+    } else if (comment.text) {
+      comment.text = blockquotify(comment.text)
     }
     return comment;
   });
@@ -173,7 +170,7 @@ async function comments(response: Response) {
 /** Consumes a `Response` body while discarding all chunks. 
  *  Useful for pulling data into `HTMLRewriter`. */
 async function consume(r: Response) {
-  const reader = r.body!.getReader()
+  const reader = r.body!.getReader();
   while (!(await reader.read()).done);
 }
 
