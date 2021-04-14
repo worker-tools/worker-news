@@ -5,7 +5,7 @@ import { notFound } from "@worker-tools/response-creators";
 import { RouteArgs, router } from "../router";
 import { page } from './components';
 
-import { stories, Post, Stories, AComment } from './api/provider'
+import { stories, APost, Stories, AComment } from './api/provider'
 
 const tryURL = (url: string): URL | null => {
   try { return new URL(url, self.location.origin); } catch { return null }
@@ -26,7 +26,7 @@ const stripWWW = (url?: URL | null) => {
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
-export const aThing = ({ type, id, url, title }: Post, index?: number, op?: Stories) => {
+export const aThing = ({ type, id, url, title }: APost, index?: number, op?: Stories) => {
   try {
     const uRL = tryURL(url);
     return html`
@@ -48,7 +48,7 @@ export const aThing = ({ type, id, url, title }: Post, index?: number, op?: Stor
   }
 }
 
-const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants }: Post, _index?: number, op?: Stories) => {
+const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants }: APost, _index?: number, op?: Stories) => {
   return html`
     <tr>
       <td colspan="2"></td>
@@ -68,7 +68,7 @@ const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants }: Post, 
   `;
 }
 
-const rowEl = (arg: Post, i: number, type: Stories) => {
+const rowEl = (arg: APost, i: number, type: Stories) => {
   // FIXME: support other types
   return html`
     ${aThing(arg, i, type)}

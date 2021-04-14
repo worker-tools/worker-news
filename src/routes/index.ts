@@ -1,4 +1,3 @@
-import { seeOther } from "@worker-tools/response-creators";
 import { router } from "../router";
 
 import { news } from './news';
@@ -18,4 +17,5 @@ router.get('/newsfaq.html', () => fetch('https://news.ycombinator.com/newsfaq.ht
 router.get('/newsguidelines.html', () => fetch('https://news.ycombinator.com/newsguidelines.html'))
 router.get('/showhn.html', () => fetch('https://news.ycombinator.com/showhn.html'))
 router.get('/security.html', () => fetch('https://news.ycombinator.com/security.html'))
+
 router.get('/', news);

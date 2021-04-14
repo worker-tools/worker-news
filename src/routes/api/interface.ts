@@ -4,7 +4,7 @@ export enum Stories {
   BEST = 'best',
   ASK = 'ask',
   SHOW = 'show',
-  JOB = 'job',
+  JOB = 'jobs',
 }
 
 export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
@@ -32,7 +32,7 @@ export interface Poll {
 }
 
 export type Type = "job" | "story" | "comment" | "poll" | "pollopt";
-export interface Post extends AThing {
+export interface APost extends AThing {
   title: string,
   url: string
   score: number | null,

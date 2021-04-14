@@ -4,7 +4,7 @@ import { notFound } from "@worker-tools/response-creators";
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, AComment, Post } from "./api/provider";
+import { comments as apiComments, AComment, APost } from "./api/provider";
 
 import { page } from './components';
 import { aThing } from './news';
@@ -62,7 +62,7 @@ async function* commentTree(kids: AsyncIterable<AComment>, itemId: number): Asyn
   }
 }
 
-const itemSubtext = ({ id, title, score, by, timeAgo, descendants }: Post) => html`<tr>
+const itemSubtext = ({ id, title, score, by, timeAgo, descendants }: APost) => html`<tr>
   <td colspan="2"></td>
   <td class="subtext">
     <span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}"

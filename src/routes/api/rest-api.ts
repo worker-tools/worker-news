@@ -15,7 +15,7 @@
  * It also works in a Service Worker, but due to the limit of 4 (?) open connections per page, it's noticeably slower.
  */
 
-import { Post, AComment, Stories } from './interface';
+import { APost, AComment, Stories } from './interface';
 import { default as PQueue } from 'p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
@@ -32,7 +32,7 @@ export const api = async <T>(path: string, useCache = true): Promise<T> => {
 
 const PAGE = 30;
 
-export async function* stories(page = 1, type = Stories.TOP): AsyncIterableIterator<Post> {
+export async function* stories(page = 1, type = Stories.TOP): AsyncIterableIterator<APost> {
   const href: string = type === Stories.TOP ? `/v0/topstories.json`
     : type === Stories.NEW ? '/v0/newstories.json'
     : type === Stories.BEST ? '/v0/beststories.json'
@@ -55,7 +55,7 @@ export async function* stories(page = 1, type = Stories.TOP): AsyncIterableItera
   }
 }
 
-type RESTPost = Omit<Post, 'kids'> & { kids: number[], time: number }
+type RESTPost = Omit<APost, 'kids'> & { kids: number[], time: number }
 type RESTComment = Omit<AComment, 'kids'> & { kids: number[], time: number }
 
 async function commentTask(id: number, queue: PQueue, dict: Map<number, ResolvablePromise<RESTComment>>) {
@@ -85,7 +85,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
   }
 }
 
-export async function comments(id: number): Promise<Post> {
+export async function comments(id: number): Promise<APost> {
   const post: RESTPost = await api(`/v0/item/${id}.json`);
   const queue = new PQueue({ concurrency: CONCURRENCY });
   const kids = post.kids ?? [];

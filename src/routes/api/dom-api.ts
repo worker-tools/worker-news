@@ -8,7 +8,7 @@ import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
 import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 
-import { Post, AComment, Quality, Stories } from './interface';
+import { APost, AComment, Quality, Stories } from './interface';
 import { aMap } from './iter';
 import { blockquotify } from './util';
 
@@ -28,10 +28,10 @@ export async function* stories(p = 1, type = Stories.TOP) {
 }
 
 async function* storiesGenerator(response: Response) {
-  let post!: Partial<Post>;
+  let post!: Partial<APost>;
 
   const data = new EventTarget();
-  const iter = eventTargetToAsyncIter<CustomEvent<Post>>(data, 'data');
+  const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data');
 
   consume(new HTMLRewriter()
     .on('.athing[id]', {
@@ -69,18 +69,18 @@ async function* storiesGenerator(response: Response) {
     if (!post.by) { // No users post this = job ads
       post.type = 'job';
     }
-    yield post as Post;
+    yield post as APost;
   }
 }
 
-export async function comments(id: number): Promise<Post> {
+export async function comments(id: number): Promise<APost> {
   const url = new ParamsURL('/item', { id }, API).href;
   const body = await fetch(url)
   return commentsGenerator(body);
 }
 
 async function commentsGenerator(response: Response) {
-  const post: Partial<Post> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '' }
+  const post: Partial<APost> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '' }
 
   await consume(new HTMLRewriter()
     .on('#pagespace', { 
@@ -178,7 +178,7 @@ async function commentsGenerator(response: Response) {
 
   console.log(post)
 
-  return post as Post;
+  return post as APost;
 };
 
 /** Consumes a `Response` body while discarding all chunks. 
