@@ -79,10 +79,12 @@ export async function comments(id: number): Promise<APost> {
   return commentsGenerator(body);
 }
 
-async function commentsGenerator(response: Response) {
-  const post: Partial<APost> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '' }
+const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
 
-  await consume(new HTMLRewriter()
+async function commentsGenerator(response: Response) {
+  const post: Partial<APost> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '', storyTitle: '' };
+
+  const postRewriter = new HTMLRewriter()
     .on('#pagespace', { 
       element(el) { post.title = el.getAttribute('title') as string }
     })
@@ -108,21 +110,28 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem > tr[style="height:2px"] + tr > td:nth-child(2)', <ParsedElementHandler>{ 
       innerHTML(html) { post.text += html }
     })
-    .on('.fatitem .athing[id] .hnuser', {
+    .on('.fatitem .comhead > .hnuser', {
       text({ text }) { post.by += text }
     })
-    .on('.fatitem .athing[id] .age', {
+    .on('.fatitem .comhead > .age', {
       text({ text }) { post.timeAgo += text }
     })
-    .on('.fatitem .athing[id] .commtext', <ParsedElementHandler>{
+    .on('.fatitem .comhead > .par > a[href]', {
+      element(a) { post.parent = extractId(a.getAttribute('href')) }
+    })
+    .on('.fatitem .comhead > .storyon > a[href]', {
+      element(a) { post.story = extractId(a.getAttribute('href')) },
+      text({ text }) { (<string>post.storyTitle) += text }
+    })
+    .on('.fatitem .commtext', <ParsedElementHandler>{
       element(el) { 
         post.type = 'comment'; 
         post.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality; 
       },
       innerHTML(html) { post.text += html }
-    })
-    .transform(response.clone())
-  );
+    });
+
+  await consume(postRewriter.transform(response.clone()));
 
   // Crawl comment tree (well, technically it's just table rows...)
   let comment!: Partial<AComment>;
@@ -131,7 +140,7 @@ async function commentsGenerator(response: Response) {
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data');
 
   // No `await` here, b/c we're yielding data as it streams in (via event target).
-  consume(new HTMLRewriter()
+  const treeRewriter = new HTMLRewriter()
     .on('.comment-tree .athing.comtr[id]', {
       element(thing) {
         if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
@@ -141,9 +150,7 @@ async function commentsGenerator(response: Response) {
       },
     })
     .on('.comment-tree .athing.comtr[id] .ind > img[src="s.gif"][width]', {
-      element(el) { 
-        comment.level = Number(el.getAttribute('width')) / 40 
-      }
+      element(el) { comment.level = Number(el.getAttribute('width')) / 40 }
     })
     .on('.comment-tree .athing.comtr[id] .hnuser', {
       text({ text }) { comment.by += text }
@@ -155,11 +162,14 @@ async function commentsGenerator(response: Response) {
       element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
       innerHTML(html) { comment.text += html }
     })
-    .on('.comment-tree .athing.comtr[id] .comment .reply', { element(el) { el.remove() }})
-    .transform(response)).then(() => {
-      if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
-      iter.return();
+    .on('.comment-tree .athing.comtr[id] .comment .reply', { 
+      element(el) { el.remove() }
     });
+    
+  consume(treeRewriter.transform(response)).then(() => {
+    if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
+    iter.return();
+  });
 
   if (post.text) {
     post.text = blockquotify('<p>' + post.text)
@@ -175,8 +185,6 @@ async function commentsGenerator(response: Response) {
     }
     return comment;
   });
-
-  console.log(post)
 
   return post as APost;
 };

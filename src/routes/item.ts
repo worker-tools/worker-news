@@ -9,8 +9,10 @@ import { comments as apiComments, AComment, APost } from "./api/provider";
 import { page } from './components';
 import { aThing } from './news';
 
-export const commentTr = ({ id, level, by, text, timeAgo, quality, deleted }: AComment, itemId: number, reply = true) => html`
-  <tr>
+export const commentTr = (comm: AComment, itemId: number, tree = true) => {
+  const { id, level, by, text, timeAgo, quality, deleted, parent } = comm;
+  const { story, storyTitle } = comm as unknown as APost // FIXME
+  return html`<tr>
     <td class="ind"><img src="s.gif" height="1" width="${level * 40}"></td>
     <td valign="top" class="votelinks">
       <center>${deleted 
@@ -21,16 +23,20 @@ export const commentTr = ({ id, level, by, text, timeAgo, quality, deleted }: AC
         </a>`}</center>
     </td>
     <td class="default">
-      <div style="margin-top:2px; margin-bottom:-10px;"><span class="comhead">
-          <a href="user?id=${by}" class="hnuser">${by}</a> <span class="age"><a
-              href="item?id=${id}">${timeAgo}</a></span> <span id="unv_${id}"></span><span
-            class="par"></span> <a class="togg" n="1" href="javascript:void(0)"
-            onclick="return toggle(event, ${id})">[–]</a> <span class="storyon"></span>
-        </span></div><br>
+      <div style="margin-top:2px; margin-bottom:-10px;">
+        <span class="comhead">
+          <a href="user?id=${by}" class="hnuser">${by}</a> 
+          <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
+          <span id="unv_${id}"></span>
+          <span class="par">${!tree ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
+          <span class="storyon">${!tree && story && storyTitle ? html` | on: <a href="item?id=${story}">${storyTitle}</a>`: ''}</span>
+          ${tree ? html`<a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, ${id})">[–]</a>` : ''}
+        </span>
+      </div><br>
       <div class="comment">
         <span class="commtext ${quality}">
           ${deleted ? '[flagged]' : text ? unsafeHTML(text) : ' '}
-          ${!reply || deleted ? '' : html`<div class="reply">
+          ${!tree || deleted ? '' : html`<div class="reply">
             <p>
               <font size="1">
                 <u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${itemId}%23${id}">reply</a></u>
@@ -41,9 +47,9 @@ export const commentTr = ({ id, level, by, text, timeAgo, quality, deleted }: AC
       </div>
     </td>
   </tr>`;
+}
 
 const commentEl = (comment: AComment, itemId: number) => {
-  console.log(comment)
   return html`<tr class="athing comtr" id="${comment.id}">
     <td>
       <table border="0">
