@@ -3,7 +3,7 @@ import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
-import { page } from './components';
+import { pageLayout } from './components';
 
 import { stories, APost, Stories, AComment } from './api/provider'
 
@@ -94,7 +94,7 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Edge HN');
 
-  return new HTMLResponse(page({ op: type, title: x[type] })(html`
+  return new HTMLResponse(pageLayout({ op: type, title: x[type] })(html`
     <tr id="pagespace" title="${x[type]}" style="height:10px"></tr>
     <tr>
       <td>

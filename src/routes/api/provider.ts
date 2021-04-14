@@ -9,4 +9,7 @@ export const stories = DOM.stories
 export const comments = DOM.comments
 // export const comments = REST.comments
 
+// export const user = DOM.user
+export const user = REST.user
+
 export * from './interface';

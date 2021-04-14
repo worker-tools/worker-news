@@ -6,7 +6,7 @@ import { RouteArgs, router } from "../router";
 
 import { comments as apiComments, AComment, APost } from "./api/provider";
 
-import { page } from './components';
+import { pageLayout } from './components';
 import { aThing } from './news';
 
 export const commentTr = (comm: AComment, itemId: number, tree = true) => {
@@ -87,14 +87,12 @@ function getItem({ searchParams }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
 
-  return new HTMLResponse(page({ title: PLACEHOLDER, op: 'item' })(async () => {
+  return new HTMLResponse(pageLayout({ title: PLACEHOLDER, op: 'item' })(async () => {
     const post = await apiComments(id);
     const { title, text, kids } = post;
     return html`
       <tr id="pagespace" title="${unsafeHTML(title)}" style="height:10px"></tr>
-      ${title 
-        ? html` <script>document.title = document.title.replace('${PLACEHOLDER}', document.getElementById('pagespace').title)</script>` 
-        : null}
+      ${title ? html` <script>document.title = document.title.replace('${PLACEHOLDER}', document.getElementById('pagespace').title)</script>` : ''}
       <tr>
         <td>
           <table class="fatitem" border="0">

@@ -5,7 +5,7 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
   : content
 
-export const headerEl = ({ op }: { op: Stories | 'item' }) => html`
+export const headerEl = ({ op }: { op: Stories | 'item' | 'user' }) => html`
   <tr>
     <td id="header" bgcolor="#ff6600">
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
@@ -67,7 +67,7 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const page = ({ title, op }: { title?: string, op: Stories | 'item' }) => (content: HTMLContent) => html`
+export const pageLayout = ({ title, op }: { title?: string, op: Stories | 'item' | 'user' }) => (content: HTMLContent) => html`
   <html lang="en" op="${op}">
   <head>
     <meta name="referrer" content="origin">

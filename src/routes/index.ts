@@ -2,6 +2,7 @@ import { router } from "../router";
 
 import { news } from './news';
 import './item';
+import './user';
 import './css';
 // import './crawl';
 

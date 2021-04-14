@@ -15,7 +15,7 @@
  * It also works in a Service Worker, but due to the limit of 4 (?) open connections per page, it's noticeably slower.
  */
 
-import { APost, AComment, Stories } from './interface';
+import { APost, AComment, Stories, AUser } from './interface';
 import { default as PQueue } from 'p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
@@ -57,6 +57,7 @@ export async function* stories(page = 1, type = Stories.TOP): AsyncIterableItera
 
 type RESTPost = Omit<APost, 'kids'> & { kids: number[], time: number }
 type RESTComment = Omit<AComment, 'kids'> & { kids: number[], time: number }
+type RESTUser = AUser;
 
 async function commentTask(id: number, queue: PQueue, dict: Map<number, ResolvablePromise<RESTComment>>) {
   const x: RESTComment = await api(`/v0/item/${id}.json`);
@@ -99,5 +100,13 @@ export async function comments(id: number): Promise<APost> {
     quality: 'c00', // REST API doesn't support quality..
     url: post.text != null ? `item?id=${post.id}`: post.url,
     kids: crawlCommentTree(kids, dict),
+  };
+}
+
+export async function user(id: string): Promise<AUser> {
+  const { about, ...user }: RESTUser = await api(`/v0/user/${id}.json`);
+  return {
+    ...user,
+    ...about ? { about: blockquotify('<p>' + about) } : {},
   };
 }

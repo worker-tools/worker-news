@@ -16,6 +16,14 @@ export interface AThing {
   kids?: AsyncIterable<AComment>,
 }
 
+export interface AUser {
+  about?: string,
+  created: number,
+  id: string,
+  karma: number,
+  submitted: number[],
+}
+
 export interface AComment extends AThing {
   type: 'comment',
   level: number,
@@ -31,7 +39,7 @@ export interface Poll {
   points: number,
 }
 
-export type Type = "job" | "story" | "comment" | "poll" | "pollopt";
+export type Type = 'job' | 'story' | 'comment' | 'poll' | 'pollopt';
 export interface APost extends AThing {
   title: string,
   url: string
