@@ -109,7 +109,7 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem .subtext > a[href^=item]', { 
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
-    .on('.fatitem > tr[style="height:2px"] + tr > td:nth-child(2)', <ParsedElementHandler>{ 
+    .on('.fatitem tr:nth-child(4) > td:nth-child(2)', <ParsedElementHandler>{ 
       innerHTML(html) { post.text += html }
     })
     .on('.fatitem .comhead > .hnuser', {
@@ -201,10 +201,10 @@ export async function user(id: string): Promise<AUser> {
     .on('tr.athing td[timestamp]', {
       element(el) { user.created = Number(el.getAttribute('timestamp')) }
     })
-    .on('tr.athing + tr + tr > td:nth-child(2)', {
+    .on('tr > td > table[border=0] > tr:nth-child(3) > td:nth-child(2)', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) user.karma = parseInt(text, 10) }
     })
-    .on('tr.athing + tr + tr + tr > td:nth-child(2)', <ParsedElementHandler>{
+    .on('tr > td > table[border=0] > tr:nth-child(4) > td:nth-child(2)', <ParsedElementHandler>{
       innerHTML(html) { if (html.trim() !== '') user.about = '<p>' + html.trim() }
     })
 
