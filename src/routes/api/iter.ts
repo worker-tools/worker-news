@@ -1,4 +1,3 @@
-
 export async function* aMap<A, B>(as: AsyncIterable<A>, f: (a: A) => B) {
   for await (const a of as) yield f(a)
 }

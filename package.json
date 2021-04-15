@@ -46,6 +46,7 @@
     "base64-encoding": "^0.14.3",
     "date-fns": "^2.20.1",
     "event-target-to-async-iter": "github:qwtel/event-target-to-async-iter",
+    "firebase": "^9.0.0-beta.1",
     "kv-storage-polyfill": "^2.0.0",
     "linkedom": "^0.6.2",
     "msgpackr": "^1.2.7",
