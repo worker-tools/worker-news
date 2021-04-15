@@ -93,14 +93,14 @@ function getItem({ searchParams }: RouteArgs)  {
       const post = await apiComments(id);
       const { title, text, kids } = post;
       return html`
-        <tr id="pagespace" title="${unsafeHTML(title)}" style="height:10px"></tr>
-        ${title ? html` <script>document.title = document.title.replace('${PLACEHOLDER}', document.getElementById('pagespace').title)</script>` : ''}
+        <tr id="pagespace" title="${encodeURIComponent(title)}" style="height:10px"></tr>
+        ${title ? html` <script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` : ''}
         <tr>
           <td>
             <table class="fatitem" border="0">
               <tbody>
                 ${post.type === 'comment' 
-                  ? commentTr(post as any, 0, false)
+                  ? [commentTr(post as any /* FIXME */, 0, false)]
                   : [aThing(post), itemSubtext(post), text != null
                     ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(text)}</td></tr>`
                     : '']}

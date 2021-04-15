@@ -26,8 +26,8 @@ const CONCURRENCY = 128;
 export const API = 'https://hacker-news.firebaseio.com';
 
 export const api = async <T>(path: string): Promise<T> => {
-  const href = new URL(path, API).href;
-  return fetch(href).then(x => x.json());
+  const url = new URL(path.endsWith('.json') ? path : `${path}.json`, API);
+  return fetch(url.href).then(x => x.json());
 }
 
 const PAGE = 30;
@@ -45,7 +45,7 @@ export async function* stories(page = 1, type = Stories.TOP): AsyncIterableItera
   const href = x[type];
   const ps = (await api<number[]>(href))
     .slice(PAGE * (page - 1), PAGE * page)
-    .map(id => api<RESTPost>(`/v0/item/${id}.json`));
+    .map(id => api<RESTPost>(`/v0/item/${id}`));
 
   for await (const { kids, text, url, ...p } of ps) {
     yield {
@@ -62,7 +62,7 @@ type RESTComment = Omit<AComment, 'kids'> & { kids: number[], time: number }
 type RESTUser = AUser;
 
 async function commentTask(id: number, queue: PQueue, dict: Map<number, ResolvablePromise<RESTComment>>) {
-  const x = await api<RESTComment>(`/v0/item/${id}.json`);
+  const x = await api<RESTComment>(`/v0/item/${id}`);
   dict.get(x.id)?.resolve(x);
   const kids = x.kids ?? [];
   for (const kid of kids) {
@@ -88,8 +88,30 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
   }
 }
 
+// FIXME: Match HN behavior more closely
+const truncateText = (text?: string | null) => {
+  if (text) {
+    const words = text.split(' '); 
+    const trunc = words.splice(0, 11).join(' ');
+    return words.length > 11 ? trunc + ' ...' : trunc;
+  }
+  return '';
+}
+
+const stripHTML = (text?: string | null) => text ? text.replace(/(<([^>]+)>)/gi, "") : '';
+
 export async function comments(id: number): Promise<APost> {
-  const post: RESTPost = await api(`/v0/item/${id}.json`);
+  const post: RESTPost = await api(`/v0/item/${id}`);
+
+  if (post.type === 'comment') {
+    let curr = post;
+    while (curr.parent) {
+      curr = await api(`/v0/item/${curr.parent}`);
+    }
+    post.story = curr.id
+    post.storyTitle = truncateText(curr.title)
+  }
+
   const queue = new PQueue({ concurrency: CONCURRENCY });
   const kids = post.kids ?? [];
   const dict = new Map(kids.map(id => [id, resolvablePromise<RESTComment>()]));
@@ -97,11 +119,13 @@ export async function comments(id: number): Promise<APost> {
     queue.add(() => commentTask(kid, queue, dict));
   }
   // queue.addAll(kids.map(id => () => commentTask(id, queue, dict)));
+
+  const text = post.text != null ? blockquotify('<p>' + post.text) : null;
   return { 
     ...post, 
     timeAgo: formatDistanceToNowStrict(post.time * 1000, { addSuffix: true }),
-    title: post.title || (post.text ? post.text.split(' ').splice(0, 11).join(' ') + ' ...' : ''),
-    text: post.text != null ? blockquotify('<p>' + post.text) : null,
+    title: post.title || truncateText(stripHTML(text)),
+    text,
     quality: 'c00', // REST API doesn't support quality..
     url: post.text != null ? `item?id=${post.id}`: post.url,
     kids: crawlCommentTree(kids, dict),
@@ -109,7 +133,7 @@ export async function comments(id: number): Promise<APost> {
 }
 
 export async function user(id: string): Promise<AUser> {
-  const { about, ...user }: RESTUser = await api(`/v0/user/${id}.json`);
+  const { about, ...user }: RESTUser = await api(`/v0/user/${id}`);
   return {
     ...user,
     ...about ? { about: blockquotify('<p>' + about) } : {},
