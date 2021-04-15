@@ -8,21 +8,23 @@ import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
 import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 
-import { APost, AComment, Quality, Stories } from './interface';
+import { APost, AComment, Quality, Stories, AUser } from './interface';
 import { aMap } from './iter';
-import { blockquotify } from './util';
+import { blockquotify, consume } from './util';
 
 const API = 'https://news.ycombinator.com'
 
-export async function* stories(p = 1, type = Stories.TOP) {
-  const pathname = type === Stories.TOP ? '/news'
-    : type === Stories.NEW ? '/newest'
-    : type === Stories.BEST ? '/best'
-    : type === Stories.SHOW ? '/show'
-    : type === Stories.ASK ? '/ask'
-    : type === Stories.JOB ? '/jobs'
-    : (() => { throw new Error() })();
+const x = {
+  [Stories.TOP]: '/news',
+  [Stories.NEW]: '/newest',
+  [Stories.BEST]: '/best',
+  [Stories.SHOW]: '/show',
+  [Stories.ASK]: '/ask',
+  [Stories.JOB]: '/jobs',
+};
 
+export async function* stories(p = 1, type = Stories.TOP) {
+  const pathname = x[type];
   const url = new ParamsURL(pathname, { p }, API);
   yield* storiesGenerator(await fetch(url.href));
 }
@@ -48,7 +50,7 @@ async function* storiesGenerator(response: Response) {
     })
     // // FIXME: concatenate text before parseInt jtbs..
     .on('.subtext > .score', {
-      text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) }
+      text({ text }) { if (text?.trimStart().match(/^\d/)) post.score = parseInt(text, 10) }
     })
     .on('.subtext > .hnuser', {
       text({ text }) { post.by += text }
@@ -57,7 +59,7 @@ async function* storiesGenerator(response: Response) {
       text({ text }) { post.timeAgo += text }
     })
     .on('.subtext > a[href^=item]', {
-      text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) }
+      text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
     .transform(response)).then(() => {
       if (post) data.dispatchEvent(new CustomEvent('data', { detail: post }))
@@ -96,7 +98,7 @@ async function commentsGenerator(response: Response) {
     })
     // FIXME: concatenate text before parseInt jtbs..
     .on('.fatitem .subtext > .score', { 
-      text({ text }) { if (text?.match(/^\d/)) post.score = parseInt(text, 10) }
+      text({ text }) { if (text?.trimStart().match(/^\d/)) post.score = parseInt(text, 10) }
     })
     .on('.fatitem .subtext > .hnuser', { 
       text({ text }) { post.by += text }
@@ -105,7 +107,7 @@ async function commentsGenerator(response: Response) {
       text({ text }) { post.timeAgo += text }
     })
     .on('.fatitem .subtext > a[href^=item]', { 
-      text({ text }) { if (text?.match(/^\d/)) post.descendants = parseInt(text, 10) }
+      text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
     .on('.fatitem > tr[style="height:2px"] + tr > td:nth-child(2)', <ParsedElementHandler>{ 
       innerHTML(html) { post.text += html }
@@ -189,11 +191,26 @@ async function commentsGenerator(response: Response) {
   return post as APost;
 };
 
-/** Consumes a `Response` body while discarding all chunks. 
- *  Useful for pulling data into `HTMLRewriter`. */
-async function consume(r: Response) {
-  const reader = r.body!.getReader();
-  while (!(await reader.read()).done);
+export async function user(id: string): Promise<AUser> {
+  const url = new ParamsURL('user', { id }, API);
+  const response = await fetch(url.href);
+
+  let user: Partial<AUser> = { id, about: '', submitted: [] };
+
+  const rewriter = new HTMLRewriter()
+    .on('tr.athing td[timestamp]', {
+      element(el) { user.created = Number(el.getAttribute('timestamp')) }
+    })
+    .on('tr.athing + tr + tr > td:nth-child(2)', {
+      text({ text }) { if (text?.trimStart().match(/^\d/)) user.karma = parseInt(text, 10) }
+    })
+    .on('tr.athing + tr + tr + tr > td:nth-child(2)', <ParsedElementHandler>{
+      innerHTML(html) { if (html.trim() !== '') user.about = '<p>' + html.trim() }
+    })
+
+  await consume(rewriter.transform(response));
+
+  return user as AUser;
 }
 
 // class AsyncIterableArray<T> extends Array<T> {

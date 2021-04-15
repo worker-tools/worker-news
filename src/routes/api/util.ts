@@ -25,3 +25,10 @@ export function blockquotify(text: string) {
   }
   return doc.toString();
 }
+
+/** Consumes a `Response` body while discarding all chunks. 
+ *  Useful for pulling data into `HTMLRewriter`. */
+export async function consume(r: Response) {
+  const reader = r.body!.getReader();
+  while (!(await reader.read()).done);
+}

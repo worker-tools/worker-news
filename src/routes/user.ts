@@ -1,5 +1,6 @@
-import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
+import { html, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
+// import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
@@ -20,7 +21,7 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
 
 const user = ({ searchParams }: RouteArgs) => {
   const un = searchParams.get('id');
-  if (!un) return new Response('No such user.')
+  if (!un) return notFound('No such user.')
 
   const title = `Profile: ${un}`;
 
