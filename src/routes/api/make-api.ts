@@ -15,12 +15,15 @@ const x = {
   [Stories.NEW]: '/v0/newstories',
   [Stories.BEST]: '/v0/beststories',
   [Stories.SHOW]: '/v0/showstories',
+  [Stories.SHOW_NEW]: '',
   [Stories.ASK]: '/v0/askstories',
   [Stories.JOB]: '/v0/jobstories',
 };
 
 export async function* stories(api: APIFn, page = 1, type = Stories.TOP): AsyncIterableIterator<APost> {
   const href = x[type];
+  if (!href) throw Error('Unsupported by HN REST API')
+
   const ps = (await api<number[]>(href))
     .slice(PAGE * (page - 1), PAGE * page)
     .map(id => api<RESTPost>(`/v0/item/${id}`));

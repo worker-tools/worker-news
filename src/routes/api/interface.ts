@@ -4,6 +4,7 @@ export enum Stories {
   BEST = 'best',
   ASK = 'ask',
   SHOW = 'show',
+  SHOW_NEW = 'shownew',
   JOB = 'jobs',
 }
 
@@ -52,5 +53,6 @@ export interface APost extends AThing {
   parent?: number,
   story?: number,
   storyTitle?: string,
+  moreLink?: string,
   /** @deprecated */ more_comments_id?: string | null;
 }

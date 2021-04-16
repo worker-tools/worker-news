@@ -6,7 +6,7 @@ import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 
 // Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
-import { /* ParsedHTMLRewriter as HTMLRewriter, */ ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
+import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 
 import { APost, AComment, Quality, Stories, AUser } from './interface';
 import { aMap } from './iter';
@@ -19,6 +19,7 @@ const x = {
   [Stories.NEW]: '/newest',
   [Stories.BEST]: '/best',
   [Stories.SHOW]: '/show',
+  [Stories.SHOW_NEW]: '/shownew',
   [Stories.ASK]: '/ask',
   [Stories.JOB]: '/jobs',
 };
@@ -174,12 +175,12 @@ async function commentsGenerator(response: Response) {
   await iter.next();
 
   if (post.text) {
-    post.text = ('<p>' + post.text)
+    post.text = blockquotify('<p>' + post.text)
   }
 
   post.kids = aMap(iter, ({ detail: comment }) => {
     if (comment.text) {
-      comment.text = ('<p>' + comment.text)
+      comment.text = blockquotify('<p>' + comment.text)
     } else {
       // ??
       comment.deleted = true;
@@ -212,47 +213,3 @@ export async function user(id: string): Promise<AUser> {
 
   return user as AUser;
 }
-
-// class AsyncIterableArray<T> extends Array<T> {
-//   async *[Symbol.asyncIterator]() {
-//     for (const x of this) yield x;
-//   }
-// }
-
-// function stackComments(comments: AsyncIterableArray<Comment>): AsyncIterableArray<Comment> {
-//   for (const [i, comment] of comments.entries()) {
-//     const { level } = comment;
-
-//     if (level > 0) {
-//       let index = i, parentComment: Comment;
-//       do {
-//         parentComment = comments[--index];
-//       } while (parentComment.level >= level);
-//       (parentComment.kids as AsyncIterableArray<Comment>).push(comment);
-//     }
-//   }
-//   return comments.filter(comment => comment.level === 0) as AsyncIterableArray<Comment>;
-// }
-
-// class LoggingHTMLRewriter extends HTMLRewriter {
-//   on(x: string, h: ElementHandler) {
-//     return super.on(x, {
-//       text(n) { 
-//         if (h.text) {
-//           const textS = n.text?.substr(0, 80).trim()
-//           console.log(`#Text { ${textS.length >= 77 ? (textS + '...') : textS } } lastInTextNode=${n.lastInTextNode}`)
-//           h.text(n);
-//         } 
-//       },
-//       element(n) { 
-//         if (h.element) {
-//           // const attributes = [...n.attributes as any];
-//           // const attrS = [attributes as any].map(([k, v]) => `${k}="${v}"`).join(' ')
-//           console.log(`<${n.tagName}${/*attrS ? (' ' + attrS) : ''*/''}>`)
-//           h.element(n as any) 
-//         }
-//       },
-//       comments(arg) { h.comments?.(arg) },
-//     });
-//   }
-// }

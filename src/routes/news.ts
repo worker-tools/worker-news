@@ -5,7 +5,7 @@ import { notFound } from "@worker-tools/response-creators";
 import { RouteArgs, router } from "../router";
 import { pageLayout } from './components';
 
-import { stories, APost, Stories, AComment } from './api/provider'
+import { stories, APost, Stories } from './api/provider'
 
 const tryURL = (url: string): URL | null => {
   try { return new URL(url, self.location.origin); } catch { return null }
@@ -83,6 +83,7 @@ const x = {
   [Stories.BEST]: 'Top Links',
   [Stories.NEW]: 'New Links',
   [Stories.SHOW]: 'Show',
+  [Stories.SHOW_NEW]: 'New Show',
 }
 
 const messageEl = (message: HTMLContent, marginBottom = 12) => html`
@@ -130,6 +131,7 @@ export const news = mkStories(Stories.TOP)
 export const newest = mkStories(Stories.NEW)
 export const best = mkStories(Stories.BEST)
 export const show = mkStories(Stories.SHOW)
+export const showNew = mkStories(Stories.SHOW_NEW)
 export const ask = mkStories(Stories.ASK)
 export const jobs = mkStories(Stories.JOB)
 
@@ -138,5 +140,6 @@ router.get('/news', news);
 router.get('/newest', newest);
 router.get('/best', best);
 router.get('/show', show);
+router.get('/shownew', showNew);
 router.get('/ask', ask);
 router.get('/jobs', jobs);

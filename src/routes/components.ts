@@ -23,8 +23,11 @@ export const headerEl = ({ op }: { op: Stories | 'item' | 'user' }) => html`
                 | ${topSel(op === Stories.ASK, html`<a href="ask">ask</a>`)}
                 | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
                 | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)}
-                <!-- | <a href="submit">submit</a> -->
                 | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
+                <!-- | <a href="submit">submit</a> -->
+                ${op === Stories.SHOW_NEW
+                    ? html`| <font color="#ffffff">${op}</font>` 
+                    : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
                 ${/*<!-- <a id="me" href="user?id=USER">USER</a> (15) |
