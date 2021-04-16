@@ -27,7 +27,13 @@ async function handleRequest(event: FetchEvent) {
       return match.handler(args);
     } catch (err) {
       if (DEBUG) console.error(err);
-      return re.internalServerError(err.message);
+      const stack = JSON.stringify(err.stack) || err;
+      return re.internalServerError(err.message, {
+        headers: DEBUG ? {
+          "X-Debug-stack": stack,
+          "X-Debug-err": err,
+        } : {},
+      });
     }
   }
   return re.notFound();

@@ -2,19 +2,18 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@worker-tools/kv-storage": [
-        "./node_modules/@worker-tools/cloudflare-kv-storage"
-      ],
+      "@worker-tools/kv-storage": ["./node_modules/@worker-tools/cloudflare-kv-storage"],
+      "perf_hooks": ["./src/vendor/perf_hooks.js"],
     },
     "outDir": "./dist",
     "module": "ESNext",
-    "target": "ESNext",
+    "target": "ES2020",
     "lib": [
-      "ESNext",
+      "ES2020",
       "WebWorker",
+      "ESNext.AsyncIterable",
       "DOM",
       "DOM.Iterable",
-      "ESNext.AsyncIterable"
     ],
     "moduleResolution": "node",
     "experimentalDecorators": true,

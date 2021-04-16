@@ -26,9 +26,19 @@ export function blockquotify(text: string) {
   return doc.toString();
 }
 
-/** Consumes a `Response` body while discarding all chunks. 
- *  Useful for pulling data into `HTMLRewriter`. */
-export async function consume(r: Response) {
+/** 
+ * Consumes a `Response` body while discarding all chunks. 
+ * Useful for pulling data into `HTMLRewriter`. 
+ */
+export async function consume(r: Response, signal?: AbortSignal) {
   const reader = r.body!.getReader();
-  while (!(await reader.read()).done);
+  if (!signal) {
+    while (await reader.read().then(x => !x.done)) { /* noop */ }
+  } else {
+    const aborted = new Promise(res => signal.addEventListener('abort', res));
+    while (await Promise.race([
+      reader.read().then(x => !x.done), 
+      aborted.then(() => false),
+    ])) { /* noop */ }
+  }
 }
