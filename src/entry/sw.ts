@@ -1,5 +1,5 @@
 import '@worker-tools/parsed-html-rewriter/polyfill';
-import './entry';
+import '../index';
 
 self.addEventListener('install', () => {
   (<any>self).skipWaiting();
