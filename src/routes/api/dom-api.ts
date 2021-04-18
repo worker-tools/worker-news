@@ -11,6 +11,7 @@ import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worke
 import { APost, AComment, Quality, Stories, AUser } from './interface';
 import { aMap } from './iter';
 import { blockquotify, consume } from './util';
+import { resolvablePromise } from 'src/vendor/resolvable-promise';
 
 const API = 'https://news.ycombinator.com'
 
@@ -22,11 +23,16 @@ const x = {
   [Stories.SHOW_NEW]: '/shownew',
   [Stories.ASK]: '/ask',
   [Stories.JOB]: '/jobs',
+  [Stories.USER]: '/submitted',
 };
 
-export async function* stories(p = 1, type = Stories.TOP) {
+export async function* stories({ p, next, id }: { p?: number, next?: number, id?: string }, type = Stories.TOP) {
   const pathname = x[type];
-  const url = new ParamsURL(pathname, { p }, API);
+  const url = new ParamsURL(pathname, { 
+    ...p ? { p } : {}, 
+    ...next ? { next } : {}, 
+    ...id ? { id } : {},
+  }, API);
   yield* storiesGenerator(await fetch(url.href));
 }
 
@@ -36,6 +42,7 @@ async function* storiesGenerator(response: Response) {
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data');
 
+  const moreLink = resolvablePromise<string>();
   const rewriter = new HTMLRewriter()
     .on('.athing[id]', {
       element(el) {
@@ -61,7 +68,10 @@ async function* storiesGenerator(response: Response) {
     })
     .on('.subtext > a[href^=item]', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
-    });
+    })
+    .on('.morelink[href]', {
+      element(el) { moreLink.resolve(el.getAttribute('href')!) }
+    })
 
   consume(rewriter.transform(response)).then(() => {
     if (post) data.dispatchEvent(new CustomEvent('data', { detail: post }));
@@ -75,6 +85,10 @@ async function* storiesGenerator(response: Response) {
     }
     yield post as APost;
   }
+
+  moreLink.resolve('')
+  
+  yield await moreLink;
 }
 
 export async function comments(id: number): Promise<APost> {

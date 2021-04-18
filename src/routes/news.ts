@@ -89,6 +89,7 @@ const x = {
   [Stories.NEW]: 'New Links',
   [Stories.SHOW]: 'Show',
   [Stories.SHOW_NEW]: 'New Show',
+  [Stories.USER]: `$user's submissions`,
 }
 
 const messageEl = (message: HTMLContent, marginBottom = 12) => html`
@@ -99,9 +100,14 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
 const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Edge HN');
+  const next = Number(searchParams.get('next'))
+  const n = Number(searchParams.get('n'))
+  const id = Stories.USER ? searchParams.get('id')! : '';
 
-  return new HTMLResponse(pageLayout({ op: type, title: x[type] })(html`
-    <tr id="pagespace" title="${x[type]}" style="height:10px"></tr>
+  const title = x[type].replace('$user', searchParams.get('id')!)
+
+  return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
+    <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
@@ -114,18 +120,24 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
               <a href="https://www.ycombinator.com/jobs"><u>ycombinator.com/jobs</u></a>.`, 14) : ''}
             ${async function* () {
               try {
-                let i = (p - 1) * 30;
-                for await (const post of stories(p, type)) 
-                  yield rowEl(post, type !== Stories.JOB ? i++ : NaN, type);
+                let i = (next && n)
+                  ? (n - 1) 
+                  : (p - 1) * 30;
+                for await (const post of stories({ p, next, id }, type)) {
+                  if (typeof post !== 'string') 
+                    yield rowEl(post, type !== Stories.JOB ? i++ : NaN, type);
+                  else if (post) {
+                    yield html`<tr class="morespace" style="height:10px"></tr>
+                      <tr>
+                        <td colspan="2"></td>
+                        <td class="title"><a href="${post}" class="morelink" rel="next">More</a></td>
+                      </tr>`;
+                  }
+                }
               } catch (err) {
                 yield html`<tr><td colspan="2"></td><td>${err.message}</td></tr>`;
               }
             }}
-            <tr class="morespace" style="height:10px"></tr>
-            <tr>
-              <td colspan="2"></td>
-              <td class="title"><a href="${type}?p=${p + 1}" class="morelink" rel="next">More</a></td>
-            </tr>
           </tbody>
         </table>
       </td>
@@ -139,7 +151,7 @@ export const show = mkStories(Stories.SHOW)
 export const showNew = mkStories(Stories.SHOW_NEW)
 export const ask = mkStories(Stories.ASK)
 export const jobs = mkStories(Stories.JOB)
-
+export const submitted = mkStories(Stories.USER)
 
 router.get('/news', news);
 router.get('/newest', newest);
@@ -148,3 +160,4 @@ router.get('/show', show);
 router.get('/shownew', showNew);
 router.get('/ask', ask);
 router.get('/jobs', jobs);
+router.get('/submitted', submitted)

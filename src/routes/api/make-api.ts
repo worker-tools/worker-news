@@ -18,9 +18,10 @@ const x = {
   [Stories.SHOW_NEW]: '',
   [Stories.ASK]: '/v0/askstories',
   [Stories.JOB]: '/v0/jobstories',
+  [Stories.USER]: ''
 };
 
-export async function* stories(api: APIFn, page = 1, type = Stories.TOP): AsyncIterableIterator<APost> {
+export async function* stories(api: APIFn, page = 1, type = Stories.TOP) {
   const href = x[type];
   if (!href) throw Error('Unsupported by HN REST API')
 
@@ -29,13 +30,16 @@ export async function* stories(api: APIFn, page = 1, type = Stories.TOP): AsyncI
     .map(id => api<RESTPost>(`/v0/item/${id}`));
 
   for await (const { kids, text, url, ...p } of ps) {
-    yield {
+    yield <APost>{
       ...p,
       timeAgo: formatDistanceToNowStrict(p.time * 1000, { addSuffix: true }),
       text: text != null ? blockquotify(text) : null,
       url: text != null ? `item?id=${p.id}` : url,
     };
   }
+
+  // FIXME
+  yield page !== 1 ? `${type}?p=${page}` : type;
 }
 
 type RESTPost = Omit<APost, 'kids'> & { kids: number[], time: number }

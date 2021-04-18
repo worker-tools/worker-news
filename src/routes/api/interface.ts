@@ -6,6 +6,7 @@ export enum Stories {
   SHOW = 'show',
   SHOW_NEW = 'shownew',
   JOB = 'jobs',
+  USER = 'submitted',
 }
 
 export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';

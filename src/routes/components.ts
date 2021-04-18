@@ -5,7 +5,7 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
   : content
 
-export const headerEl = ({ op }: { op: Stories | 'item' | 'user' }) => html`
+export const headerEl = ({ op, id }: { op: Stories | 'item' | 'user', id?: string }) => html`
   <tr>
     <td id="header" bgcolor="#ff6600">
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
@@ -27,6 +27,9 @@ export const headerEl = ({ op }: { op: Stories | 'item' | 'user' }) => html`
                 <!-- | <a href="submit">submit</a> -->
                 ${op === Stories.SHOW_NEW
                     ? html`| <font color="#ffffff">${op}</font>` 
+                    : ''}
+                ${op === Stories.USER
+                    ? html`| <font color="#ffffff">${id}'s submissions</font>` 
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
@@ -70,7 +73,7 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const pageLayout = ({ title, op }: { title?: string, op: Stories | 'item' | 'user' }) => (content: HTMLContent) => html`
+export const pageLayout = ({ title, op, id }: { title?: string, op: Stories | 'item' | 'user', id?: string }) => (content: HTMLContent) => html`
   <html lang="en" op="${op}">
   <head>
     <meta name="referrer" content="origin">
@@ -84,7 +87,7 @@ export const pageLayout = ({ title, op }: { title?: string, op: Stories | 'item'
     <center>
       <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
         <tbody>
-          ${headerEl({ op })}
+          ${headerEl({ op, id })}
           ${content}
           ${footerEl()}
         </tbody>
