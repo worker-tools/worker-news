@@ -26,40 +26,45 @@ const stripWWW = (url?: URL | null) => {
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
-export const aThing = ({ type, id, url, title }: APost, index?: number, op?: Stories) => {
+export const aThing = ({ type, id, url, title, dead }: APost, index?: number, op?: Stories) => {
   try {
     const uRL = tryURL(url);
     return html`
       <tr class="athing" id="${id}">
         <td align="right" valign="top" class="title">${rankEl(index)}</td>
-        <td valign="top" class="votelinks"><center>${type === 'job'
+        <td valign="top" class="votelinks"><center>${dead || type === 'job'
           ? html`<img src="s.gif" height="1" width="14">`
           : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
               href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=${op}">
               <div class="votearrow" title="upvote"></div>
             </a>`}</center></td>
-        <td class="title"><a href="${url}"
+        <td class="title">${dead 
+          ? '[flagged]' 
+          : html`<a href="${url}"
             class="storylink">${title}</a>${uRL?.host === self.location.host ? '' : html`<span
             class="sitebit comhead"> (<a href="from?site=${uRL?.hostname}"><span
-                class="sitestr">${stripWWW(uRL)}</span></a>)</span>`}</td>
+                class="sitestr">${stripWWW(uRL)}</span></a>)</span>`}</td>`}
       </tr>`;
   } catch (err) {
     throw html`<tr><td>Something went wrong</td><td>${err.message}</td></tr>`
   }
 }
 
-const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants }: APost, _index?: number, op?: Stories) => {
+export const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants, dead }: APost, _index?: number, op?: Stories) => {
   return html`
     <tr>
       <td colspan="2"></td>
       <td class="subtext">
+        ${!dead && type !== 'job' 
+          ? html`<span class="score" id="score_${id}">${score} points</span> by`
+          : ''}
         ${type !== 'job' 
-          ? html`<span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}" class="hnuser">${by}</a>`
+          ? html`<a href="user?id=${by}" class="hnuser">${by}</a>` 
           : ''}
         <span class="age"><a href="item?id=${id}">${time_ago}</a></span>
         <span id="unv_${id}"></span>
         <!-- | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=${op}" onclick="return hidestory(event, this, ${id})">hide</a>  -->
-        ${type !== 'job' 
+        ${!dead && type !== 'job' 
           ? html`| <a href="item?id=${id}">${descendants === 0 
             ? 'discuss' 
             : unsafeHTML(`${descendants}&nbsp;comments`)}</a></td>`

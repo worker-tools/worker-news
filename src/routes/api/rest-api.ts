@@ -19,6 +19,7 @@ import { Stories } from './interface';
 import * as mkAPI from './make-api';
 
 export const API = 'https://hacker-news.firebaseio.com';
+
 export const api = async <T>(path: string): Promise<T> => {
   const url = new URL(path.endsWith('.json') ? path : `${path}.json`, API);
   return fetch(url.href).then(x => x.json());

@@ -32,6 +32,7 @@ export interface AComment extends AThing {
   text: string,
   quality: Quality,
   parent: number,
+  dead?: boolean,
   deleted?: boolean,
 }
 
@@ -43,6 +44,7 @@ export interface Poll {
 export type Type = 'job' | 'story' | 'comment' | 'poll' | 'pollopt';
 export interface APost extends AThing {
   title: string,
+  dead: boolean
   url: string
   score: number | null,
   timeAgo: string | null,
