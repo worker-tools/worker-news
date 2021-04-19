@@ -8,16 +8,21 @@ import { comments as apiComments, AComment, APost } from "./api/provider";
 import { pageLayout } from './components';
 import { aThing, subtext } from './news';
 
-export const commentTr = (comm: AComment, itemId: number, tree = true) => {
-  const { id, level, by, text, timeAgo, quality, deleted, parent } = comm;
-  const { story, storyTitle } = comm as unknown as APost // FIXME
+export interface CommOpts {
+  showToggle?: boolean,
+  showReply?: boolean,
+  showParent?: boolean,
+}
+
+export const commentTr = (comm: AComment, { showToggle = true, showReply = true, showParent = false }: CommOpts = {}) => {
+  const { id, level, by, text, timeAgo, quality, deleted, parent, story, storyTitle } = comm;
   return html`<tr>
-    <td class="ind"><img src="s.gif" height="1" width="${level * 40}"></td>
+    <td class="ind"><img src="s.gif" height="1" width="${(level ?? 0) * 40}"></td>
     <td valign="top" class="votelinks">
       <center>${deleted 
         ? html`<img src="s.gif" height="1" width="14">`
         : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-          href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${itemId}%23${id}">
+          href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${comm.story}%23${id}">
           <div class="votearrow" title="upvote"></div>
         </a>`}</center>
     </td>
@@ -27,44 +32,44 @@ export const commentTr = (comm: AComment, itemId: number, tree = true) => {
           <a href="user?id=${by}" class="hnuser">${by}</a> 
           <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
           <span id="unv_${id}"></span>
-          <span class="par">${!tree ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
-          <span class="storyon">${!tree && story && storyTitle ? html` | on: <a href="item?id=${story}">${storyTitle}</a>`: ''}</span>
-          ${tree ? html`<a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, ${id})">[–]</a>` : ''}
+          <span class="par">${showParent ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
+          ${showToggle ? html`<a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, ${id})">[–]</a>` : ''}
+          <span class="storyon">${showParent && story && storyTitle ? html` | on: <a href="item?id=${story}">${storyTitle}</a>`: ''}</span>
         </span>
       </div><br>
       <div class="comment">
         <span class="commtext ${quality}">
           ${deleted ? '[flagged]' : text ? unsafeHTML(text) : ' '}
-          ${!tree || deleted ? '' : html`<div class="reply">
+          ${showReply && !deleted ? html`<div class="reply">
             <p>
               <font size="1">
-                <u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${itemId}%23${id}">reply</a></u>
+                <u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${comm.story}%23${id}">reply</a></u>
               </font>
             </p>
-          </div>`}
+          </div>`: ''}
         </span>
       </div>
     </td>
   </tr>`;
 }
 
-const commentEl = (comment: AComment, itemId: number) => {
+export const commentEl = (comment: AComment, commOpts: CommOpts = {}) => {
   if (comment.dead) return '';
   return html`<tr class="athing comtr" id="${comment.id}">
     <td>
       <table border="0">
         <tbody>
-          ${commentTr(comment, itemId)}
+          ${commentTr(comment, commOpts)}
         </tbody>
       </table>
     </td>
   </tr>`;
 }
 
-async function* commentTree(kids: AsyncIterable<AComment>, itemId: number): AsyncGenerator<HTMLContent> {
+export async function* commentTree(kids: AsyncIterable<AComment>): AsyncGenerator<HTMLContent> {
   for await (const item of kids) {
-    yield commentEl(item, itemId);
-    if (item.kids) yield* commentTree(item.kids, itemId);
+    yield commentEl(item);
+    if (item.kids) yield* commentTree(item.kids);
   }
 }
 
@@ -117,7 +122,7 @@ function getItem({ searchParams }: RouteArgs)  {
             <table class="fatitem" border="0">
               <tbody>
                 ${post.type === 'comment' 
-                  ? [commentTr(post as any /* FIXME */, 0, false)]
+                  ? [commentTr(post as AComment, { showParent: true })]
                   : [aThing(post), subtext(post), text != null
                     ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(text)}</td></tr>`
                     : '']}
@@ -126,7 +131,7 @@ function getItem({ searchParams }: RouteArgs)  {
             </table><br><br>
             <table border="0" class="comment-tree">
               <tbody>
-                ${kids && commentTree(kids, post.id)}
+                ${kids && commentTree(kids)}
               </tbody>
             </table>
             <br><br>

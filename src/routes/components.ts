@@ -5,7 +5,7 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
   : content
 
-export const headerEl = ({ op, id }: { op: Stories | 'item' | 'user', id?: string }) => html`
+export const headerEl = ({ op, id }: { op: Stories | 'item' | 'user' | 'threads', id?: string }) => html`
   <tr>
     <td id="header" bgcolor="#ff6600">
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
@@ -29,6 +29,9 @@ export const headerEl = ({ op, id }: { op: Stories | 'item' | 'user', id?: strin
                     ? html`| <font color="#ffffff">${op}</font>` 
                     : ''}
                 ${op === Stories.USER
+                    ? html`| <font color="#ffffff">${id}'s submissions</font>` 
+                    : ''}
+                ${op === 'threads'
                     ? html`| <font color="#ffffff">${id}'s submissions</font>` 
                     : ''}
               </span></td>
@@ -73,7 +76,11 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const pageLayout = ({ title, op, id }: { title?: string, op: Stories | 'item' | 'user', id?: string }) => (content: HTMLContent) => html`
+export const pageLayout = ({ title, op, id }: { 
+  title?: string, 
+  op: Stories | 'item' | 'user' | 'threads', 
+  id?: string 
+}) => (content: HTMLContent) => html`
   <html lang="en" op="${op}">
   <head>
     <meta name="referrer" content="origin">

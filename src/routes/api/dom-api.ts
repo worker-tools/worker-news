@@ -26,10 +26,13 @@ const x = {
   [Stories.USER]: '/submitted',
 };
 
-export async function* stories({ p, next, id }: { p?: number, next?: number, id?: string }, type = Stories.TOP) {
+type StoriesParams = RequireAtLeastOne<{ p?: number, n?: number, next?: number, id?: string }, 'p' | 'n' | 'id'>;
+
+export async function* stories({ p, n, next, id }: StoriesParams, type = Stories.TOP) {
   const pathname = x[type];
   const url = new ParamsURL(pathname, { 
     ...p ? { p } : {}, 
+    ...n ? { n } : {},
     ...next ? { next } : {}, 
     ...id ? { id } : {},
   }, API);
@@ -37,7 +40,7 @@ export async function* stories({ p, next, id }: { p?: number, next?: number, id?
 }
 
 async function* storiesGenerator(response: Response) {
-  let post!: Partial<APost>;
+  let post: Partial<APost>;
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data');
@@ -49,7 +52,7 @@ async function* storiesGenerator(response: Response) {
         if (post) data.dispatchEvent(new CustomEvent('data', { detail: post }));
 
         const id = Number(el.getAttribute('id'));
-        post = { id, title: '', score: 0, by: '', timeAgo: '', descendants: 0 };
+        post = { id, title: '', score: 0, by: '', timeAgo: '', descendants: 0, story: post?.story };
       }
     })
     .on('.athing[id] .title a.storylink', {
@@ -86,7 +89,8 @@ async function* storiesGenerator(response: Response) {
     yield post as APost;
   }
 
-  moreLink.resolve('')
+  // Prevent lock...
+  moreLink.resolve('');
   
   yield await moreLink;
 }
@@ -97,11 +101,57 @@ export async function comments(id: number): Promise<APost> {
   return commentsGenerator(body);
 }
 
+export async function* threads(id: string) {
+  const url = new ParamsURL('/threads', { id }, API).href;
+  const body = await fetch(url)
+  yield* threadsGenerator(body)
+}
+
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
+
+function scrapeComments(rewriter: globalThis.HTMLRewriter, data: EventTarget, prefix = '') {
+  let comment!: Partial<AComment>;
+
+  return rewriter
+    .on(`${prefix} .athing.comtr[id]`, {
+      element(thing) {
+        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
+        const id = Number(thing.getAttribute('id'))
+        comment = { id, type: 'comment', by: '', timeAgo: '', text: '', storyTitle: '' };
+      },
+    })
+    .on(`${prefix} .athing.comtr[id] .ind > img[src="s.gif"][width]`, {
+      element(el) { comment.level = Number(el.getAttribute('width')) / 40 }
+    })
+    .on(`${prefix} .athing.comtr[id] .hnuser`, {
+      text({ text }) { comment.by += text }
+    })
+    .on(`${prefix} .athing.comtr[id] .age`, {
+      text({ text }) { comment.timeAgo += text }
+    })
+    .on(`${prefix} .athing.comtr[id] .par > a[href]`, {
+      element(a) { comment.parent = extractId(a.getAttribute('href')) }
+    })
+    .on(`${prefix} .athing.comtr[id] .storyon > a[href]`, {
+      element(a) { comment.story = extractId(a.getAttribute('href')) },
+      text({ text }) { comment.storyTitle += text }
+    })
+    .on(`${prefix} .athing.comtr[id] .commtext`, <ParsedElementHandler>{
+      element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
+      innerHTML(html) { comment.text += html }
+    })
+    .on(`${prefix} .athing.comtr[id] .comment .reply`, { 
+      element(el) { el.remove() }
+    })
+    .on('.yclinks', {
+      element() {
+        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
+      }
+    })
+}
 
 async function commentsGenerator(response: Response) {
   const post: Partial<APost> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '', storyTitle: '' };
-  let comment!: Partial<AComment>;
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data');
@@ -154,36 +204,15 @@ async function commentsGenerator(response: Response) {
       innerHTML(html) { post.text += html }
     })
     .on('.comment-tree .athing.comtr[id]', {
-      element(thing) {
+      element() {
         if (first) data.dispatchEvent(new CustomEvent('data', { detail: post }))
         first = false;
-
-        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
-        const id = Number(thing.getAttribute('id'))
-        comment = { id, type: 'comment', by: '', timeAgo: '', text: '' };
       },
     })
-    .on('.comment-tree .athing.comtr[id] .ind > img[src="s.gif"][width]', {
-      element(el) { comment.level = Number(el.getAttribute('width')) / 40 }
-    })
-    .on('.comment-tree .athing.comtr[id] .hnuser', {
-      text({ text }) { comment.by += text }
-    })
-    .on('.comment-tree .athing.comtr[id] .age', {
-      text({ text }) { comment.timeAgo += text }
-    })
-    .on('.comment-tree .athing.comtr[id] .commtext', <ParsedElementHandler>{
-      element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
-      innerHTML(html) { comment.text += html }
-    })
-    .on('.comment-tree .athing.comtr[id] .comment .reply', { 
-      element(el) { el.remove() }
-    });
+
+  scrapeComments(rewriter, data, '.comment-tree');
     
-  consume(rewriter.transform(response)).then(() => {
-    if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
-    iter.return();
-  });
+  consume(rewriter.transform(response)).then(() => iter.return());
 
   // wait for `post` to be populated
   await iter.next();
@@ -193,6 +222,8 @@ async function commentsGenerator(response: Response) {
   }
 
   post.kids = aMap(iter, ({ detail: comment }) => {
+    comment.story = post.id;
+
     if (comment.text) {
       comment.text = blockquotify('<p>' + comment.text)
     } else {
@@ -204,6 +235,24 @@ async function commentsGenerator(response: Response) {
   });
 
   return post as APost;
+};
+
+async function* threadsGenerator(response: Response) {
+  const target = new EventTarget();
+  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data');
+  const rewriter = scrapeComments(new HTMLRewriter(), target);
+  consume(rewriter.transform(response)).then(() => iter.return());
+
+  for await (const { detail: comment } of iter) {
+    if (comment.text) {
+      comment.text = blockquotify('<p>' + comment.text)
+    } else {
+      // ??
+      comment.deleted = true;
+      comment.text = ' [flagged] ';
+    }
+    yield comment;
+  }
 };
 
 export async function user(id: string): Promise<AUser> {

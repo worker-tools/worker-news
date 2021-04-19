@@ -10,8 +10,9 @@ const firebaseApp = initializeApp({
 const db = getDatabase(firebaseApp)
 const api = <T>(href: string) => new Promise<T>(res => onValue(ref(db, href), snap => res(snap.val())));
 
-export function stories(page = 1, type = Stories.TOP) {
-  return mkAPI.stories(api, page, type);
+// FIXME: `next` pagination
+export function stories({ p, next, id }: { p?: number, next?: number, id?: string }, type = Stories.TOP) {
+  return mkAPI.stories(api, p, type);
 }
 
 export function comments(id: number) {

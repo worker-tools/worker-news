@@ -41,7 +41,8 @@ const user = ({ searchParams }: RouteArgs) => {
               <tr><td valign="top">about:</td><td style="overflow:hidden;">${unsafeHTML(uo.about ?? '')}</td></tr>
               <tr><td></td><td><a href="submitted?id=${un}"><u>submissions</u></a></td></tr>
               <tr><td></td><td><a href="threads?id=${un}"><u>comments</u></a></td></tr>
-              <tr><td></td><td><a href="favorites?id=${un}"><u>favorites</u></a></td></tr>`;
+              <!-- <tr><td></td><td><a href="favorites?id=${un}"><u>favorites</u></a></td></tr> -->
+            `;
           }}
         </tbody></table>
         <br><br>

@@ -28,11 +28,13 @@ export interface AUser {
 
 export interface AComment extends AThing {
   type: 'comment',
-  level: number,
+  level?: number,
   timeAgo: string,
   text: string,
   quality: Quality,
   parent: number,
+  story?: number,
+  storyTitle?: string,
   dead?: boolean,
   deleted?: boolean,
 }

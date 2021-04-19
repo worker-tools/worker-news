@@ -123,10 +123,11 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
                 let i = (next && n)
                   ? (n - 1) 
                   : (p - 1) * 30;
-                for await (const post of stories({ p, next, id }, type)) {
-                  if (typeof post !== 'string') 
+                for await (const post of stories({ p, n, next, id }, type)) {
+                  if (typeof post !== 'string') {
                     yield rowEl(post, type !== Stories.JOB ? i++ : NaN, type);
-                  else if (post) {
+                  } else if (post) {
+                    console.log(post);
                     yield html`<tr class="morespace" style="height:10px"></tr>
                       <tr>
                         <td colspan="2"></td>
