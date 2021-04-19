@@ -3,10 +3,11 @@ import { notFound } from "@worker-tools/response-creators";
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, AComment, APost } from "./api/provider";
+import { comments as apiComments, AComment, APost, Stories } from "./api/provider";
 
 import { pageLayout } from './components';
 import { aThing, subtext } from './news';
+import { moreLinkEl } from "./threads";
 
 export interface CommOpts {
   showToggle?: boolean,
@@ -107,12 +108,13 @@ const replyTr = ({ id, type }: APost) => {
 function getItem({ searchParams }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
+  const p = Number(searchParams.get('p'));
 
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
   return new HTMLResponse(pageRenderer(async () => {
     try {
-      const post = await apiComments(id);
+      const post = await apiComments(id, p);
       const { title, text, kids } = post;
       return html`
         <tr id="pagespace" title="${encodeURIComponent(title)}" style="height:10px"></tr>
@@ -123,18 +125,23 @@ function getItem({ searchParams }: RouteArgs)  {
               <tbody>
                 ${post.type === 'comment' 
                   ? [commentTr(post as AComment, { showParent: true })]
-                  : [aThing(post), subtext(post), text != null
+                  : [aThing(post), subtext(post, undefined, undefined, { showPast: true }), text
                     ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(text)}</td></tr>`
                     : '']}
                 ${!post.dead ? replyTr(post) : ''}
               </tbody>
-            </table><br><br>
+            </table>
             <table border="0" class="comment-tree">
               <tbody>
                 ${kids && commentTree(kids)}
+                ${async () => {
+                  const moreLink = await post.moreLink;
+                  return moreLink
+                    ? moreLinkEl(moreLink)
+                    : html`<br><br>`;
+                }}
               </tbody>
             </table>
-            <br><br>
           </td>
         </tr>`;
     } catch (err) {

@@ -50,7 +50,8 @@ export const aThing = ({ type, id, url, title, dead }: APost, index?: number, op
   }
 }
 
-export const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants, dead }: APost, _index?: number, op?: Stories) => {
+export const subtext = (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
+  const { type, id, title, timeAgo, score, by, descendants, dead } = post;
   return html`
     <tr>
       <td colspan="2"></td>
@@ -61,8 +62,12 @@ export const subtext = ({ type, id, timeAgo: time_ago, score, by, descendants, d
         ${type !== 'job' 
           ? html`<a href="user?id=${by}" class="hnuser">${by}</a>` 
           : ''}
-        <span class="age"><a href="item?id=${id}">${time_ago}</a></span>
+        <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
         <span id="unv_${id}"></span>
+        ${showPast
+          ? html`| <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a>`
+          : ''}
+        <!-- | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${id}">hide</a> -->
         <!-- | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=${op}" onclick="return hidestory(event, this, ${id})">hide</a>  -->
         ${!dead && type !== 'job' 
           ? html`| <a href="item?id=${id}">${descendants === 0 

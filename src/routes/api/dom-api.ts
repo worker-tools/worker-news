@@ -26,6 +26,8 @@ const x = {
   [Stories.USER]: '/submitted',
 };
 
+const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
+
 type StoriesParams = RequireAtLeastOne<{ p?: number, n?: number, next?: number, id?: string }, 'p' | 'n' | 'id'>;
 
 export async function* stories({ p, n, next, id }: StoriesParams, type = Stories.TOP) {
@@ -95,19 +97,17 @@ async function* storiesGenerator(response: Response) {
   yield await moreLink;
 }
 
-export async function comments(id: number): Promise<APost> {
-  const url = new ParamsURL('/item', { id }, API).href;
+export async function comments(id: number, p?: number): Promise<APost> {
+  const url = new ParamsURL('/item', { id, ...p ? { p } : {} }, API).href;
   const body = await fetch(url)
   return commentsGenerator(body);
 }
 
-export async function* threads(id: string) {
-  const url = new ParamsURL('/threads', { id }, API).href;
+export async function* threads(id: string, next?: number) {
+  const url = new ParamsURL('/threads', { id, ...next ? { next } : {} }, API).href;
   const body = await fetch(url)
   yield* threadsGenerator(body)
 }
-
-const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
 
 function scrapeComments(rewriter: globalThis.HTMLRewriter, data: EventTarget, prefix = '') {
   let comment!: Partial<AComment>;
@@ -156,7 +156,8 @@ async function commentsGenerator(response: Response) {
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data');
 
-  let first = true;
+  const moreLink = resolvablePromise<string>();
+
   const rewriter = new HTMLRewriter()
     .on('#pagespace', { 
       element(el) { post.title = el.getAttribute('title') as string }
@@ -203,16 +204,16 @@ async function commentsGenerator(response: Response) {
       },
       innerHTML(html) { post.text += html }
     })
-    .on('.comment-tree .athing.comtr[id]', {
-      element() {
-        if (first) data.dispatchEvent(new CustomEvent('data', { detail: post }))
-        first = false;
-      },
+    .on('.comment-tree', {
+      element() { data.dispatchEvent(new CustomEvent('data', { detail: post })) },
     })
+    .on('a.morelink[href][rel="next"]', { 
+      element(el) { moreLink.resolve(el.getAttribute('href')!) } 
+    });
 
   scrapeComments(rewriter, data, '.comment-tree');
     
-  consume(rewriter.transform(response)).then(() => iter.return());
+  const x = consume(rewriter.transform(response)).then(() => iter.return());
 
   // wait for `post` to be populated
   await iter.next();
@@ -223,36 +224,47 @@ async function commentsGenerator(response: Response) {
 
   post.kids = aMap(iter, ({ detail: comment }) => {
     comment.story = post.id;
-
-    if (comment.text) {
-      comment.text = blockquotify('<p>' + comment.text)
-    } else {
-      // ??
-      comment.deleted = true;
-      comment.text = ' [flagged] ';
-    }
-    return comment;
+    return fixComment(comment)
   });
+
+  post.moreLink = Promise.race([moreLink, x.then(() => '')]);
+  console.log(post.moreLink)
 
   return post as APost;
 };
 
+function fixComment(comment: Partial<AComment>) {
+  if (comment.text) {
+    comment.text = blockquotify('<p>' + comment.text)
+  } else {
+    // FIXME?
+    comment.deleted = true;
+    comment.text = ' [flagged] ';
+  }
+  return comment as AComment;
+}
+
 async function* threadsGenerator(response: Response) {
   const target = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data');
-  const rewriter = scrapeComments(new HTMLRewriter(), target);
+
+  const moreLink = resolvablePromise<string>();
+  const rewriter = new HTMLRewriter()
+    .on('a.morelink[href][rel="next"]', { 
+      element(el) { moreLink.resolve(el.getAttribute('href')!) } 
+    });
+
+  scrapeComments(rewriter, target, '');
   consume(rewriter.transform(response)).then(() => iter.return());
 
   for await (const { detail: comment } of iter) {
-    if (comment.text) {
-      comment.text = blockquotify('<p>' + comment.text)
-    } else {
-      // ??
-      comment.deleted = true;
-      comment.text = ' [flagged] ';
-    }
-    yield comment;
+    yield fixComment(comment);
   }
+
+  // Prevent lock... FIXME: better solution?
+  moreLink.resolve('');
+
+  yield await moreLink;
 };
 
 export async function user(id: string): Promise<AUser> {

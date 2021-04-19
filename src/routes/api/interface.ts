@@ -58,6 +58,6 @@ export interface APost extends AThing {
   parent?: number,
   story?: number,
   storyTitle?: string,
-  moreLink?: string,
+  moreLink?: Promise<string>,
   /** @deprecated */ more_comments_id?: string | null;
 }

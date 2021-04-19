@@ -32,7 +32,7 @@ export const headerEl = ({ op, id }: { op: Stories | 'item' | 'user' | 'threads'
                     ? html`| <font color="#ffffff">${id}'s submissions</font>` 
                     : ''}
                 ${op === 'threads'
-                    ? html`| <font color="#ffffff">${id}'s submissions</font>` 
+                    ? html`| <font color="#ffffff">${id}'s comments</font>` 
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
