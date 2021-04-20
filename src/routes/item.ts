@@ -6,6 +6,7 @@ import { RouteArgs, router } from "../router";
 import { comments as apiComments, AComment, APost, Stories } from "./api/provider";
 
 import { pageLayout } from './components';
+import { cookies, LoginArgs, session } from "./login";
 import { aThing, subtext } from './news';
 import { moreLinkEl } from "./threads";
 
@@ -105,16 +106,17 @@ const replyTr = ({ id, type }: APost) => {
 }
 
 // Dead items: 26841031
-function getItem({ searchParams }: RouteArgs)  {
+function getItem({ searchParams, session }: LoginArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Number(searchParams.get('p'));
 
-  const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
+  const postResponse = apiComments(id, p);
+  const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item', session })
 
   return new HTMLResponse(pageRenderer(async () => {
     try {
-      const post = await apiComments(id, p);
+      const post = await postResponse;
       const { title, text, kids } = post;
       return html`
         <tr id="pagespace" title="${encodeURIComponent(title)}" style="height:10px"></tr>
@@ -151,4 +153,4 @@ function getItem({ searchParams }: RouteArgs)  {
   }));
 }
 
-router.get('/item', getItem);
+router.get('/item', cookies(session(getItem)));

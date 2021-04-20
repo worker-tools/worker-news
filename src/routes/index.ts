@@ -1,11 +1,12 @@
 import { router } from "../router";
 
+import './css';
+
 import { news } from './news';
 import './item';
 import './user';
 import './threads';
-import './css';
-// import './crawl';
+import './login';
 
 router.get('/favicon.ico', () => fetch('https://news.ycombinator.com/favicon.ico'))
 router.get('/s.gif', () => fetch('https://news.ycombinator.com/s.gif'))

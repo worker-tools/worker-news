@@ -6,6 +6,7 @@ import { RouteArgs, router } from "../router";
 import { pageLayout } from './components';
 
 import { stories, APost, Stories } from './api/provider'
+import { cookies, session, LoginArgs } from "./login";
 
 const tryURL = (url: string): URL | null => {
   try { return new URL(url, self.location.origin); } catch { return null }
@@ -102,7 +103,7 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
   <tr><td colspan="2"></td><td>${message}</td></tr>
   <tr style="height:${marginBottom}px"></tr>`;
 
-const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
+const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Edge HN');
   const next = Number(searchParams.get('next'))
@@ -110,8 +111,9 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
   const id = Stories.USER ? searchParams.get('id')! : '';
 
   const title = x[type].replace('$user', searchParams.get('id')!)
+  const storiesGen = stories({ p, n, next, id }, type);
 
-  return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
+  return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')!, session })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
@@ -128,7 +130,7 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
                 let i = (next && n)
                   ? (n - 1) 
                   : (p - 1) * 30;
-                for await (const post of stories({ p, n, next, id }, type)) {
+                for await (const post of storiesGen) {
                   if (typeof post !== 'string') {
                     yield rowEl(post, type !== Stories.JOB ? i++ : NaN, type);
                   } else if (post) {
@@ -150,14 +152,14 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
     </tr>`));
 };
 
-export const news = mkStories(Stories.TOP)
-export const newest = mkStories(Stories.NEW)
-export const best = mkStories(Stories.BEST)
-export const show = mkStories(Stories.SHOW)
-export const showNew = mkStories(Stories.SHOW_NEW)
-export const ask = mkStories(Stories.ASK)
-export const jobs = mkStories(Stories.JOB)
-export const submitted = mkStories(Stories.USER)
+export const news = cookies(session(mkStories(Stories.TOP)))
+export const newest = cookies(session(mkStories(Stories.NEW)))
+export const best = cookies(session(mkStories(Stories.BEST)))
+export const show = cookies(session(mkStories(Stories.SHOW)))
+export const showNew = cookies(session(mkStories(Stories.SHOW_NEW)))
+export const ask = cookies(session(mkStories(Stories.ASK)))
+export const jobs = cookies(session(mkStories(Stories.JOB)))
+export const submitted = cookies(session(mkStories(Stories.USER)))
 
 router.get('/news', news);
 router.get('/newest', newest);

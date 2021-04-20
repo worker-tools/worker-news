@@ -7,6 +7,7 @@ import { threads as apiThreads } from "./api/provider";
 
 import { pageLayout } from './components';
 import { commentEl } from "./item";
+import { cookies, LoginArgs, session } from "./login";
 
 export const moreLinkEl = (moreLink: string) => html`
   <tr class="morespace" style="height:10px"></tr>
@@ -22,14 +23,15 @@ export const moreLinkEl = (moreLink: string) => html`
     </td>
   </tr>`;
 
-function threads({ searchParams }: RouteArgs)  {
+function threads({ searchParams, session }: LoginArgs)  {
   const id = searchParams.get('id');
   if (!id) return notFound('No such item.');
   const title = `${id}'s comments`;
 
   const next = Number(searchParams.get('next'));
 
-  const pageRenderer = pageLayout({ title, op: 'threads', id })
+  const threadsGen = apiThreads(id, next);
+  const pageRenderer = pageLayout({ title, op: 'threads', id, session })
 
   return new HTMLResponse(pageRenderer(async () => {
     try {
@@ -40,7 +42,7 @@ function threads({ searchParams }: RouteArgs)  {
           </td>
         </tr>
         ${async function* () {
-          for await (const item of apiThreads(id, next)) {
+          for await (const item of threadsGen) {
             if (typeof item !== 'string') {
               yield commentEl(item, { showReply: true, showParent: item.level === 0 });
             } else if (item) {
@@ -56,4 +58,4 @@ function threads({ searchParams }: RouteArgs)  {
   }));
 }
 
-router.get('/threads', threads);
+router.get('/threads', cookies(session(threads)));

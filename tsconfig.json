@@ -24,7 +24,6 @@
     "allowJs": true,
     "checkJs": true,
     "types": [
-      "@types/node",
       "@cloudflare/workers-types",
     ],
   },

@@ -6,6 +6,7 @@ import { notFound } from "@worker-tools/response-creators";
 import { RouteArgs, router } from "../router";
 import { user as apiUser } from "./api/provider";
 import { pageLayout } from './components';
+import { cookies, LoginArgs, session } from "./login";
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -19,19 +20,20 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-const user = ({ searchParams }: RouteArgs) => {
+const user = ({ searchParams, session }: LoginArgs) => {
   const un = searchParams.get('id');
-  if (!un) return notFound('No such user.')
+  if (!un) return notFound('No such user.');
 
+  const userPromise = apiUser(un);
   const title = `Profile: ${un}`;
 
-  return new HTMLResponse(pageLayout({ op: 'user', title })(html`
+  return new HTMLResponse(pageLayout({ op: 'user', title, session })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0"><tbody>
           ${async () => {
-            const uo = await apiUser(un);
+            const uo = await userPromise;
             const dt = new Date(uo.created * 1000);
             const [{ value: month },, { value: day },, { value: year }] = numDTF.formatToParts(dt);
             return html`
@@ -50,4 +52,4 @@ const user = ({ searchParams }: RouteArgs) => {
     </tr>`));
 }
 
-router.get('/user', user);
+router.get('/user', cookies(session(user)));

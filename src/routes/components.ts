@@ -1,11 +1,17 @@
 import { html, HTMLContent } from "@worker-tools/html";
 import { Stories } from "./api/interface";
+import { SessionType } from './login';
+import { user as apiUser } from './api/provider';
 
 const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
   : content
 
-export const headerEl = ({ op, id }: { op: Stories | 'item' | 'user' | 'threads', id?: string }) => html`
+export const headerEl = ({ op, id, session }: { 
+  op: Stories | 'item' | 'user' | 'threads', 
+  id?: string,  
+  session?: SessionType,
+}) => html`
   <tr>
     <td id="header" bgcolor="#ff6600">
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
@@ -36,9 +42,11 @@ export const headerEl = ({ op, id }: { op: Stories | 'item' | 'user' | 'threads'
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
-                ${/*<!-- <a id="me" href="user?id=USER">USER</a> (15) |
-                <a id="logout"
-                  href="logout?auth=${'TODO'}&amp;goto=news">logout</a> -->*/''}
+                ${session?.user 
+                  ? html`<a id="me" href="user?id=${session.user}">${session.user}</a> 
+                      ${apiUser(session.user).then(x => `(${x.karma})`)}
+                      | <a id="logout" href="logout?auth=${'TODO'}&amp;goto=news">logout</a>`
+                  : html`<a id="login" href="login">login</a>`}
             </span></td>
           </tr>
         </tbody>
@@ -76,10 +84,11 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const pageLayout = ({ title, op, id }: { 
+export const pageLayout = ({ title, op, id, session }: { 
   title?: string, 
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string 
+  session?: SessionType,
 }) => (content: HTMLContent) => html`
   <html lang="en" op="${op}">
   <head>
@@ -94,7 +103,7 @@ export const pageLayout = ({ title, op, id }: {
     <center>
       <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
         <tbody>
-          ${headerEl({ op, id })}
+          ${headerEl({ op, id, session })}
           ${content}
           ${footerEl()}
         </tbody>
