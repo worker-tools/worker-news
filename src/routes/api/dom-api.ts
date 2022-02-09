@@ -173,14 +173,12 @@ async function commentsGenerator(response: Response) {
   const moreLink = resolvablePromise<string>();
 
   const rewriter = h2r(new HTMLRewriter())
-    .on('.fatitem .athing[id] a.titlelink', { 
-      text({ text }) { post.title += text }
-    })
     .on('.fatitem .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
-    .on('.fatitem .title a.storylink', {
+    .on('.fatitem .athing[id] > .title > a.titlelink', { 
       element(link) { post.url = link.getAttribute('href') || undefined; },
+      text({ text }) { post.title += text }
     })
     // FIXME: concatenate text before parseInt jtbs..
     .on('.fatitem .subtext > .score', { 
@@ -246,7 +244,7 @@ async function commentsGenerator(response: Response) {
 
   if (post.text?.trim()) {
     post.text = blockquotify('<p>' + post.text)
-  }
+  } else delete post.text
 
   post.kids = aMap(iter, ({ detail: comment }) => {
     comment.story = post.id;

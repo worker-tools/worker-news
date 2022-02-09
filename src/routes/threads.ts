@@ -36,7 +36,7 @@ function threads({ searchParams, session }: LoginArgs)  {
   return new HTMLResponse(pageRenderer(async () => {
     try {
       return html`
-        <tr id="pagespace" title="${encodeURIComponent(title)}" style="height:10px"></tr>
+        <tr id="pagespace" title="${title}" style="height:10px"></tr>
         <tr>
           <td>
           </td>

@@ -119,7 +119,7 @@ function getItem({ searchParams, session }: LoginArgs)  {
       const post = await postResponse;
       const { title, text, kids } = post;
       return html`
-        <tr id="pagespace" title="${encodeURIComponent(title)}" style="height:10px"></tr>
+        <tr id="pagespace" title="${title}" style="height:10px"></tr>
         ${title ? html` <script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` : ''}
         <tr>
           <td>
