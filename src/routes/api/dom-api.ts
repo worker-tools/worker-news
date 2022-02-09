@@ -244,7 +244,7 @@ async function commentsGenerator(response: Response) {
   // wait for `post` to be populated
   await iter.next();
 
-  if (post.text) {
+  if (post.text?.trim()) {
     post.text = blockquotify('<p>' + post.text)
   }
 
