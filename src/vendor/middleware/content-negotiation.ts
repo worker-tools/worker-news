@@ -2,7 +2,7 @@ import { notAcceptable, unsupportedMediaType } from '@worker-tools/response-crea
 import negotiated from 'negotiated';
 
 import { Awaitable } from '../common-types';
-import { Base } from './index';
+import { BaseContext } from './index';
 
 const weightSortFn = <X extends { weight: number }>(a: X, b: X) => a.weight >= b.weight ? a : b;
 
@@ -104,7 +104,7 @@ export const withContentNegotiation = <
   AE extends readonly string[],
   AC extends readonly string[],
   >(opts: ContentNegotiationOptions<CT, CL, CE, CC, AT, AL, AE, AC> = {}) =>
-  <X extends Base>(handler: (ctx: X & ContentNegotiationResults<CT[number], CL[number], CE[number], CC[number], AT[number], AL[number], AE[number], AC[number]>) => Awaitable<Response>) =>
+  <X extends BaseContext>(handler: (ctx: X & ContentNegotiationResults<CT[number], CL[number], CE[number], CC[number], AT[number], AL[number], AE[number], AC[number]>) => Awaitable<Response>) =>
     async (ctx: X): Promise<Response> => {
       const headers = ctx.event.request.headers;
 

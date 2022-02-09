@@ -1,10 +1,12 @@
 import { html, HTMLResponse } from '@worker-tools/html';
+import { ParamsURL } from '@worker-tools/json-fetch';
 import { StorageArea } from '@worker-tools/kv-storage';
-import { found } from '@worker-tools/response-creators';
+import { badRequest, found, internalServerError, ok, unauthorized } from '@worker-tools/response-creators';
 import { WithCookies, withCookies, WithSession, withSession } from 'src/vendor/middleware';
 import { FORM, FORM_DATA } from 'src/vendor/middleware/mime';
 
 import { RouteArgs, router } from "../router";
+import { consume } from './api/util';
 
 function recordToFormData(rec: Record<string, string | Blob>) {
   const data = new FormData();
@@ -17,6 +19,22 @@ function recordToSearchParams(rec: Record<string, string>) {
   for (const [k, v] of Object.entries(rec)) data.append(k, v);
   return data;
 }
+
+export type SessionType = { 
+  user?: string | null, 
+  token?: string | null,
+  cookie?: string | null, 
+  votes: Set<number>,
+}
+
+export type LoginArgs = RouteArgs & WithCookies & WithSession<SessionType>
+
+export const cookies = withCookies();
+export const session = withSession<SessionType>({ 
+  storage: new StorageArea('logins'),
+  expirationTtl: 60 * 60 * 24 * 365 * 15,
+  defaultSession: { votes: new Set() }
+});
 
 function loginEl(autoFocus: boolean) {
   return html`
@@ -32,8 +50,9 @@ function loginEl(autoFocus: boolean) {
     </table><br>`;
 }
 
-router.get('/login', ({ searchParams }) => {
+router.get('/login', cookies(session(({ searchParams, session }) => {
   const goto = searchParams.get('goto') ?? 'news';
+  if (session.token) found(goto)
   return new HTMLResponse(html`<html lang="en">
     <head>
       <meta name="referrer" content="origin">
@@ -60,17 +79,9 @@ router.get('/login', ({ searchParams }) => {
       </form>
     </body>
   </html>`);
-});
+})));
 
 const HOSTNAME = 'https://news.ycombinator.com'
-
-export type SessionType = { cookie?: string | null, user?: string | null, token?: string | null }
-export type LoginArgs = RouteArgs & WithCookies & WithSession<SessionType>
-export const cookies = withCookies();
-export const session = withSession<SessionType>({ 
-  storage: new StorageArea('logins'),
-  expirationTtl: 60 * 60 * 24 * 365 * 15,
-});
 
 router.post('/login', cookies(session(async ({ request, session }) => {
   const fd = await request.formData();
@@ -78,14 +89,15 @@ router.post('/login', cookies(session(async ({ request, session }) => {
   const pw = fd.get('pw') as string;
   const goto = (fd.get('goto') ?? 'news') as string;
 
-  const { ok, headers } = await fetch(new URL(`/login`, HOSTNAME).href, {
+  const { headers } = await fetch(new URL(`/login`, HOSTNAME).href, {
     method: 'POST',
     headers: { 'content-type': FORM },
     body: recordToSearchParams({ acct, pw, goto }),
-  })
+    redirect: 'manual',
+  });
 
   // FIXME
-  if (!ok) return found('login')
+  // if (!ok) return internalServerError()
 
   const setCookie = headers.get('set-cookie');
   const [user, token] = setCookie?.split('; ')[0]?.substr('user='.length).split('&') ?? [];
@@ -95,3 +107,61 @@ router.post('/login', cookies(session(async ({ request, session }) => {
 
   return found(goto);
 })));
+
+router.get('/logout', cookies(session(async ({ searchParams, session, cookieStore }) => {
+  const goto = searchParams.get('goto') ?? 'news';
+  if (session.user) {
+    delete session.user;
+    delete session.token;
+    delete session.cookie;
+    await cookieStore.delete('sid');
+  }
+  return found(goto)
+})));
+
+async function getAuthToken(id: number, cookie: string) {
+  const authResponse = await fetch(new ParamsURL('/item', { id }, HOSTNAME).href, {
+    headers: [['Cookie', cookie]],
+  });
+
+  // FIXME: auth.ok??
+
+  const abort = new AbortController();
+  let auth: string;
+  const rewriter = new HTMLRewriter()
+    .on(`#up_${id}[href]`, {
+      element(el) {
+        auth = new URL(el.getAttribute('href')!, HOSTNAME).searchParams.get('auth')!
+        abort.abort();
+      }
+    });
+
+  await consume(rewriter.transform(authResponse), abort.signal);
+  return auth!;
+}
+
+router.get('/vote', cookies(session(async ({ searchParams, session }) => {
+  if (session.user && session.token) {
+    const id = Number(searchParams.get('id'));
+    const how = searchParams.get('how')
+    const goto = searchParams.get('goto')
+    if (!id || !how || Number.isNaN(id)) return badRequest();
+
+    const cookie = `user=${session.user}&${session.token}`;
+    const auth = await getAuthToken(id, cookie);
+
+    const voteResponse = await fetch(new ParamsURL('/vote', { id, how, auth }, HOSTNAME).href, {
+      headers: [['Cookie', cookie]],
+    });
+    
+    if (voteResponse.ok) {
+      session.votes = session.votes.add(id);
+      // FIXME: response.ok?
+      return found(goto ?? 'news')
+    } else {
+      return internalServerError()
+    }
+  } else {
+    return unauthorized();
+  }
+})))

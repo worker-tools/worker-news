@@ -1,12 +1,10 @@
-import 'abortcontroller-polyfill';
-
-import { StorageArea } from 'kv-storage-interface';
+import type { StorageArea } from 'kv-storage-interface';
 import { UUID } from 'uuid-class';
 import { Base64Decoder, Base64Encoder } from 'base64-encoding';
 import { Encoder as MsgPackEncoder, Decoder as MsgPackDecoder } from 'msgpackr';
 // import { Encoder as CBOREncoder, Decoder as CBORDecoder } from 'cbor-x/browser';
 
-import { Base, Handler, WithCookies, WithSignedCookies } from './index';
+import { BaseContext, Handler, WithCookies, WithSignedCookies } from './index';
 import { Awaitable } from '../common-types';
 import { WithEncryptedCookies } from './cookies';
 import { shortenId, parseUUID } from '../short-id';
@@ -15,10 +13,10 @@ type AnyRec = Record<any, any>;
 
 export type WithSession<S extends AnyRec = AnyRec> = { session: S };
 
-export type WithCookieSessionDeps = Base & (WithEncryptedCookies | WithSignedCookies);
+export type WithCookieSessionDeps = BaseContext & (WithEncryptedCookies | WithSignedCookies | WithCookies);
 export type WithCookieSessionHandler<X extends WithCookieSessionDeps, S> = (ctx: X & WithSession<S>) => Awaitable<Response>;
 
-export type WithSessionDeps = Base & (WithEncryptedCookies | WithSignedCookies | WithCookies);
+export type WithSessionDeps = BaseContext & (WithEncryptedCookies | WithSignedCookies | WithCookies);
 export type WithSessionHandler<X extends WithSessionDeps, S> = (ctx: X & WithSession<S>) => Awaitable<Response>;
 
 export interface CookieSessionOptions<S extends AnyRec = AnyRec> {
@@ -48,8 +46,9 @@ export const withCookieSession = <S extends AnyRec = AnyRec>({ defaultSession = 
       const { event } = ctx;
       const { encryptedCookies, encryptedCookieStore } = ctx as WithEncryptedCookies;
       const { signedCookies, signedCookieStore } = ctx as WithSignedCookies;
-      const cookieStore = encryptedCookieStore || signedCookieStore;
-      const cookies = encryptedCookies || signedCookies;
+      const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as WithCookies;
+      const cookieStore = encryptedCookieStore || signedCookieStore || baseCookieStore;
+      const cookies = encryptedCookies || signedCookies || baseCookies;
 
       const controller = new AbortController();
 
@@ -122,8 +121,10 @@ export const withSession = <S extends AnyRec = AnyRec>({ storage, defaultSession
 // TODO: make configurable
 // const stringifySessionCookie = <T>(value: T) => new Base64Encoder({ url: true }).encode(new CBOREncoder({ structuredClone: true }).encode(value));
 // const parseSessionCookie = <T>(value: string) => <T>new CBORDecoder({ structuredClone: true }).decode(new Base64Decoder().decode(value));
-const stringifySessionCookie = <T>(value: T) => new Base64Encoder({ url: true }).encode(new MsgPackEncoder({ structuredClone: true }).encode(value));
-const parseSessionCookie = <T>(value: string) => <T>new MsgPackDecoder({ structuredClone: true }).decode(new Base64Decoder().decode(value));
+const stringifySessionCookie = <T>(value: T) => 
+  new Base64Encoder({ url: true }).encode(new MsgPackEncoder({ structuredClone: true }).encode(value));
+const parseSessionCookie = <T>(value: string) => 
+  <T>new MsgPackDecoder({ structuredClone: true }).decode(new Base64Decoder().decode(value));
 
 async function getCookieSessionProxy<S extends AnyRec = AnyRec>(
   cookieVal: string | null | undefined,
@@ -161,8 +162,8 @@ async function getSessionProxy<S extends AnyRec = AnyRec>(
   const sessionId = parseUUID(cookieVal) || new UUID();
   const obj = (await storage.get<S>(sessionId)) || defaultSession;
 
+  /** HACK: Batch calls within the same micro task */
   let nr = 0;
-  /** Batch calls within the same micro task */
   const persist = () => {
     const capturedNr = ++nr;
     event.waitUntil((async () => {

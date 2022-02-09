@@ -1,12 +1,13 @@
 import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
+import { StorageArea } from "@worker-tools/kv-storage";
 import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
 import { pageLayout } from './components';
 
-import { stories, APost, Stories } from './api/provider'
-import { cookies, session, LoginArgs } from "./login";
+import { stories, APost, Stories } from './api'
+import { cookies, session, LoginArgs, SessionType } from "./login";
 
 const tryURL = (url: string): URL | null => {
   try { return new URL(url, self.location.origin); } catch { return null }
@@ -27,18 +28,19 @@ const stripWWW = (url?: URL | null) => {
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
-export const aThing = ({ type, id, url, title, dead }: APost, index?: number, op?: Stories) => {
+export const aThing = async ({ type, id, url, title, dead }: APost, index?: number, op?: Stories, session?: SessionType) => {
   try {
     const uRL = tryURL(url);
+    const upVoted = session?.votes.has(id);
     return html`
       <tr class="athing" id="${id}">
         <td align="right" valign="top" class="title">${rankEl(index)}</td>
         <td valign="top" class="votelinks"><center>${dead || type === 'job'
           ? html`<img src="s.gif" height="1" width="14">`
-          : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-              href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=${op}">
-              <div class="votearrow" title="upvote"></div>
-            </a>`}</center></td>
+          : upVoted ? '' : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
+                href="vote?id=${id}&amp;how=up&amp;goto=${op}">
+                <div class="votearrow" title="upvote"></div>
+              </a>`}</center></td>
         <td class="title">${dead 
           ? '[flagged]' 
           : html`<a href="${url}"
@@ -47,7 +49,7 @@ export const aThing = ({ type, id, url, title, dead }: APost, index?: number, op
                 class="sitestr">${stripWWW(uRL)}</span></a>)</span>`}</td>`}
       </tr>`;
   } catch (err) {
-    throw html`<tr><td>Something went wrong</td><td>${err.message}</td></tr>`
+    throw html`<tr><td>Something went wrong</td><td>${err instanceof Error ? err.message : err as string}</td></tr>`
   }
 }
 
@@ -79,10 +81,9 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
   `;
 }
 
-const rowEl = (arg: APost, i: number, type: Stories) => {
-  // FIXME: support other types
+const rowEl = (arg: APost, i: number, type: Stories, session?: SessionType) => {
   return html`
-    ${aThing(arg, i, type)}
+    ${aThing(arg, i, type, session)}
     ${subtext(arg, i, type)}
     <tr class="spacer" style="height:5px"></tr>`;
 }
@@ -105,7 +106,7 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
 
 const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
   const p = Number(searchParams.get('p') || '1');
-  if (p > Math.ceil(500 / 30)) return notFound('Not supported by Edge HN');
+  if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
   const n = Number(searchParams.get('n'))
   const id = Stories.USER ? searchParams.get('id')! : '';
@@ -132,9 +133,8 @@ const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
                   : (p - 1) * 30;
                 for await (const post of storiesGen) {
                   if (typeof post !== 'string') {
-                    yield rowEl(post, type !== Stories.JOB ? i++ : NaN, type);
+                    yield rowEl(post, type !== Stories.JOB ? i++ : NaN, type, session);
                   } else if (post) {
-                    console.log(post);
                     yield html`<tr class="morespace" style="height:10px"></tr>
                       <tr>
                         <td colspan="2"></td>
@@ -143,7 +143,7 @@ const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
                   }
                 }
               } catch (err) {
-                yield html`<tr><td colspan="2"></td><td>${err.message}</td></tr>`;
+                yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err as string}</td></tr>`;
               }
             }}
           </tbody>

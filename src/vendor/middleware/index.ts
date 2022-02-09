@@ -1,8 +1,8 @@
 import { Awaitable } from "../common-types";
 
-export type Base = { event: FetchEvent }
-export type BaseHandler = (ctx: Base) => Awaitable<Response>;
-export type Handler<X extends Base> = (ctx: X) => Awaitable<Response>;
+export type BaseContext = { event: FetchEvent }
+export type BaseHandler = (ctx: BaseContext) => Awaitable<Response>;
+export type Handler<X extends BaseContext> = (ctx: X) => Awaitable<Response>;
 
 /**
  * @example

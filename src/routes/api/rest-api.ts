@@ -36,3 +36,7 @@ export function comments(id: number) {
 export function user(id: string) {
   return mkAPI.user(api, id);
 }
+
+export function threads() {
+
+}

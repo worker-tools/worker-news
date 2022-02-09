@@ -1,5 +1,5 @@
 import { Awaitable } from "../common-types";
-import { Base } from "./index";
+import { BaseContext } from "./index";
 
 export type WithBasics = { 
   headers: Headers, 
@@ -8,9 +8,9 @@ export type WithBasics = {
   pathname: string, 
   searchParams: URLSearchParams,
 };
-export type WithBasicsHandler<X extends Base> = (ctx: X & WithBasics) => Awaitable<Response>;
+export type WithBasicsHandler<X extends BaseContext> = (ctx: X & WithBasics) => Awaitable<Response>;
 
-export const withBasics = () => <X extends Base>(handler: WithBasicsHandler<X>) => (ctx: X) => {
+export const withBasics = () => <X extends BaseContext>(handler: WithBasicsHandler<X>) => (ctx: X) => {
   const { request } = ctx.event;
   const { headers } = request;
   const method = request.method;

@@ -6,12 +6,16 @@ import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 
 // Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
-import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
+// import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
+import { HTMLRewriter as HR, ElementHandlers, Element, TextChunk } from 'html-rewriter-wasm';
 
 import { APost, AComment, Quality, Stories, AUser } from './interface';
 import { aMap } from './iter';
 import { blockquotify, consume } from './util';
 import { resolvablePromise } from 'src/vendor/resolvable-promise';
+
+const h2r = (htmlRewriter: HTMLRewriter) => htmlRewriter as unknown as HR;
+const r2h = (hTMLRewriter: HR) => hTMLRewriter as unknown as HTMLRewriter;
 
 const API = 'https://news.ycombinator.com'
 
@@ -28,6 +32,8 @@ const x = {
 
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
 
+const elToTagOpen = (el: Element) => `<${el.tagName} ${[...el.attributes].map(x => `${x[0]}="${x[1]}"`).join(' ')}>`;
+
 type StoriesParams = RequireAtLeastOne<{ p?: number, n?: number, next?: number, id?: string }, 'p' | 'n' | 'id'>;
 
 export async function* stories({ p, n, next, id }: StoriesParams, type = Stories.TOP) {
@@ -41,23 +47,27 @@ export async function* stories({ p, n, next, id }: StoriesParams, type = Stories
   yield* storiesGenerator(await fetch(url.href));
 }
 
+function newCustomEvent<T>(event: string, detail: T) {
+  return new CustomEvent<T>(event, { detail });
+}
+
 async function* storiesGenerator(response: Response) {
   let post: Partial<APost>;
 
   const data = new EventTarget();
-  const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data');
+  const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data', { returnEvent: 'return' });
 
   const moreLink = resolvablePromise<string>();
-  const rewriter = new HTMLRewriter()
+  const rewriter = h2r(new HTMLRewriter())
     .on('.athing[id]', {
       element(el) {
-        if (post) data.dispatchEvent(new CustomEvent('data', { detail: post }));
+        if (post) data.dispatchEvent(newCustomEvent('data', post));
 
         const id = Number(el.getAttribute('id'));
         post = { id, title: '', score: 0, by: '', timeAgo: '', descendants: 0, story: post?.story };
       }
     })
-    .on('.athing[id] .title a.storylink', {
+    .on('.athing[id] > .title > a.titlelink', {
       element(link) { post.url = link.getAttribute('href') || undefined },
       text({ text }) { post.title += text },
     })
@@ -77,11 +87,11 @@ async function* storiesGenerator(response: Response) {
     .on('.morelink[href]', {
       element(el) { moreLink.resolve(el.getAttribute('href')!) }
     })
+    .on('.yclinks', {
+      element() { if (post) data.dispatchEvent(newCustomEvent('data', post)) }
+    })
 
-  consume(rewriter.transform(response)).then(() => {
-    if (post) data.dispatchEvent(new CustomEvent('data', { detail: post }));
-    iter.return();
-  });
+  consume(r2h(rewriter).transform(response)).then(() => iter.return());
 
   for await (const { detail: post } of iter) {
     post.type = post.type || 'story';
@@ -109,13 +119,13 @@ export async function* threads(id: string, next?: number) {
   yield* threadsGenerator(body)
 }
 
-function scrapeComments(rewriter: globalThis.HTMLRewriter, data: EventTarget, prefix = '') {
+function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
   let comment!: Partial<AComment>;
 
   return rewriter
     .on(`${prefix} .athing.comtr[id]`, {
       element(thing) {
-        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
+        if (comment) data.dispatchEvent(newCustomEvent('data', comment));
         const id = Number(thing.getAttribute('id'))
         comment = { id, type: 'comment', by: '', timeAgo: '', text: '', storyTitle: '' };
       },
@@ -136,17 +146,21 @@ function scrapeComments(rewriter: globalThis.HTMLRewriter, data: EventTarget, pr
       element(a) { comment.story = extractId(a.getAttribute('href')) },
       text({ text }) { comment.storyTitle += text }
     })
-    .on(`${prefix} .athing.comtr[id] .commtext`, <ParsedElementHandler>{
+    .on(`${prefix} .athing.comtr[id] .commtext`, {
       element(el) { comment.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality },
-      innerHTML(html) { comment.text += html }
+      text(chunk) { comment.text += chunk.text },
+    })
+    .on(`${prefix} .athing.comtr[id] .commtext *`, {
+      element(el) { 
+        comment.text += elToTagOpen(el);
+        el.onEndTag(endTag => { comment.text += `</${endTag.name}>`})
+      }
     })
     .on(`${prefix} .athing.comtr[id] .comment .reply`, { 
       element(el) { el.remove() }
     })
     .on('.yclinks', {
-      element() {
-        if (comment) data.dispatchEvent(new CustomEvent('data', { detail: comment }));
-      }
+      element() { if (comment) data.dispatchEvent(newCustomEvent('data', comment)) }
     })
 }
 
@@ -154,11 +168,11 @@ async function commentsGenerator(response: Response) {
   const post: Partial<APost> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '', storyTitle: '' };
 
   const data = new EventTarget();
-  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data');
+  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data', { returnEvent: 'return' });
 
   const moreLink = resolvablePromise<string>();
 
-  const rewriter = new HTMLRewriter()
+  const rewriter = h2r(new HTMLRewriter())
     .on('#pagespace', { 
       element(el) { post.title = el.getAttribute('title') as string }
     })
@@ -181,8 +195,8 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem .subtext > a[href^=item]', { 
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
-    .on('.fatitem tr:nth-child(4) > td:nth-child(2)', <ParsedElementHandler>{ 
-      innerHTML(html) { if (!html?.trimStart().startsWith('<form')) post.text += html }
+    .on('.fatitem tr:nth-child(4) > td:nth-child(2)', { 
+      // innerHTML(html) { if (!html?.trimStart().startsWith('<form')) post.text += html }
     })
     .on('.fatitem .comhead > .hnuser', {
       text({ text }) { post.by += text }
@@ -197,15 +211,21 @@ async function commentsGenerator(response: Response) {
       element(a) { post.story = extractId(a.getAttribute('href')) },
       text({ text }) { (<string>post.storyTitle) += text }
     })
-    .on('.fatitem .commtext', <ParsedElementHandler>{
+    .on('.fatitem .commtext', {
       element(el) { 
         post.type = 'comment'; 
         post.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality; 
       },
-      innerHTML(html) { post.text += html }
+      text(chunk) { post.text += chunk.text }
+    })
+    .on('.fatitem .commtext *', {
+      element(el) { 
+        post.text += elToTagOpen(el);
+        el.onEndTag(endTag => { post.text += `</${endTag.name}>`})
+      }
     })
     .on('.comment-tree', {
-      element() { data.dispatchEvent(new CustomEvent('data', { detail: post })) },
+      element() { data.dispatchEvent(newCustomEvent('data', post)) },
     })
     .on('a.morelink[href][rel="next"]', { 
       element(el) { moreLink.resolve(el.getAttribute('href')!) } 
@@ -213,7 +233,7 @@ async function commentsGenerator(response: Response) {
 
   scrapeComments(rewriter, data, '.comment-tree');
     
-  const x = consume(rewriter.transform(response)).then(() => iter.return());
+  const x = consume(r2h(rewriter).transform(response)).then(() => iter.return());
 
   // wait for `post` to be populated
   await iter.next();
@@ -228,7 +248,6 @@ async function commentsGenerator(response: Response) {
   });
 
   post.moreLink = Promise.race([moreLink, x.then(() => '')]);
-  console.log(post.moreLink)
 
   return post as APost;
 };
@@ -249,13 +268,13 @@ async function* threadsGenerator(response: Response) {
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data');
 
   const moreLink = resolvablePromise<string>();
-  const rewriter = new HTMLRewriter()
+  const rewriter = h2r(new HTMLRewriter())
     .on('a.morelink[href][rel="next"]', { 
       element(el) { moreLink.resolve(el.getAttribute('href')!) } 
     });
 
-  scrapeComments(rewriter, target, '');
-  consume(rewriter.transform(response)).then(() => iter.return());
+  scrapeComments(rewriter as unknown as HR, target, '');
+  consume(r2h(rewriter).transform(response)).then(() => iter.return());
 
   for await (const { detail: comment } of iter) {
     yield fixComment(comment);
@@ -273,18 +292,29 @@ export async function user(id: string): Promise<AUser> {
 
   let user: Partial<AUser> = { id, about: '', submitted: [] };
 
-  const rewriter = new HTMLRewriter()
+  const rewriter = h2r(new HTMLRewriter())
     .on('tr.athing td[timestamp]', {
-      element(el) { user.created = Number(el.getAttribute('timestamp')) }
+      element(el) { 
+        console.log(...el.attributes);
+        user.created = Number(el.getAttribute('timestamp')) 
+      }
     })
-    .on('tr > td > table[border=0] > tr:nth-child(3) > td:nth-child(2)', {
+    .on('tr > td > table[border="0"] > tr:nth-child(3) > td:nth-child(2)', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) user.karma = parseInt(text, 10) }
     })
-    .on('tr > td > table[border=0] > tr:nth-child(4) > td:nth-child(2)', <ParsedElementHandler>{
-      innerHTML(html) { if (html.trim() !== '') user.about = '<p>' + html.trim() }
+    .on('tr > td > table[border="0"] > tr:nth-child(4) > td:nth-child(2)', {
+      text(chunk) { user.about += chunk.text }
+    })
+    .on('tr > td > table[border="0"] > tr:nth-child(4) > td:nth-child(2) *', {
+      element(el) { 
+        user.about += elToTagOpen(el);
+        el.onEndTag(endTag => { user.about += `</${endTag.name}>`})
+      }
     })
 
-  await consume(rewriter.transform(response));
+  await consume(r2h(rewriter).transform(response));
+
+  if (user.about?.trim()) user.about = '<p>' + user.about.trim();
 
   return user as AUser;
 }

@@ -1,4 +1,4 @@
-import { Base, Handler } from "./index";
+import { BaseContext, Handler } from "./index";
 
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 
@@ -20,7 +20,7 @@ interface CORSOptions {
 /**
  * A CORS middleware that gives clients exactly the permissions they ask for.
  */
-export const withCORS = (opt: CORSOptions = {}) => <X extends Base>(handler: Handler<X>) => async (ctx: X): Promise<Response> => {
+export const withCORS = (opt: CORSOptions = {}) => <X extends BaseContext>(handler: Handler<X>) => async (ctx: X): Promise<Response> => {
   const req = ctx.event.request;
   const res = await handler(ctx);
 

@@ -4,7 +4,7 @@ import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
-import { user as apiUser } from "./api/provider";
+import { user as apiUser } from "./api";
 import { pageLayout } from './components';
 import { cookies, LoginArgs, session } from "./login";
 

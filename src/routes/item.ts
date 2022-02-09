@@ -3,7 +3,7 @@ import { notFound } from "@worker-tools/response-creators";
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, AComment, APost, Stories } from "./api/provider";
+import { comments as apiComments, AComment, APost, Stories } from "./api";
 
 import { pageLayout } from './components';
 import { cookies, LoginArgs, session } from "./login";
@@ -97,8 +97,8 @@ const replyTr = ({ id, type }: APost) => {
       <td>
         <form method="post" action="comment"><input type="hidden" name="parent" value="${id}"><input
             type="hidden" name="goto" value="item?id=${id}"><input type="hidden" name="hmac"
-            value="${'TODO'}"><textarea name="text" rows="6"
-            cols="60" disabled></textarea>
+            value="${'TODO'}"><textarea name="text" rows="8"
+            cols="80" disabled></textarea>
           <br><br><input type="submit" value="${type === 'comment' ? 'reply' : 'add comment'}" disabled>
         </form>
       </td>
@@ -148,7 +148,7 @@ function getItem({ searchParams, session }: LoginArgs)  {
         </tr>`;
     } catch (err) {
       return html`<tr id="pagespace" title="Error" style="height:10px"></tr>
-        <tr><td>${err.message}</td></tr>`
+        <tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`
     }
   }));
 }

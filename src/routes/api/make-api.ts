@@ -1,5 +1,5 @@
 import { APost, AComment, Stories, AUser } from './interface';
-import { default as PQueue } from 'p-queue-browser';
+import { default as PQueue } from '@qwtel/p-queue-browser';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
 import { blockquotify } from './util';

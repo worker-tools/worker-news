@@ -3,7 +3,7 @@ import { notFound } from "@worker-tools/response-creators";
 
 import { RouteArgs, router } from "../router";
 
-import { threads as apiThreads } from "./api/provider";
+import { threads as apiThreads } from "./api";
 
 import { pageLayout } from './components';
 import { commentEl } from "./item";
@@ -53,7 +53,7 @@ function threads({ searchParams, session }: LoginArgs)  {
         `;
     } catch (err) {
       return html`<tr id="pagespace" title="Error" style="height:10px"></tr>
-        <tr><td>${err.message}</td></tr>`
+        <tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`
     }
   }));
 }

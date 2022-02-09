@@ -1,7 +1,7 @@
 import { html, HTMLContent } from "@worker-tools/html";
 import { Stories } from "./api/interface";
 import { SessionType } from './login';
-import { user as apiUser } from './api/provider';
+import { user as apiUser } from './api';
 
 const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
@@ -21,7 +21,7 @@ export const headerEl = ({ op, id, session }: {
                   src="y18.gif" width="18" height="18"
                   style="border:1px white solid;"></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a
-                    href="news">Edge HN</a></b>
+                    href="news">Worker News</a></b>
                 ${topSel(op === Stories.NEW, html`<a href="newest">new</a>`)}
                 <!-- | <a href="threads?id=USER">threads</a> -->
                 <!-- | <a href="front">past</a> -->
@@ -45,7 +45,7 @@ export const headerEl = ({ op, id, session }: {
                 ${session?.user 
                   ? html`<a id="me" href="user?id=${session.user}">${session.user}</a> 
                       ${apiUser(session.user).then(x => `(${x.karma})`)}
-                      | <a id="logout" href="logout?auth=${'TODO'}&amp;goto=news">logout</a>`
+                      | <a id="logout" href="logout?goto=news">logout</a>`
                   : html`<a id="login" href="login">login</a>`}
             </span></td>
           </tr>
@@ -97,7 +97,7 @@ export const pageLayout = ({ title, op, id, session }: {
     <link rel="stylesheet" type="text/css" href="news.css">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
-    <title>${title ? `${title} | Edge HN` : 'Edge HN'}</title>
+    <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
   </head>
   <body>
     <center>

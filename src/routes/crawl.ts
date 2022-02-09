@@ -1,6 +1,6 @@
 import { StorageArea } from '@worker-tools/kv-storage';
 import { ok } from '@worker-tools/response-creators';
-import { default as PQueue } from 'p-queue-browser';
+import { default as PQueue } from '@qwtel/p-queue-browser';
 
 import { router } from "../router";
 import { API, api } from './api/_old/api';
@@ -63,7 +63,7 @@ async function crawlItem(id: number) {
       await crawlItem(kid);
     }
   } catch (err) {
-    console.log('try later ' + id + ' ' + err.message)
+    console.log('try later ' + id + ' ' + (err instanceof Error ? err.message : err as string))
   }
 }
 
@@ -150,7 +150,7 @@ router.get('/__crawl-pqueue', async ({ event, searchParams }) => {
     await queue.onIdle();
     console.log('y done?')
     return ok('done');
-  } catch (e) { console.error(e.message); throw e }
+  } catch (e) { console.error(e instanceof Error ? e.message : e as string); throw e }
 })
 
 function crawlItem4(queue: PQueue, id: number) {
