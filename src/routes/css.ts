@@ -73,13 +73,11 @@ router.get('/news.css', () => {
     html  { background-color: var(--page-background);}
     body  { font-family:var(--font); font-size:10pt; color:var(--text); }
     td    { font-family:var(--font); font-size:10pt; color:var(--text); }
-    hr    { margin: 9pt 0 }
 
     .admin td   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
     .subtext td { font-family:var(--font); font-size:  7pt; color:var(--text); }
     
     input    { font-family:monospace; font-size:10pt; }
-    input[type=\\"submit\\"] { font-family:var(--font); }
     textarea { font-family:monospace; font-size:10pt; }
     blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 9px; }
     
@@ -255,7 +253,21 @@ router.get('/news.css', () => {
     @media only screen and (min-width : 1260px) and (max-width : 1349px) {
       .comment { max-width: 1130px; overflow: hidden }
     }
-    
+
+    hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
+    .sr-only {
+      clip: rect(1px, 1px, 1px, 1px) !important;
+      -webkit-clip-path: inset(50%) !important;
+      clip-path: inset(50%) !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      margin-left: -2px !important;
+      padding: 0 !important;
+      display: inline-block;
+      position: absolute !important;
+      width: 1px !important;
+      white-space: nowrap !important;
+    }
   `);
   // FIXME: better solution?
   response.headers.set('content-type', 'text/css');

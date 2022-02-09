@@ -65,8 +65,8 @@ export const footerEl = () => html`
           </tr>
         </tbody>
       </table><br>
-      <center>Made by <a href="https://qwtel.com/">@qwtel</a> with <a
-          href="https://worker-tools.github.io/">Worker Tools</a> and <a
+      <center>Made by <a href="https://qwtel.com">@qwtel</a> with <a
+          href="https://workers.tools">Worker Tools</a> and <a
           href="https://workers.cloudflare.com">Cloudflare Workers</a>.</center><br>
       <center><span class="yclinks"><a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>

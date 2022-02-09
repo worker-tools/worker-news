@@ -10,7 +10,6 @@ import './threads';
 
 router.get('/favicon.ico', () => fetch('https://news.ycombinator.com/favicon.ico'))
 router.get('/s.gif', () => fetch('https://news.ycombinator.com/s.gif'))
-// router.get('/y18.gif', () => fetch('https://workers.cloudflare.com/resources/logo/logo.svg'))
 router.get('/y18.gif', () => fetch('https://workers.tools/assets/img/logo_d.png'))
 router.get('/grayarrow.gif', () => fetch('https://news.ycombinator.com/grayarrow.gif'))
 router.get('/grayarrow2x.gif', () => fetch('https://news.ycombinator.com/grayarrow2x.gif'))

@@ -173,8 +173,8 @@ async function commentsGenerator(response: Response) {
   const moreLink = resolvablePromise<string>();
 
   const rewriter = h2r(new HTMLRewriter())
-    .on('#pagespace', { 
-      element(el) { post.title = el.getAttribute('title') as string }
+    .on('.fatitem .athing[id] a.titlelink', { 
+      text({ text }) { post.title += text }
     })
     .on('.fatitem .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
@@ -196,7 +196,13 @@ async function commentsGenerator(response: Response) {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
     .on('.fatitem tr:nth-child(4) > td:nth-child(2)', { 
-      // innerHTML(html) { if (!html?.trimStart().startsWith('<form')) post.text += html }
+      text({ text }) { post.text += text }
+    })
+    .on('.fatitem tr:nth-child(4) > td:nth-child(2) *:not(form) *', { 
+      element(el) {
+        post.text += elToTagOpen(el);
+        el.onEndTag(endTag => { post.text += `</${endTag.name}>`})
+      }
     })
     .on('.fatitem .comhead > .hnuser', {
       text({ text }) { post.by += text }
@@ -204,10 +210,10 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem .comhead > .age', {
       text({ text }) { post.timeAgo += text }
     })
-    .on('.fatitem .comhead > .par > a[href]', {
+    .on('.fatitem .comhead > .navs > a[href^="item"]', {
       element(a) { post.parent = extractId(a.getAttribute('href')) }
     })
-    .on('.fatitem .comhead > .storyon > a[href]', {
+    .on('.fatitem .comhead > .onstory > a[href]', {
       element(a) { post.story = extractId(a.getAttribute('href')) },
       text({ text }) { (<string>post.storyTitle) += text }
     })
