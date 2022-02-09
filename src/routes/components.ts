@@ -19,7 +19,7 @@ export const headerEl = ({ op, id, session }: {
           <tr>
             <td style="width:18px;padding-right:4px"><a href="/"><img
                   src="y18.gif" width="18" height="18"
-                  style="border:1px white solid;"></a></td>
+                  style="border:1px var(--text) solid;"></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a
                     href="news">Worker News</a></b>
                 ${topSel(op === Stories.NEW, html`<a href="newest">new</a>`)}
@@ -42,11 +42,11 @@ export const headerEl = ({ op, id, session }: {
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
-                ${session?.user 
+                ${/*session?.user 
                   ? html`<a id="me" href="user?id=${session.user}">${session.user}</a> 
                       ${apiUser(session.user).then(x => `(${x.karma})`)}
                       | <a id="logout" href="logout?goto=news">logout</a>`
-                  : html`<a id="login" href="login">login</a>`}
+                  : html`<a id="login" href="login">login</a>`*/null}
             </span></td>
           </tr>
         </tbody>

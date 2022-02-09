@@ -21,6 +21,10 @@ export function blockquotify(text: string) {
       li.textContent = p.textContent.substring(1);
       p.outerHTML = li.outerHTML;
     }
+    // Test: item?id=30244534
+    if (p.textContent && /^[-*]{3,}$/.test(p.textContent)) {
+      p.outerHTML = `<hr/>`;
+    }
   }
   return doc.toString();
 }

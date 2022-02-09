@@ -13,7 +13,7 @@ router.get('/news.css', () => {
       --light-grey: #828282;
       --lightest-grey: #b8b8b8;
       --white: #fff;
-      --orange: #ff6600;
+      --orange: #f38020;
       --beige: #f6f6ef;
 
       --darkest-blue: hsl(var(--blue-h), var(--blue-s), 7%);
@@ -73,6 +73,7 @@ router.get('/news.css', () => {
     html  { background-color: var(--page-background);}
     body  { font-family:var(--font); font-size:10pt; color:var(--text); }
     td    { font-family:var(--font); font-size:10pt; color:var(--text); }
+    hr    { margin: 9pt 0 }
 
     .admin td   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
     .subtext td { font-family:var(--font); font-size:  7pt; color:var(--text); }
