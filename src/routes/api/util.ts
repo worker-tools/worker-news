@@ -18,6 +18,7 @@ export function blockquotify(text: string) {
       bq.prepend(invis, doc.createTextNode(' '));
       p.outerHTML = bq.outerHTML;
     }
+
     // Test: item?id=26514612, item?id=26545082
     if (p.textContent && (match = /^([-*])[^-*]/.exec(p.textContent))) {
       const li = doc.createElement('li')
@@ -26,6 +27,7 @@ export function blockquotify(text: string) {
       li.prepend(invis, doc.createTextNode(' '));
       p.outerHTML = li.outerHTML;
     }
+
     // Test: item?id=30244534
     if (p.textContent && (match = /^([-*]{3,})$/.exec(p.textContent))) {
       p.outerHTML = `<hr/><span class="sr-only">${match[1]}</span>`;

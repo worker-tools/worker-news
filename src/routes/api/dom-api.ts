@@ -91,7 +91,8 @@ async function* storiesGenerator(response: Response) {
       element() { if (post) data.dispatchEvent(newCustomEvent('data', post)) }
     })
 
-  consume(r2h(rewriter).transform(response)).then(() => iter.return());
+  consume(r2h(rewriter).transform(response))
+    .then(() => iter.return());
 
   for await (const { detail: post } of iter) {
     post.type = post.type || 'story';
@@ -237,7 +238,8 @@ async function commentsGenerator(response: Response) {
 
   scrapeComments(rewriter, data, '.comment-tree');
     
-  const x = consume(r2h(rewriter).transform(response)).then(() => iter.return());
+  const x = consume(r2h(rewriter).transform(response))
+    .then(() => iter.return());
 
   // wait for `post` to be populated
   await iter.next();
@@ -257,7 +259,7 @@ async function commentsGenerator(response: Response) {
 };
 
 function fixComment(comment: Partial<AComment>) {
-  if (comment.text) {
+  if (comment.text?.trim()) {
     comment.text = blockquotify('<p>' + comment.text)
   } else {
     // FIXME?
@@ -278,7 +280,9 @@ async function* threadsGenerator(response: Response) {
     });
 
   scrapeComments(rewriter as unknown as HR, target, '');
-  consume(r2h(rewriter).transform(response)).then(() => iter.return());
+
+  consume(r2h(rewriter).transform(response))
+    .then(() => iter.return());
 
   for await (const { detail: comment } of iter) {
     yield fixComment(comment);

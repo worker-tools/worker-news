@@ -20,7 +20,7 @@ export interface AThing {
 
 export interface AUser {
   about?: string,
-  created: number,
+  created?: number,
   id: string,
   karma: number,
   submitted: number[],

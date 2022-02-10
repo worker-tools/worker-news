@@ -19,7 +19,7 @@ export const headerEl = ({ op, id, session }: {
           <tr>
             <td style="width:18px;padding-right:4px"><a href="/"><img
                   src="y18.gif" width="18" height="18"
-                  style="border:1px var(--text) solid;"></a></td>
+                  style="border:1px transparent solid;"></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a
                     href="news">Worker News</a></b>
                 ${topSel(op === Stories.NEW, html`<a href="newest">new</a>`)}

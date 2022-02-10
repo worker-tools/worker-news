@@ -34,7 +34,7 @@ const user = ({ searchParams, session }: LoginArgs) => {
         <table border="0"><tbody>
           ${async () => {
             const uo = await userPromise;
-            const dt = new Date(uo.created * 1000);
+            const dt = uo?.created && new Date(uo.created * 1000);
             const [{ value: month },, { value: day },, { value: year }] = numDTF.formatToParts(dt);
             return html`
               <tr class="athing"><td valign="top">user:</td><td timestamp="${uo.created}"><a href="user?id=${un}" class="hnuser">${un}</a></td></tr>
