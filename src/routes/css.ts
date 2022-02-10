@@ -16,6 +16,7 @@ router.get('/news.css', () => {
       --lightest-grey: #b8b8b8;
       --white: #fff;
       --orange: #f38020;
+      --yellow: #e9bc4b;
       --beige: #f6f6ef;
 
       --darkest-blue: hsl(var(--blue-h), var(--blue-s), 7%);
@@ -44,6 +45,9 @@ router.get('/news.css', () => {
 
     @media (prefers-color-scheme: dark) {
       :root {
+        --orange: hsl(27deg 90% 42%);
+        --yellow: hsl(43deg 78% 42%);
+
         --page-background: var(--darkest-blue);
         --accent: var(--blue);
         --text: var(--light-blue);
@@ -62,6 +66,8 @@ router.get('/news.css', () => {
         --cbe: hsl(var(--blue-h), var(--blue-s), 31%);
         --cce: hsl(var(--blue-h), var(--blue-s), 26%);
         --cdd: hsl(var(--blue-h), var(--blue-s), 21%);
+
+        -webkit-font-smoothing: antialiased;
       }
 
       :root input[type="text"],
@@ -87,15 +93,15 @@ router.get('/news.css', () => {
     a:visited { color:var(--text); text-decoration:none; }
 
     #hnmain  { background-color: var(--background);}
-    #header  { background-color: var(--accent);}
-    #border  { background-color: var(--accent);}
-    
+    #header  { background: linear-gradient(to right, var(--orange), var(--yellow)); -webkit-font-smoothing: auto;  }
+    #border  { background: linear-gradient(to right, var(--orange), var(--yellow)); }
     .default { font-family:var(--font); font-size: 10pt; color:var(--text); }
     .admin   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
     .title   { font-family:var(--font); font-size: 10pt; color:var(--text); overflow:hidden; }
     .subtext { font-family:var(--font); font-size:  7pt; color:var(--text); }
     .yclinks { font-family:var(--font); font-size:  8pt; color:var(--text); }
-    .pagetop { font-family:var(--font); font-size: 10pt; color:var(--border); line-height:12px; }
+    .pagetop { font-family:var(--font); font-size: 10pt; color:var(--dark-grey); line-height:12px; }
+        
     .comhead { font-family:var(--font); font-size:  8pt; color:var(--text); }
     .comment { font-family:var(--font); font-size:  9pt; }
     .hnname  { margin-right: 5px; }
@@ -115,7 +121,7 @@ router.get('/news.css', () => {
     .cce, .cce a:link, .cce a:visited { color:var(--cce); }
     .cdd, .cdd a:link, .cdd a:visited { color:var(--cdd); }
     
-    .pagetop a:visited { color:var(--text-strong);}
+    .pagetop a, .pagetop a:visited { color:var(--black); }
     .topsel a:link, .topsel a:visited { color:#ffffff; }
     
     .subtext a:link, .subtext a:visited { color:var(--text); }
