@@ -1,7 +1,7 @@
 /**
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
-import { ParamsURL } from '@worker-tools/json-fetch';
+import { ParamsURL, urlWithParams } from '@worker-tools/json-fetch';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 import { unescape } from 'html-escaper';
 
@@ -29,11 +29,13 @@ const x = {
   [Stories.ASK]: '/ask',
   [Stories.JOB]: '/jobs',
   [Stories.USER]: '/submitted',
+  [Stories.CLASSIC]: '/classic',
 };
 
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
-
 const elToTagOpen = (el: Element) => `<${el.tagName} ${[...el.attributes].map(x => `${x[0]}="${x[1]}"`).join(' ')}>`;
+const header2nl = (headers: Headers) => [...headers].map(([k, v]) => `${k}: ${v}`).join('\n')
+const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText}\n${header2nl(body.headers)}`) }
 
 type StoriesParams = RequireAtLeastOne<{ p?: number, n?: number, next?: number, id?: string }, 'p' | 'n' | 'id'>;
 
@@ -45,10 +47,12 @@ export async function* stories({ p, n, next, id }: StoriesParams, type = Stories
     ...next ? { next } : {}, 
     ...id ? { id } : {},
   }, API);
-  yield* storiesGenerator(await fetch(url.href));
+  const body = await fetch(url.href)
+  if (!body.ok) await r2err(body)
+  yield* storiesGenerator(body);
 }
 
-function newCustomEvent<T>(event: string, detail: T) {
+function newCustomEvent<T>(event: string, detail?: T) {
   return new CustomEvent<T>(event, { detail });
 }
 
@@ -69,7 +73,7 @@ async function* storiesGenerator(response: Response) {
       }
     })
     .on('.athing[id] > .title > a.titlelink', {
-      element(link) { post.url = link.getAttribute('href') || undefined },
+      element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
       text({ text }) { post.title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
@@ -89,13 +93,18 @@ async function* storiesGenerator(response: Response) {
       element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) }
     })
     .on('.yclinks', {
-      element() { if (post) data.dispatchEvent(newCustomEvent('data', post)) }
+      element() { 
+        if (post) data.dispatchEvent(newCustomEvent('data', post)) 
+        data.dispatchEvent(newCustomEvent('return'))
+      }
     })
 
-  consume(r2h(rewriter).transform(response))
-    .then(() => iter.return());
+  consume(r2h(rewriter).transform(response).body!)
+    .then(() => iter.return())
+    .catch(err => iter.throw(err));
 
   for await (const { detail: post } of iter) {
+    console.log('hello?', post.id)
     post.type = post.type || 'story';
     if (!post.by) { // No users post this = job ads
       post.type = 'job';
@@ -112,12 +121,14 @@ async function* storiesGenerator(response: Response) {
 export async function comments(id: number, p?: number): Promise<APost> {
   const url = new ParamsURL('/item', { id, ...p ? { p } : {} }, API).href;
   const body = await fetch(url)
-  return commentsGenerator(body);
+  if (body.ok) return commentsGenerator(body);
+  return await r2err(body);
 }
 
 export async function* threads(id: string, next?: number) {
   const url = new ParamsURL('/threads', { id, ...next ? { next } : {} }, API).href;
   const body = await fetch(url)
+  if (!body.ok) await r2err(body);
   yield* threadsGenerator(body)
 }
 
@@ -162,7 +173,10 @@ function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
       element(el) { el.remove() }
     })
     .on('.yclinks', {
-      element() { if (comment) data.dispatchEvent(newCustomEvent('data', comment)) }
+      element() { 
+        if (comment) data.dispatchEvent(newCustomEvent('data', comment)) 
+        data.dispatchEvent(newCustomEvent('return'))
+      }
     })
 }
 
@@ -174,9 +188,11 @@ async function commentsGenerator(response: Response) {
 
   const moreLink = resolvablePromise<string>();
 
+  // console.log(response.status, response.url, ...response.headers, (await response.clone().arrayBuffer()).byteLength)
+
   const rewriter = h2r(new HTMLRewriter())
     .on('.fatitem .athing[id]', {
-      element(el) { post.id = Number(el.getAttribute('id')) },
+      element(el) { post.id = Number(el.getAttribute('id')); console.log(post.id) },
     })
     .on('.fatitem .athing[id] > .title > a.titlelink', { 
       element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
@@ -234,16 +250,21 @@ async function commentsGenerator(response: Response) {
       element() { data.dispatchEvent(newCustomEvent('data', post)) },
     })
     .on('a.morelink[href][rel="next"]', { 
-      element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
-    });
+      element(el) { 
+        moreLink.resolve(unescape(el.getAttribute('href') ?? '')) 
+      }, 
+    })
 
   scrapeComments(rewriter, data, '.comment-tree');
     
-  const x = consume(r2h(rewriter).transform(response))
-    .then(() => iter.return());
+  const x = consume(r2h(rewriter).transform(response).body!)
+    .then(() => iter.return())
+    .catch(err => iter.throw(err));
 
+  // console.log('hello?')
   // wait for `post` to be populated
   await iter.next();
+  // console.log('cancelled yet?')
 
   if (post.text?.trim()) {
     post.text = blockquotify('<p>' + post.text)
@@ -272,7 +293,7 @@ function fixComment(comment: Partial<AComment>) {
 
 async function* threadsGenerator(response: Response) {
   const target = new EventTarget();
-  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data');
+  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data', { returnEvent: 'return' });
 
   const moreLink = resolvablePromise<string>();
   const rewriter = h2r(new HTMLRewriter())
@@ -280,10 +301,11 @@ async function* threadsGenerator(response: Response) {
       element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
     });
 
-  scrapeComments(rewriter as unknown as HR, target, '');
+  scrapeComments(rewriter, target, '');
 
-  consume(r2h(rewriter).transform(response))
-    .then(() => iter.return());
+  consume(r2h(rewriter).transform(response).body!)
+    .then(() => iter.return())
+    .catch(err => iter.throw(err));
 
   for await (const { detail: comment } of iter) {
     yield fixComment(comment);
@@ -298,13 +320,13 @@ async function* threadsGenerator(response: Response) {
 export async function user(id: string): Promise<AUser> {
   const url = new ParamsURL('user', { id }, API);
   const response = await fetch(url.href);
+  if (!response.ok) await r2err(response);
 
   let user: Partial<AUser> = { id, about: '', submitted: [] };
 
   const rewriter = h2r(new HTMLRewriter())
     .on('tr.athing td[timestamp]', {
       element(el) { 
-        console.log(...el.attributes);
         user.created = Number(el.getAttribute('timestamp')) 
       }
     })
@@ -321,7 +343,7 @@ export async function user(id: string): Promise<AUser> {
       }
     })
 
-  await consume(r2h(rewriter).transform(response));
+  await consume(r2h(rewriter).transform(response).body!);
 
   if (user.about?.trim()) user.about = '<p>' + user.about.trim();
 

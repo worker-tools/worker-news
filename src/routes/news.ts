@@ -97,6 +97,7 @@ const x = {
   [Stories.SHOW]: 'Show',
   [Stories.SHOW_NEW]: 'New Show',
   [Stories.USER]: `$user's submissions`,
+  [Stories.CLASSIC]: '',
 }
 
 const messageEl = (message: HTMLContent, marginBottom = 12) => html`
@@ -160,6 +161,7 @@ export const showNew = cookies(session(mkStories(Stories.SHOW_NEW)))
 export const ask = cookies(session(mkStories(Stories.ASK)))
 export const jobs = cookies(session(mkStories(Stories.JOB)))
 export const submitted = cookies(session(mkStories(Stories.USER)))
+export const classic = cookies(session(mkStories(Stories.CLASSIC)))
 
 router.get('/news', news);
 router.get('/newest', newest);
@@ -169,3 +171,4 @@ router.get('/shownew', showNew);
 router.get('/ask', ask);
 router.get('/jobs', jobs);
 router.get('/submitted', submitted)
+router.get('/classic', classic)

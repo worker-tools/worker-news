@@ -8,7 +8,7 @@ import './user';
 import './threads';
 // import './login';
 
-router.get('/favicon.ico', () => fetch('https://news.ycombinator.com/favicon.ico'))
+router.get('/favicon.ico', () => fetch('https://workers.tools/favicon.ico'))
 router.get('/s.gif', () => fetch('https://news.ycombinator.com/s.gif'))
 router.get('/y18.gif', () => fetch('https://workers.tools/assets/img/logo_d.png'))
 router.get('/grayarrow.gif', () => fetch('https://news.ycombinator.com/grayarrow.gif'))

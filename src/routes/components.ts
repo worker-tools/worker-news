@@ -30,6 +30,7 @@ export const headerEl = ({ op, id, session }: {
                 | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
                 | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)}
                 | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
+                | ${topSel(op === Stories.CLASSIC, html`<a href="classic">classic</a>`)}
                 <!-- | <a href="submit">submit</a> -->
                 ${op === Stories.SHOW_NEW
                     ? html`| <font color="#ffffff">${op}</font>` 
