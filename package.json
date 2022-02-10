@@ -32,6 +32,7 @@
   "dependencies": {
     "@miniflare/html-rewriter": "^2.3.0",
     "@qwtel/p-queue-browser": "^6.6.2",
+    "@types/html-escaper": "^3.0.0",
     "@worker-tools/cloudflare-kv-storage": "^0.8.0",
     "@worker-tools/deno-fetch-event-adapter": "^1.0.5",
     "@worker-tools/deno-kv-storage": "^0.4.4",
@@ -48,6 +49,7 @@
     "date-fns": "^2.28.0",
     "event-target-to-async-iter": "^0.2.1",
     "firebase": "^9.6.6",
+    "html-escaper": "^3.0.3",
     "html-rewriter-wasm": "^0.4.1",
     "kv-storage-interface": "^0.2.0",
     "kv-storage-polyfill": "^2.0.0",

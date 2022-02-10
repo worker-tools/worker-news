@@ -4,6 +4,7 @@ specifiers:
   '@cloudflare/workers-types': ^2.2.2
   '@miniflare/html-rewriter': ^2.3.0
   '@qwtel/p-queue-browser': ^6.6.2
+  '@types/html-escaper': ^3.0.0
   '@types/node': ^14.18.10
   '@worker-tools/cloudflare-kv-storage': ^0.8.0
   '@worker-tools/deno-fetch-event-adapter': ^1.0.5
@@ -22,6 +23,7 @@ specifiers:
   esbuild: ^0.14.21
   event-target-to-async-iter: ^0.2.1
   firebase: ^9.6.6
+  html-escaper: ^3.0.3
   html-rewriter-wasm: ^0.4.1
   kv-storage-interface: ^0.2.0
   kv-storage-polyfill: ^2.0.0
@@ -41,6 +43,7 @@ specifiers:
 dependencies:
   '@miniflare/html-rewriter': 2.3.0
   '@qwtel/p-queue-browser': 6.6.2
+  '@types/html-escaper': 3.0.0
   '@worker-tools/cloudflare-kv-storage': 0.8.0
   '@worker-tools/deno-fetch-event-adapter': 1.0.5
   '@worker-tools/deno-kv-storage': 0.4.4
@@ -57,6 +60,7 @@ dependencies:
   date-fns: 2.28.0
   event-target-to-async-iter: 0.2.1
   firebase: 9.6.6
+  html-escaper: 3.0.3
   html-rewriter-wasm: 0.4.1
   kv-storage-interface: 0.2.0
   kv-storage-polyfill: 2.0.0
@@ -742,6 +746,10 @@ packages:
     requiresBuild: true
     dependencies:
       p-timeout: 4.1.0
+    dev: false
+
+  /@types/html-escaper/3.0.0:
+    resolution: {integrity: sha512-OcJcvP3Yk8mjYwf/IdXZtTE1tb/u0WF0qa29ER07ZHCYUBZXSN29Z1mBS+/96+kNMGTFUAbSz9X+pHmHpZrTCw==}
     dev: false
 
   /@types/long/4.0.1:

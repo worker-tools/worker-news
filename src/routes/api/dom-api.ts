@@ -3,6 +3,7 @@
  */
 import { ParamsURL } from '@worker-tools/json-fetch';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
+import { unescape } from 'html-escaper';
 
 // Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
@@ -85,7 +86,7 @@ async function* storiesGenerator(response: Response) {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
     .on('.morelink[href]', {
-      element(el) { moreLink.resolve(el.getAttribute('href')!) }
+      element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) }
     })
     .on('.yclinks', {
       element() { if (post) data.dispatchEvent(newCustomEvent('data', post)) }
@@ -178,7 +179,7 @@ async function commentsGenerator(response: Response) {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
     .on('.fatitem .athing[id] > .title > a.titlelink', { 
-      element(link) { post.url = link.getAttribute('href') || undefined; },
+      element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
       text({ text }) { post.title += text }
     })
     // FIXME: concatenate text before parseInt jtbs..
@@ -233,7 +234,7 @@ async function commentsGenerator(response: Response) {
       element() { data.dispatchEvent(newCustomEvent('data', post)) },
     })
     .on('a.morelink[href][rel="next"]', { 
-      element(el) { moreLink.resolve(el.getAttribute('href')!) } 
+      element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
     });
 
   scrapeComments(rewriter, data, '.comment-tree');
@@ -276,7 +277,7 @@ async function* threadsGenerator(response: Response) {
   const moreLink = resolvablePromise<string>();
   const rewriter = h2r(new HTMLRewriter())
     .on('a.morelink[href][rel="next"]', { 
-      element(el) { moreLink.resolve(el.getAttribute('href')!) } 
+      element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
     });
 
   scrapeComments(rewriter as unknown as HR, target, '');
