@@ -17,7 +17,7 @@ export const headerEl = ({ op, id, session }: {
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
         <tbody>
           <tr>
-            <td style="width:18px;padding-right:4px"><a href="/"><img
+            <td style="width:18px;padding-right:4px"><a href="https://workers.tools"><img
                   src="y18.gif" width="18" height="18"
                   style="border:1px transparent solid;"></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a

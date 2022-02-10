@@ -4,6 +4,8 @@ import { router } from "../router";
 router.get('/news.css', () => {
   const response = new HTMLResponse(css`
     :root {
+      color-scheme: dark light;
+
       --font: Verdana, Geneva, sans-serif;
       --blue-h: 227;
       --blue-s: 10%;
@@ -18,7 +20,7 @@ router.get('/news.css', () => {
 
       --darkest-blue: hsl(var(--blue-h), var(--blue-s), 7%);
       --dark-blue:hsl(var(--blue-h), var(--blue-s), 12%);
-      --blue:hsl(var(--blue-h), var(--blue-s), 20%);
+      --blue:hsl(var(--blue-h), var(--blue-s), 24%);
       --light-blue:hsl(var(--blue-h), var(--blue-s), 51%);
 
       --page-background: var(--white);

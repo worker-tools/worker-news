@@ -51,7 +51,9 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
           ${showReply && !deleted ? html`<div class="reply">
             <p>
               <font size="1">
-                <u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${comm.story}%23${id}">reply</a></u>
+                ${/*<u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${comm.story}%23${id}">reply</a></u>*/''}
+                ${/*<span style="cursor:default;opacity:0.33" title="Not implemented">reply</span>*/''}
+                <u><a href="https://news.ycombinator.com/item?id=${id}">reply\u{2009}↗</a></u>
               </font>
             </p>
           </div>`: ''}
