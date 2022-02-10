@@ -45,8 +45,8 @@ router.get('/news.css', () => {
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --orange: hsl(27deg 90% 42%);
-        --yellow: hsl(43deg 78% 42%);
+        --orange: hsl(27deg 90% 36%);
+        --yellow: hsl(43deg 78% 36%);
 
         --page-background: var(--darkest-blue);
         --accent: var(--blue);
