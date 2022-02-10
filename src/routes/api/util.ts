@@ -2,7 +2,7 @@ import { DOMParser } from 'linkedom';
 import { unescape } from 'html-escaper';
 
 // Primitive support for 
-// Problem: item?id=26520957
+// Problem: item?id=26520957, item?id=30283264
 export function blockquotify(text: string) {
   const { protocol, host } = self.location;
 
