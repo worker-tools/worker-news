@@ -71,7 +71,7 @@ router.get('/news.css', () => {
     }
 
     html  { background-color: var(--page-background);}
-    body  { font-family:var(--font); font-size:10pt; color:var(--text); }
+    body  { font-family:var(--font); font-size:10pt; color:var(--text); overflow-y:scroll; }
     td    { font-family:var(--font); font-size:10pt; color:var(--text); }
 
     .admin td   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }

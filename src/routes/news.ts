@@ -1,7 +1,7 @@
 import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { StorageArea } from "@worker-tools/kv-storage";
 import { notFound } from "@worker-tools/response-creators";
-// import { formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
 import { pageLayout } from './components';
@@ -54,7 +54,8 @@ export const aThing = async ({ type, id, url, title, dead }: APost, index?: numb
 }
 
 export const subtext = (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
-  const { type, id, title, timeAgo, score, by, descendants, dead } = post;
+  const { type, id, title, time, score, by, descendants, dead } = post;
+  const timeAgo = time && formatDistanceToNowStrict(time, { addSuffix: true })
   return html`
     <tr>
       <td colspan="2"></td>
@@ -65,7 +66,7 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
         ${type !== 'job' 
           ? html`<a href="user?id=${by}" class="hnuser">${by}</a>` 
           : ''}
-        <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
+        <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
         <span id="unv_${id}"></span>
         ${showPast
           ? html`| <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a>`

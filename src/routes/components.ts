@@ -69,7 +69,8 @@ export const footerEl = () => html`
       <center>Made by <a href="https://qwtel.com">@qwtel</a> with <a
           href="https://workers.tools">Worker Tools</a> and <a
           href="https://workers.cloudflare.com">Cloudflare Workers</a>.</center><br>
-      <center><span class="yclinks"><a href="newsguidelines.html">Guidelines</a>
+      <center><span class="yclinks">From YC: 
+            <a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>
           <!-- | <a href="lists">Lists</a> -->
           | <a href="https://github.com/HackerNews/API">API</a>

@@ -1,5 +1,6 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
+import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
 
@@ -17,9 +18,10 @@ export interface CommOpts {
 }
 
 export const commentTr = (comm: AComment, { showToggle = true, showReply = true, showParent = false }: CommOpts = {}) => {
-  const { id, level, by, text, timeAgo, quality, deleted, parent, story, storyTitle } = comm;
+  const { id, level, by, text, time, quality, deleted, parent, story, storyTitle } = comm;
+  const timeAgo = time && formatDistanceToNowStrict(time, { addSuffix: true })
   return html`<tr>
-    <td class="ind"><img src="s.gif" height="1" width="${(level ?? 0) * 40}"></td>
+    <td class="ind" indent="${level ?? 0}"><img src="s.gif" height="1" width="${(level ?? 0) * 40}"></td>
     <td valign="top" class="votelinks">
       <center>${deleted 
         ? html`<img src="s.gif" height="1" width="14">`
@@ -32,11 +34,15 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
       <div style="margin-top:2px; margin-bottom:-10px;">
         <span class="comhead">
           <a href="user?id=${by}" class="hnuser">${by}</a> 
-          <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
+          <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
           <span id="unv_${id}"></span>
-          <span class="par">${showParent ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
-          ${showToggle ? html`<a class="togg" n="1" href="javascript:void(0)" onclick="return toggle(event, ${id})">[–]</a>` : ''}
-          <span class="storyon">${showParent && story && storyTitle ? html` | on: <a href="item?id=${story}">${storyTitle}</a>`: ''}</span>
+          <span class="navs">
+            <span class="par">${showParent ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
+          </span>
+          ${showToggle 
+            ? html`<a class="togg clicky" id="${id}" n="${(comm.descendants ?? 0) + 1}" href="javascript:void(0)">[–]</a>` 
+            : ''}
+          <span class="onstory">${showParent && story && storyTitle ? html` | on: <a href="item?id=${story}">${storyTitle}</a>`: ''}</span>
         </span>
       </div><br>
       <div class="comment">
@@ -88,7 +94,7 @@ export async function* commentTree(kids: AsyncIterable<AComment>): AsyncGenerato
 //   </td>
 // </tr>`;
 
-const PLACEHOLDER = 'Streaming...';
+const PLACEHOLDER = 'Worker News';
 
 const replyTr = ({ id, type }: APost) => {
   return html`<tr style="height:10px"></tr>
@@ -120,7 +126,9 @@ function getItem({ searchParams, session }: LoginArgs)  {
       const { title, text, kids } = post;
       return html`
         <tr id="pagespace" title="${title}" style="height:10px"></tr>
-        ${title ? html` <script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` : ''}
+        ${title 
+          ? html`<script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` 
+          : ''}
         <tr>
           <td>
             <table class="fatitem" border="0">

@@ -30,7 +30,8 @@ export interface AUser {
 export interface AComment extends AThing {
   type: 'comment',
   level?: number,
-  timeAgo: string,
+  time?: Date,
+  descendants?: number | null,
   text: string,
   quality: Quality,
   parent: number,
@@ -51,7 +52,7 @@ export interface APost extends AThing {
   dead: boolean
   url: string
   score: number | null,
-  timeAgo: string | null,
+  time?: Date,
   descendants: number | null,
   text: string | null
   quality: Quality,

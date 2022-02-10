@@ -43,6 +43,5 @@
 
 // export const item = async (id: number): Promise<Item> => {
 //   const it: _Item = await api2(`/api/v1/items/${id}`);
-//   console.log(it);
 //   return countChildren(sortChildren(it));
 // }

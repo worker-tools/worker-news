@@ -34,6 +34,7 @@ const x = {
 
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
 const elToTagOpen = (el: Element) => `<${el.tagName} ${[...el.attributes].map(x => `${x[0]}="${x[1]}"`).join(' ')}>`;
+const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
 const header2nl = (headers: Headers) => [...headers].map(([k, v]) => `${k}: ${v}`).join('\n')
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText}\n${header2nl(body.headers)}`) }
 
@@ -69,7 +70,7 @@ async function* storiesGenerator(response: Response) {
         if (post) data.dispatchEvent(newCustomEvent('data', post));
 
         const id = Number(el.getAttribute('id'));
-        post = { id, title: '', score: 0, by: '', timeAgo: '', descendants: 0, story: post?.story };
+        post = { id, title: '', score: 0, by: '', descendants: 0, story: post?.story };
       }
     })
     .on('.athing[id] > .title > a.titlelink', {
@@ -83,8 +84,8 @@ async function* storiesGenerator(response: Response) {
     .on('.subtext > .hnuser', {
       text({ text }) { post.by += text }
     })
-    .on('.subtext > .age', {
-      text({ text }) { post.timeAgo += text }
+    .on('.subtext > .age[title]', { 
+      element(el) { post.time = elToDate(el) }
     })
     .on('.subtext > a[href^=item]', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
@@ -104,7 +105,6 @@ async function* storiesGenerator(response: Response) {
     .catch(err => iter.throw(err));
 
   for await (const { detail: post } of iter) {
-    console.log('hello?', post.id)
     post.type = post.type || 'story';
     if (!post.by) { // No users post this = job ads
       post.type = 'job';
@@ -140,22 +140,25 @@ function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
       element(thing) {
         if (comment) data.dispatchEvent(newCustomEvent('data', comment));
         const id = Number(thing.getAttribute('id'))
-        comment = { id, type: 'comment', by: '', timeAgo: '', text: '', storyTitle: '' };
+        comment = { id, type: 'comment', by: '', text: '', storyTitle: '' };
       },
     })
-    .on(`${prefix} .athing.comtr[id] .ind > img[src="s.gif"][width]`, {
-      element(el) { comment.level = Number(el.getAttribute('width')) / 40 }
+    .on(`${prefix} .athing.comtr[id] .ind[indent]`, {
+      element(el) { comment.level = Number(el.getAttribute('indent')) }
     })
     .on(`${prefix} .athing.comtr[id] .hnuser`, {
       text({ text }) { comment.by += text }
     })
-    .on(`${prefix} .athing.comtr[id] .age`, {
-      text({ text }) { comment.timeAgo += text }
+    .on(`${prefix} .athing.comtr[id] .age[title]`, { 
+      element(el) { comment.time = elToDate(el) }
     })
-    .on(`${prefix} .athing.comtr[id] .par > a[href]`, {
-      element(a) { comment.parent = extractId(a.getAttribute('href')) }
+    // .on(`${prefix} .athing.comtr[id] .par > a[href]`, {
+    //   element(a) { comment.parent = extractId(a.getAttribute('href')) }
+    // })
+    .on(`${prefix} .athing.comtr[id] a.togg[id][n]`, { 
+      element(el) { comment.descendants = Number(el.getAttribute('n')) - 1 }
     })
-    .on(`${prefix} .athing.comtr[id] .storyon > a[href]`, {
+    .on(`${prefix} .athing.comtr[id] .onstory > a[href]`, {
       element(a) { comment.story = extractId(a.getAttribute('href')) },
       text({ text }) { comment.storyTitle += text }
     })
@@ -181,7 +184,7 @@ function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
 }
 
 async function commentsGenerator(response: Response) {
-  const post: Partial<APost> = { title: '', score: 0, by: '', timeAgo: '', descendants: 0, text: '', storyTitle: '' };
+  const post: Partial<APost> = { title: '', score: 0, by: '', descendants: 0, text: '', storyTitle: '' };
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data', { returnEvent: 'return' });
@@ -192,7 +195,7 @@ async function commentsGenerator(response: Response) {
 
   const rewriter = h2r(new HTMLRewriter())
     .on('.fatitem .athing[id]', {
-      element(el) { post.id = Number(el.getAttribute('id')); console.log(post.id) },
+      element(el) { post.id = Number(el.getAttribute('id')) },
     })
     .on('.fatitem .athing[id] > .title > a.titlelink', { 
       element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
@@ -205,8 +208,8 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem .subtext > .hnuser', { 
       text({ text }) { post.by += text }
     })
-    .on('.fatitem .subtext > .age', { 
-      text({ text }) { post.timeAgo += text }
+    .on('.fatitem .subtext > .age[title]', { 
+      element(el) { post.time = elToDate(el) }
     })
     .on('.fatitem .subtext > a[href^=item]', { 
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
@@ -223,8 +226,8 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem .comhead > .hnuser', {
       text({ text }) { post.by += text }
     })
-    .on('.fatitem .comhead > .age', {
-      text({ text }) { post.timeAgo += text }
+    .on('.fatitem .comhead > .age[title]', {
+      element(el) { post.time = elToDate(el) }
     })
     .on('.fatitem .comhead > .navs > a[href^="item"]', {
       element(a) { post.parent = extractId(a.getAttribute('href')) }
@@ -261,10 +264,8 @@ async function commentsGenerator(response: Response) {
     .then(() => iter.return())
     .catch(err => iter.throw(err));
 
-  // console.log('hello?')
   // wait for `post` to be populated
   await iter.next();
-  // console.log('cancelled yet?')
 
   if (post.text?.trim()) {
     post.text = blockquotify('<p>' + post.text)

@@ -1,6 +1,5 @@
 import { APost, AComment, Stories, AUser } from './interface';
 import { default as PQueue } from '@qwtel/p-queue-browser';
-import { formatDistanceToNowStrict } from 'date-fns';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
 import { blockquotify } from './util';
 
@@ -18,7 +17,8 @@ const x = {
   [Stories.SHOW_NEW]: '',
   [Stories.ASK]: '/v0/askstories',
   [Stories.JOB]: '/v0/jobstories',
-  [Stories.USER]: ''
+  [Stories.USER]: '',
+  [Stories.CLASSIC]: '',
 };
 
 export async function* stories(api: APIFn, page = 1, type = Stories.TOP) {
@@ -32,7 +32,7 @@ export async function* stories(api: APIFn, page = 1, type = Stories.TOP) {
   for await (const { kids, text, url, ...p } of ps) {
     yield <APost>{
       ...p,
-      timeAgo: formatDistanceToNowStrict(p.time * 1000, { addSuffix: true }),
+      time: new Date(p.time * 1000),
       text: text != null ? blockquotify(text) : null,
       url: text != null ? `item?id=${p.id}` : url,
     };
@@ -66,7 +66,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
         level,
         quality: 'c00', // REST API doesn't support quality..
         text: text && blockquotify('<p>' + text),
-        timeAgo: formatDistanceToNowStrict(item.time * 1000, { addSuffix: true }),
+        time: new Date(item.time * 1000),
         kids: crawlCommentTree(kids || [], dict, level + 1),
       };
     }
@@ -108,7 +108,7 @@ export async function comments(api: APIFn, id: number): Promise<APost> {
   const text = post.text != null ? blockquotify('<p>' + post.text) : null;
   return {
     ...post,
-    timeAgo: formatDistanceToNowStrict(post.time * 1000, { addSuffix: true }),
+    time: new Date(post.time * 1000),
     title: post.title || truncateText(stripHTML(text)),
     text,
     quality: 'c00', // REST API doesn't support quality..
