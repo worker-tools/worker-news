@@ -1,4 +1,4 @@
-name = "egde-hn-dev"
+name = "news-dev"
 type = "javascript"
 account_id = "efb289061241436254219b424fcea4cf"
 workers_dev = true
@@ -13,11 +13,21 @@ compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
   CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
 
 [env.staging]
-  name = "edge-hn-stage"
+  name = "news-stage"
   kv_namespaces = [
     { binding = "KV_STORAGE", id = "1b7502d1fe76494b84eb0330dd31f58b" }
   ]
 
   [env.staging.vars]
-    WORKER_LOCATION = 'https://edge-hn-stage.qwtel.workers.dev'
+    WORKER_LOCATION = 'https://news-stage.qwtel.workers.dev'
+    CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
+
+[env.production]
+  name = "news"
+  kv_namespaces = [
+    { binding = "KV_STORAGE", id = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }
+  ]
+
+  [env.production.vars]
+    WORKER_LOCATION = 'https://news.qwtel.workers.dev'
     CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
