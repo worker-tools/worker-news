@@ -97,7 +97,7 @@ router.get('/news.css', () => {
 
     #hnmain  { background-color: var(--background);}
     #header  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
-    #border  { background: linear-gradient(to right, var(--orange), var(--yellow)); }
+    #border  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
     .default { font-family:var(--font); font-size: 10pt; color:var(--text); }
     .admin   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
     .title   { font-family:var(--font); font-size: 10pt; color:var(--text); overflow:hidden; }
@@ -105,10 +105,6 @@ router.get('/news.css', () => {
     .yclinks { font-family:var(--font); font-size:  8pt; color:var(--text); }
     .pagetop { font-family:var(--font); font-size: 10pt; color:var(--text-strong); line-height:12px; }
 
-    @media (prefers-color-scheme: dark) { 
-      #border  { background: linear-gradient(to right, #0006, #0006), linear-gradient(to right, var(--orange), var(--yellow)); } 
-    }
-        
     .comhead { font-family:var(--font); font-size:  8pt; color:var(--text); }
     .comment { font-family:var(--font); font-size:  9pt; }
     .hnname  { margin-right: 5px; }
