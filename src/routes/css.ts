@@ -7,7 +7,7 @@ router.get('/news.css', () => {
       color-scheme: dark light;
 
       --font: Verdana, Geneva, sans-serif;
-      --blue-h: 227;
+      --blue-h: 33;
       --blue-s: 10%;
 
       --black: #000;
@@ -67,8 +67,8 @@ router.get('/news.css', () => {
         --cce: hsl(var(--blue-h), var(--blue-s), 26%);
         --cdd: hsl(var(--blue-h), var(--blue-s), 21%);
 
-        --color-from: var(--accent);
-        --color-to: var(--accent);
+        /* --color-from: var(--accent);
+        --color-to: var(--accent); */
 
         -webkit-font-smoothing: antialiased;
       }
@@ -79,6 +79,7 @@ router.get('/news.css', () => {
         background-color: var(--input-background);
         border: 1px solid var(--input-border);
       }
+      #header, #border { filter: brightness(.75) }
     }
 
     html  { background-color: var(--page-background);}
@@ -96,14 +97,14 @@ router.get('/news.css', () => {
     a:visited { color:var(--text); text-decoration:none; }
 
     #hnmain  { background-color: var(--background);}
-    #header  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
+    #header  { background: linear-gradient(to right, var(--color-from), var(--color-to)); -webkit-font-smoothing:auto; }
     #border  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
     .default { font-family:var(--font); font-size: 10pt; color:var(--text); }
     .admin   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
     .title   { font-family:var(--font); font-size: 10pt; color:var(--text); overflow:hidden; }
     .subtext { font-family:var(--font); font-size:  7pt; color:var(--text); }
     .yclinks { font-family:var(--font); font-size:  8pt; color:var(--text); }
-    .pagetop { font-family:var(--font); font-size: 10pt; color:var(--text-strong); line-height:12px; }
+    .pagetop { font-family:var(--font); font-size: 10pt; color:var(--black); line-height:12px; }
 
     .comhead { font-family:var(--font); font-size:  8pt; color:var(--text); }
     .comment { font-family:var(--font); font-size:  9pt; }
@@ -124,7 +125,7 @@ router.get('/news.css', () => {
     .cce, .cce a:link, .cce a:visited { color:var(--cce); }
     .cdd, .cdd a:link, .cdd a:visited { color:var(--cdd); }
     
-    .pagetop a, .pagetop a:visited { color:var(--text-strong); }
+    .pagetop a, .pagetop a:visited { color:var(--black); }
     .topsel a:link, .topsel a:visited { color:#ffffff; }
     
     .subtext a:link, .subtext a:visited { color:var(--text); }
