@@ -58,7 +58,7 @@ export const headerEl = ({ op, id, session }: {
 
 export const footerEl = () => html`
   <tr>
-    <td><img src="s.gif" height="10" width="0">
+    <td id="footer"><img src="s.gif" height="10" width="0">
       <table width="100%" cellspacing="0" cellpadding="1">
         <tbody>
           <tr>
@@ -66,9 +66,9 @@ export const footerEl = () => html`
           </tr>
         </tbody>
       </table><br>
-      <center>Made by <a href="https://qwtel.com">@qwtel</a> with <a
-          href="https://workers.tools">Worker Tools</a> and <a
-          href="https://workers.cloudflare.com">Cloudflare Workers</a>.</center><br>
+      <center>Made by <a href="https://qwtel.com">qwtel</a> with <a
+          href="https://workers.tools"><font size="3">&#x2699;&#xfe0e;</font> Worker Tools</a> and <a
+          href="https://workers.cloudflare.com"><font size="3">&LeftAngleBracket;&Rang;</font> Cloudflare Workers</a>.</center><br>
       <center><span class="yclinks">From YC: 
             <a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>
