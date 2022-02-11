@@ -35,8 +35,7 @@ const x = {
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
 const elToTagOpen = (el: Element) => `<${el.tagName} ${[...el.attributes].map(x => `${x[0]}="${x[1]}"`).join(' ')}>`;
 const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
-const header2nl = (headers: Headers) => [...headers].map(([k, v]) => `${k}: ${v}`).join('\n')
-const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText}\n${header2nl(body.headers)}`) }
+const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
 
 type StoriesParams = RequireAtLeastOne<{ p?: number, n?: number, next?: number, id?: string }, 'p' | 'n' | 'id'>;
 
@@ -49,7 +48,7 @@ export async function* stories({ p, n, next, id }: StoriesParams, type = Stories
     ...id ? { id } : {},
   }, API);
   const body = await fetch(url.href)
-  if (!body.ok) await r2err(body)
+  if (!body.ok) r2err(body)
   yield* storiesGenerator(body);
 }
 
@@ -152,9 +151,6 @@ function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
     .on(`${prefix} .athing.comtr[id] .age[title]`, { 
       element(el) { comment.time = elToDate(el) }
     })
-    // .on(`${prefix} .athing.comtr[id] .par > a[href]`, {
-    //   element(a) { comment.parent = extractId(a.getAttribute('href')) }
-    // })
     .on(`${prefix} .athing.comtr[id] a.togg[id][n]`, { 
       element(el) { comment.descendants = Number(el.getAttribute('n')) - 1 }
     })

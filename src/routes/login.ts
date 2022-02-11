@@ -8,7 +8,7 @@ import { FORM, FORM_DATA } from 'src/vendor/middleware/mime';
 import { RouteArgs, router } from "../router";
 import { consume } from './api/util';
 
-function recordToFormData(rec: Record<string, string | Blob>) {
+function newFormData(rec: Record<string, string | Blob> = {}) {
   const data = new FormData();
   for (const [k, v] of Object.entries(rec)) data.append(k, v);
   return data;
@@ -136,7 +136,7 @@ async function getAuthToken(id: number, cookie: string) {
       }
     });
 
-  await consume(rewriter.transform(authResponse), abort.signal);
+  await consume(rewriter.transform(authResponse).body!, abort.signal);
   return auth!;
 }
 
