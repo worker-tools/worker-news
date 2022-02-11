@@ -14,6 +14,7 @@ export function blockquotify(text: string) {
   for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
     const innerHTML = unescape(p.innerHTML.trim());
 
+    // Test nested: item?id=30297007
     if (innerHTML.startsWith('>')) {
       const bq = doc.createElement('blockquote')
       bq.innerHTML = innerHTML.substring(1);

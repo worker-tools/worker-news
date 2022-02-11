@@ -53,7 +53,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
               <font size="1">
                 ${/*<u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${comm.story}%23${id}">reply</a></u>*/''}
                 ${/*<span style="cursor:default;opacity:0.33" title="Not implemented">reply</span>*/''}
-                <u><a href="https://news.ycombinator.com/item?id=${id}">reply<small>&#x2197;&#xFE0E;</small></a></u>
+                <u><a href="https://news.ycombinator.com/item?id=${id}">reply</a></u>
               </font>
             </p>
           </div>`: ''}

@@ -41,13 +41,13 @@ router.get('/news.css', () => {
       --cbe: #bebebe;
       --cce: #cecece;
       --cdd: #dddddd;
+
+      --color-from: var(--orange);
+      --color-to: var(--yellow);
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --orange: hsl(27deg 90% 18%);
-        --yellow: hsl(43deg 78% 18%);
-
         --page-background: var(--darkest-blue);
         --accent: var(--blue);
         --text: var(--light-blue);
@@ -66,6 +66,9 @@ router.get('/news.css', () => {
         --cbe: hsl(var(--blue-h), var(--blue-s), 31%);
         --cce: hsl(var(--blue-h), var(--blue-s), 26%);
         --cdd: hsl(var(--blue-h), var(--blue-s), 21%);
+
+        --color-from: var(--accent);
+        --color-to: var(--accent);
 
         -webkit-font-smoothing: antialiased;
       }
@@ -93,14 +96,18 @@ router.get('/news.css', () => {
     a:visited { color:var(--text); text-decoration:none; }
 
     #hnmain  { background-color: var(--background);}
-    #header  { background: linear-gradient(to right, var(--orange), var(--yellow)); }
+    #header  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
     #border  { background: linear-gradient(to right, var(--orange), var(--yellow)); }
     .default { font-family:var(--font); font-size: 10pt; color:var(--text); }
     .admin   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
     .title   { font-family:var(--font); font-size: 10pt; color:var(--text); overflow:hidden; }
     .subtext { font-family:var(--font); font-size:  7pt; color:var(--text); }
     .yclinks { font-family:var(--font); font-size:  8pt; color:var(--text); }
-    .pagetop { font-family:var(--font); font-size: 10pt; color:var(--border); line-height:12px; }
+    .pagetop { font-family:var(--font); font-size: 10pt; color:var(--text-strong); line-height:12px; }
+
+    @media (prefers-color-scheme: dark) { 
+      #border  { background: linear-gradient(to right, #0006, #0006), linear-gradient(to right, var(--orange), var(--yellow)); } 
+    }
         
     .comhead { font-family:var(--font); font-size:  8pt; color:var(--text); }
     .comment { font-family:var(--font); font-size:  9pt; }
@@ -263,19 +270,8 @@ router.get('/news.css', () => {
     }
 
     hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
-    .sr-only {
-      clip: rect(1px, 1px, 1px, 1px) !important;
-      -webkit-clip-path: inset(50%) !important;
-      clip-path: inset(50%) !important;
-      height: 1px !important;
-      overflow: hidden !important;
-      margin-left: -2px !important;
-      padding: 0 !important;
-      display: inline-block;
-      position: absolute !important;
-      width: 1px !important;
-      white-space: nowrap !important;
-    }
+    .sr-only { clip: rect(1px, 1px, 1px, 1px); -webkit-clip-path: inset(50%); clip-path: inset(50%); height: 1px; overflow: hidden; margin-left: -2px; padding: 0; display: inline-block; position: absolute; width: 1px; white-space: nowrap; }
+    /* .reply a:after { content: '\\2197\\fe0e'; font-size: smaller; } */
   `);
   // FIXME: better solution?
   response.headers.set('content-type', 'text/css');
