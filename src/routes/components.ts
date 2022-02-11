@@ -66,10 +66,10 @@ export const footerEl = () => html`
           </tr>
         </tbody>
       </table><br>
-      <center>Made by <a href="https://qwtel.com">qwtel</a> with <a
-          href="https://workers.tools"><font size="3">&#x2699;&#xfe0e;</font> Worker Tools</a> and <a
-          href="https://workers.cloudflare.com"><font size="3">&LeftAngleBracket;&Rang;</font> Cloudflare Workers</a>.</center><br>
-      <center><span class="yclinks">From YC: 
+      <center>Made by <a href="https://qwtel.com">@qwtel</a> with <a
+          href="https://workers.tools"><font size="3">&#x2699;&#xfe0e;</font>&nbsp;Worker&nbsp;Tools</a> and <a
+          href="https://workers.cloudflare.com"><font size="3">&LeftAngleBracket;&Rang;</font>&nbsp;Cloudflare&nbsp;Workers</a>.</center><br>
+      <center><span class="yclinks">YC: 
             <a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>
           <!-- | <a href="lists">Lists</a> -->
