@@ -272,8 +272,8 @@ router.get('/news.css', () => {
     hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
     .sr-only { clip: rect(1px, 1px, 1px, 1px); -webkit-clip-path: inset(50%); clip-path: inset(50%); height: 1px; overflow: hidden; margin-left: -2px; padding: 0; display: inline-block; position: absolute; width: 1px; white-space: nowrap; }
     /* .reply a:after { content: '\\2197\\fe0e'; font-size: smaller; } */
-    /* #footer a[href$="workers.tools"]:before { content:'⚙︎ '; font-size:larger; } */
-    /* #footer a[href$="workers.cloudflare.com"]:before { content:'⟨⟫ '; font-size:larger; } */
+    #footer a[href$="workers.tools"]:before { content:'⚙︎\\202f'; font-size:larger; }
+    #footer a[href$="workers.cloudflare.com"]:before { content:'⟨⟫\\202f'; font-size:larger; }
   `);
   // FIXME: better solution?
   response.headers.set('content-type', 'text/css');

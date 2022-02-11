@@ -67,8 +67,8 @@ export const footerEl = () => html`
         </tbody>
       </table><br>
       <center>Made by <a href="https://qwtel.com">@qwtel</a> with <a
-          href="https://workers.tools"><font size="3">&#x2699;&#xfe0e;</font>&nbsp;Worker&nbsp;Tools</a> and <a
-          href="https://workers.cloudflare.com"><font size="3">&LeftAngleBracket;&Rang;</font>&nbsp;Cloudflare&nbsp;Workers</a>.</center><br>
+          href="https://workers.tools">Worker&nbsp;Tools</a> and <a
+          href="https://workers.cloudflare.com">Cloudflare&nbsp;Workers</a>.</center><br>
       <center><span class="yclinks">YC: 
             <a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>
@@ -77,7 +77,7 @@ export const footerEl = () => html`
           | <a href="security.html">Security</a>
           | <a href="https://www.ycombinator.com/legal/">Legal</a>
           | <a href="https://www.ycombinator.com/apply/">Apply to YC</a>
-          | <a href="mailto:hn@ycombinator.com">Contact</a></span><br><br>
+          | <a href="mailto:hn@ycombinator.com">Contact YC</a></span><br><br>
         <form method="get" action="//hn.algolia.com/">Search:
           <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off"
             autocomplete="false">
