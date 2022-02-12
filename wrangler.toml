@@ -8,6 +8,15 @@ kv_namespaces = [
 compatibility_date = "2022-02-09"
 compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
 
+[site]
+  bucket = "./public"
+  entry-point = "."
+
+[build]
+  command = "npm run build"
+  [build.upload]
+    format = "service-worker"
+
 [vars]
   WORKER_LOCATION = 'http://localhost:8787'
   CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
