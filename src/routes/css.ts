@@ -91,6 +91,7 @@ router.get('/news.css', () => {
     input    { font-family:monospace; font-size:10pt; }
     textarea { font-family:monospace; font-size:10pt; }
     blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 9px; }
+    hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
     
     a:link    { color:var(--text-strong); text-decoration:none; }
     a:visited { color:var(--text); text-decoration:none; }
@@ -265,9 +266,7 @@ router.get('/news.css', () => {
       .comment { max-width: 1130px; overflow: hidden }
     }
 
-    hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
     .sr-only { clip: rect(1px, 1px, 1px, 1px); -webkit-clip-path: inset(50%); clip-path: inset(50%); height: 1px; overflow: hidden; margin-left: -2px; padding: 0; display: inline-block; position: absolute; width: 1px; white-space: nowrap; }
-    /* .reply a:after { content: '\\2197\\fe0e'; font-size: smaller; } */
     #footer a[href$="workers.tools"]:before { content:'⚙︎\\a0'; font-size:larger; }
     #footer a[href$="workers.cloudflare.com"]:before { content:'⟨⟫\\a0'; font-size:larger; }
   `);
