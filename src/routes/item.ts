@@ -25,10 +25,8 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
     <td valign="top" class="votelinks">
       <center>${deleted 
         ? html`<img src="s.gif" height="1" width="14">`
-        : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-          href="vote?id=${id}&amp;how=up&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${comm.story}%23${id}">
-          <div class="votearrow" title="upvote"></div>
-        </a>`}</center>
+        : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}"><div class="votearrow" title="upvote"></div></a>`
+      }</center>
     </td>
     <td class="default">
       <div style="margin-top:2px; margin-bottom:-10px;">
@@ -53,7 +51,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
               <font size="1">
                 ${/*<u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${comm.story}%23${id}">reply</a></u>*/''}
                 ${/*<span style="cursor:default;opacity:0.33" title="Not implemented">reply</span>*/''}
-                <u><a href="https://news.ycombinator.com/item?id=${id}">reply</a></u>
+                <u><a onclick="popitup(this,event,600,350)" href="https://news.ycombinator.com/item?id=${id}">reply</a></u>
               </font>
             </p>
           </div>`: ''}
@@ -106,8 +104,8 @@ const replyTr = ({ id, type }: APost) => {
         <form method="post" action="comment"><input type="hidden" name="parent" value="${id}"><input
             type="hidden" name="goto" value="item?id=${id}"><input type="hidden" name="hmac"
             value="${'TODO'}"><textarea name="text" rows="8"
-            cols="80" disabled></textarea>
-          <br/><br/><input type="submit" value="${type === 'comment' ? 'reply' : 'add comment'}" disabled>
+            cols="80" disabled placeholder="Not implemented"></textarea>
+          <br/><br/><input type="submit" value="${type === 'comment' ? 'reply' : 'add comment'}" onclick="popitup(this,event,600,350)" href="https://news.ycombinator.com/item?id=${id}">
         </form>
       </td>
     </tr>`;

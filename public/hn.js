@@ -149,3 +149,12 @@ function onclick (ev) {
 }
 
 document.addEventListener("click", onclick);
+
+function popitup(el, ev, width, height) {
+  ev.preventDefault();
+  var url = el.getAttribute('href');
+  var rect = el.getBoundingClientRect();
+  var newWindow = window.open(url,'name','left='+rect.left+',top='+rect.top+',width='+(width||200)+',height='+(height||150));
+  if (window.focus) { newWindow.focus() }
+  return false;
+}

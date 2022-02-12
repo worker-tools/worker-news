@@ -37,17 +37,15 @@ export const aThing = async ({ type, id, url, title, dead }: APost, index?: numb
         <td align="right" valign="top" class="title">${rankEl(index)}</td>
         <td valign="top" class="votelinks"><center>${dead || type === 'job'
           ? html`<img src="s.gif" height="1" width="14">`
-          : upVoted ? '' : html`<a id="up_${id}" onclick="return vote(event, this, &quot;up&quot;)"
-                href="vote?id=${id}&amp;how=up&amp;goto=${op}">
-                <div class="votearrow" title="upvote"></div>
-              </a>`}</center></td>
+          : upVoted ? '' : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}"><div class="votearrow" title="upvote"></div></a>`
+        }</center></td>
         <td class="title">${dead 
           ? '[flagged]' 
           : html`<a href="${url}"
             class="storylink">${title}</a>${uRL?.host === self.location.host ? '' : html`<span
             class="sitebit comhead"> (<a href="from?site=${uRL?.hostname}"><span
-                class="sitestr">${stripWWW(uRL)}</span></a>)</span>`}</td>`}
-      </tr>`;
+                class="sitestr">${stripWWW(uRL)}</span></a>)</span>`}</td>`
+        }</tr>`;
   } catch (err) {
     throw html`<tr><td>Something went wrong</td><td>${err instanceof Error ? err.message : err as string}</td></tr>`
   }
