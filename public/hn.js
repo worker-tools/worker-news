@@ -154,7 +154,9 @@ function popitup(el, ev, width, height) {
   ev.preventDefault();
   var url = el.getAttribute('href');
   var rect = el.getBoundingClientRect();
-  var newWindow = window.open(url,'name','left='+rect.left+',top='+rect.top+',width='+(width||250)+',height='+(height||100));
+  var left = window.screenX + rect.left;
+  var top = window.screenY + rect.top;
+  var newWindow = window.open(url,'name','left='+left+',top='+top+',width='+(width||250)+',height='+(height||100));
   if (window.focus) { newWindow.focus() }
   return false;
 }

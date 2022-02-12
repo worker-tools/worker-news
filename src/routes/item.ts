@@ -51,7 +51,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
               <font size="1">
                 ${/*<u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${comm.story}%23${id}">reply</a></u>*/''}
                 ${/*<span style="cursor:default;opacity:0.33" title="Not implemented">reply</span>*/''}
-                <u><a onclick="popitup(this,event,850,320)" href="https://news.ycombinator.com/item?id=${id}#${id}">reply</a></u>
+                <u><a onclick="popitup(this,event,850,300)" href="https://news.ycombinator.com/item?id=${id}#${id}">reply</a></u>
               </font>
             </p>
           </div>`: ''}
@@ -105,7 +105,10 @@ const replyTr = ({ id, type }: APost) => {
             type="hidden" name="goto" value="item?id=${id}"><input type="hidden" name="hmac"
             value="${'TODO'}"><textarea name="text" rows="8"
             cols="80" disabled placeholder="Not implemented"></textarea>
-          <br/><br/><input type="submit" value="${type === 'comment' ? 'reply' : 'add comment'}" onclick="popitup(this,event,850,320)" href="https://news.ycombinator.com/item?id=${id}#${id}">
+          <br/><br/><input type="submit" value="${type === 'comment' ? 'reply' : 'add comment'}" disabled>
+          <font size="1"><u>
+            <a onclick="popitup(this,event,850,275)" href="https://news.ycombinator.com/item?id=${id}#${id}">${type === 'comment' ? 'reply' : 'add comment'} on HN</a>
+          </u></font>
         </form>
       </td>
     </tr>`;
