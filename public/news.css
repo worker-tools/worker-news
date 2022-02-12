@@ -86,6 +86,7 @@ td    { font-family:var(--font); font-size:10pt; color:var(--text); }
 input    { font-family:monospace; font-size:10pt; }
 textarea { font-family:monospace; font-size:10pt; }
 blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 9px; }
+hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
 
 a:link    { color:var(--text-strong); text-decoration:none; }
 a:visited { color:var(--text); text-decoration:none; }
@@ -262,5 +263,5 @@ and (max-width : 750px) {
 
 .sr-only { clip: rect(1px, 1px, 1px, 1px); -webkit-clip-path: inset(50%); clip-path: inset(50%); height: 1px; overflow: hidden; margin-left: -2px; padding: 0; display: inline-block; position: absolute; width: 1px; white-space: nowrap; }
 #footer > center { line-height:1; }
-#footer a[href$="workers.tools"]:before { content:'⚙︎\a0'; font-size:larger; }
-#footer a[href$="workers.cloudflare.com"]:before { content:'⟨⟫\a0'; font-size:larger; }
+#footer a[href$="workers.tools"]:before { content:'⚙︎\a0'; }
+#footer a[href$="workers.cloudflare.com"]:before { content:'〈》'; margin-left: -5px; position: inline-block;}
