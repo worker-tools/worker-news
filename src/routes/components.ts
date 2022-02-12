@@ -13,7 +13,7 @@ export const headerEl = ({ op, id, session }: {
   session?: SessionType,
 }) => html`
   <tr>
-    <td id="header" bgcolor="#ff6600">
+    <td id="header" bgcolor="#ee9b33">
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
         <tbody>
           <tr>
@@ -30,8 +30,7 @@ export const headerEl = ({ op, id, session }: {
                 | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
                 | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)}
                 | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
-                | ${topSel(op === Stories.CLASSIC, html`<a href="classic">classic</a>`)}
-                <!-- | <a href="submit">submit</a> -->
+                | <a href="https://news.ycombinator.com/submit">submit</a>
                 ${op === Stories.SHOW_NEW
                     ? html`| <font color="#ffffff">${op}</font>` 
                     : ''}
@@ -62,13 +61,13 @@ export const footerEl = () => html`
       <table width="100%" cellspacing="0" cellpadding="1">
         <tbody>
           <tr>
-            <td id="border" bgcolor="#ff6600"></td>
+            <td id="border" bgcolor="#ee9b33"></td>
           </tr>
         </tbody>
-      </table><br>
+      </table><br/>
       <center>Made by <a href="https://qwtel.com">@qwtel</a> with <a
           href="https://workers.tools">Worker&nbsp;Tools</a> and <a
-          href="https://workers.cloudflare.com">Cloudflare&nbsp;Workers</a>.</center><br>
+          href="https://workers.cloudflare.com">Cloudflare&nbsp;Workers</a>.</center><br/>
       <center><span class="yclinks">YC: 
             <a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>
@@ -77,7 +76,7 @@ export const footerEl = () => html`
           | <a href="security.html">Security</a>
           | <a href="https://www.ycombinator.com/legal/">Legal</a>
           | <a href="https://www.ycombinator.com/apply/">Apply to YC</a>
-          | <a href="mailto:hn@ycombinator.com">Contact YC</a></span><br><br>
+          | <a href="mailto:hn@ycombinator.com">Contact YC</a></span><br/><br/>
         <form method="get" action="//hn.algolia.com/">Search:
           <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off"
             autocomplete="false">

@@ -44,7 +44,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
             : ''}
           <span class="onstory">${showParent && story && storyTitle ? html` | on: <a href="item?id=${story}">${storyTitle}</a>`: ''}</span>
         </span>
-      </div><br>
+      </div><br/>
       <div class="comment">
         <span class="commtext ${quality}">
           ${deleted ? '[flagged]' : text ? unsafeHTML(text) : ' '}
@@ -107,7 +107,7 @@ const replyTr = ({ id, type }: APost) => {
             type="hidden" name="goto" value="item?id=${id}"><input type="hidden" name="hmac"
             value="${'TODO'}"><textarea name="text" rows="8"
             cols="80" disabled></textarea>
-          <br><br><input type="submit" value="${type === 'comment' ? 'reply' : 'add comment'}" disabled>
+          <br/><br/><input type="submit" value="${type === 'comment' ? 'reply' : 'add comment'}" disabled>
         </form>
       </td>
     </tr>`;
@@ -150,7 +150,7 @@ function getItem({ searchParams, session }: LoginArgs)  {
                   const moreLink = await post.moreLink;
                   return moreLink
                     ? moreLinkEl(moreLink)
-                    : html`<br><br>`;
+                    : html`<br/><br/>`;
                 }}
               </tbody>
             </table>

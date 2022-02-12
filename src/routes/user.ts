@@ -51,7 +51,7 @@ const user = ({ searchParams, session }: LoginArgs) => {
             }
           }}
         </tbody></table>
-        <br><br>
+        <br/><br/>
       </td>
     </tr>`));
 }

@@ -47,7 +47,7 @@ function loginEl(autoFocus: boolean) {
         <td>password:</td>
         <td><input type="password" name="pw" size="20"></td>
       </tr>
-    </table><br>`;
+    </table><br/>`;
 }
 
 router.get('/login', cookies(session(({ searchParams, session }) => {
@@ -61,16 +61,16 @@ router.get('/login', cookies(session(({ searchParams, session }) => {
     </head>
     <body>
       <b>Login</b>
-      <br><br>
+      <br/><br/>
       <form method="post" action="login">
         <input type="hidden" name="goto" value="${goto}">
         ${loginEl(true)}
         <input type="submit" value="login">
       </form>
       <a href="forgot">Forgot your password?</a>
-      <br><br>
+      <br/><br/>
       <b>Create Account</b>
-      <br><br>
+      <br/><br/>
       <form method="post" action="login">
         <input type="hidden" name="goto" value="${goto}">
         <input type="hidden" name="creating" value="t">
