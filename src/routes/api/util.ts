@@ -6,13 +6,16 @@ import { unescape } from 'html-escaper';
 export function blockquotify(text: string) {
   const { protocol, host } = self.location;
 
-  text = text.replace(/https?:\/\/news.ycombinator.com/g, `${protocol}//${host}`);
-  text = text.replace(/https?:&#x2F;&#x2F;news.ycombinator.com/g, `${protocol}//${host}`);
-
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
   for (const p of doc.querySelectorAll('p') as HTMLParagraphElement[]) {
     const innerHTML = unescape(p.innerHTML.trim());
+
+    for (const a of p.querySelectorAll('a[href^="http://news.ycombinator.com"], a[href^="https://news.ycombinator.com"]')) {
+      const href = a.getAttribute('href')!
+        .replace(/https?:\/\/news.ycombinator.com/g, `${protocol}//${host}`);
+      a.setAttribute('href', href)
+    }
 
     // Test nested: item?id=30297007
     if (innerHTML.startsWith('>')) {
