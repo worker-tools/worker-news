@@ -7,6 +7,19 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
   : content
 
+const x = {
+  [Stories.TOP]: '/news',
+  [Stories.NEW]: '/newest',
+  [Stories.BEST]: '/best',
+  [Stories.SHOW]: '/show',
+  [Stories.SHOW_NEW]: '/shownew',
+  [Stories.ASK]: '/ask',
+  [Stories.JOB]: '/jobs',
+  [Stories.USER]: '$id\'s submissions',
+  [Stories.CLASSIC]: '/classic',
+  [Stories.FROM]: '/from'
+};
+
 export const headerEl = ({ op, id, session }: { 
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string,  
@@ -39,6 +52,9 @@ export const headerEl = ({ op, id, session }: {
                     : ''}
                 ${op === 'threads'
                     ? html`| <font color="#ffffff">${id}'s comments</font>` 
+                    : ''}
+                ${op === 'from'
+                    ? html`| <font color="#ffffff">from</font>` 
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">

@@ -2,6 +2,7 @@ import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html"
 import { StorageArea } from "@worker-tools/kv-storage";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
+import { fromUrl, parseDomain } from 'parse-domain';
 
 import { RouteArgs, router } from "../router";
 import { pageLayout } from './components';
@@ -9,28 +10,50 @@ import { pageLayout } from './components';
 import { stories, APost, Stories } from './api'
 import { cookies, session, LoginArgs, SessionType } from "./login";
 
-const tryURL = (url: string): URL | null => {
-  try { return new URL(url, self.location.origin); } catch { return null }
+const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
+const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
+
+// const at = <T>(xs: T[], i: number) => i >= 0 ? xs[i] : xs[xs.length + i]
+
+const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
+  try { 
+    const url = new URL(href, self.location.origin); 
+    const res = parseDomain(url.hostname)!
+    if (res.type === 'LISTED') {
+      const { domain, topLevelDomains: tld, subDomains } = res;
+      const allowedSubDomains = SUB_SITES.some(_ => url.hostname.endsWith(_)) && subDomains.length
+        ? subDomains.slice(subDomains.length - 1).concat('').join('.')
+        : ''
+
+      const allowedPathname = GIT_SITES.includes(url.hostname)
+        ? url.pathname.split(/\/+/).slice(0, 2).join('/').toLowerCase()
+        : '';
+
+      const sitebit = `${allowedSubDomains}${domain}.${tld.join('.')}${allowedPathname}`;
+      return Object.assign(url, { sitebit });
+    }
+    return null
+  } catch { return null }
 }
 
-const stripWWW = (url?: URL | null) => {
-  if (!url) return '';
-  if (url.hostname.substr(0, 4) === 'www.') {
-    url.hostname = url.hostname.substr(4);
-  }
-  if (['github.com', 'gitlab.com'].includes(url.hostname)) {
-    const p = url.pathname.substr(1).replace(/\/+/g, '/').split('/');
-    return url.hostname + '/' + p[0];
-  }
-  return url.hostname;
-}
+// const stripWWW = (url?: URL | null) => {
+//   if (!url) return '';
+//   if (url.hostname.substr(0, 4) === 'www.') {
+//     url.hostname = url.hostname.substr(4);
+//   }
+//   if (['github.com', 'gitlab.com'].includes(url.hostname)) {
+//     const p = url.pathname.substr(1).replace(/\/+/g, '/').split('/');
+//     return url.hostname + '/' + p[0];
+//   }
+//   return url.hostname;
+// }
 
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
-export const aThing = async ({ type, id, url, title, dead }: APost, index?: number, op?: Stories, session?: SessionType) => {
+export const aThing = async ({ type, id, url: href, title, dead }: APost, index?: number, op?: Stories, session?: SessionType) => {
   try {
-    const uRL = tryURL(url);
+    const url = tryURL(href);
     const upVoted = session?.votes.has(id);
     return html`
       <tr class="athing" id="${id}">
@@ -41,10 +64,10 @@ export const aThing = async ({ type, id, url, title, dead }: APost, index?: numb
         }</center></td>
         <td class="title">${dead 
           ? '[flagged]' 
-          : html`<a href="${url}"
-            class="storylink">${title}</a>${uRL?.host === self.location.host ? '' : html`<span
-            class="sitebit comhead"> (<a href="from?site=${uRL?.hostname}"><span
-                class="sitestr">${stripWWW(uRL)}</span></a>)</span>`}</td>`
+          : html`<a href="${href}"
+            class="storylink">${title}</a>${url?.host === self.location.host ? '' : url ? html`<span
+            class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
+                class="sitestr">${url.sitebit}</span></a>)</span>` : ''}</td>`
         }</tr>`;
   } catch (err) {
     throw html`<tr><td>Something went wrong</td><td>${err instanceof Error ? err.message : err as string}</td></tr>`
@@ -80,10 +103,11 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
   `;
 }
 
-const rowEl = (arg: APost, i: number, type: Stories, session?: SessionType) => {
+const rowEl = (post: APost, i: number, type: Stories, session?: SessionType) => {
+  const index = [Stories.JOB, Stories.FROM].includes(type) ? NaN : i;
   return html`
-    ${aThing(arg, i, type, session)}
-    ${subtext(arg, i, type)}
+    ${aThing(post, index, type, session)}
+    ${subtext(post, index, type)}
     <tr class="spacer" style="height:5px"></tr>`;
 }
 
@@ -97,6 +121,7 @@ const x = {
   [Stories.SHOW_NEW]: 'New Show',
   [Stories.USER]: `$user's submissions`,
   [Stories.CLASSIC]: '',
+  [Stories.FROM]: 'Submissions from $site'
 }
 
 const messageEl = (message: HTMLContent, marginBottom = 12) => html`
@@ -110,9 +135,13 @@ const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
   const next = Number(searchParams.get('next'))
   const n = Number(searchParams.get('n'))
   const id = Stories.USER ? searchParams.get('id')! : '';
+  const site = Stories.FROM ? searchParams.get('site')! : '';
 
-  const title = x[type].replace('$user', searchParams.get('id')!)
-  const storiesGen = stories({ p, n, next, id }, type);
+  const title = x[type]
+    .replace('$user', searchParams.get('id')!)
+    .replace('$site', searchParams.get('site')!)
+
+  const storiesGen = stories({ p, n, next, id, site }, type);
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')!, session })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
@@ -133,7 +162,7 @@ const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
                   : (p - 1) * 30;
                 for await (const post of storiesGen) {
                   if (typeof post !== 'string') {
-                    yield rowEl(post, type !== Stories.JOB ? i++ : NaN, type, session);
+                    yield rowEl(post, i++, type, session);
                   } else if (post) {
                     yield html`<tr class="morespace" style="height:10px"></tr>
                       <tr>
@@ -161,6 +190,7 @@ export const ask = cookies(session(mkStories(Stories.ASK)))
 export const jobs = cookies(session(mkStories(Stories.JOB)))
 export const submitted = cookies(session(mkStories(Stories.USER)))
 export const classic = cookies(session(mkStories(Stories.CLASSIC)))
+export const from = cookies(session(mkStories(Stories.FROM)))
 
 router.get('/news', news);
 router.get('/newest', newest);
@@ -171,3 +201,4 @@ router.get('/ask', ask);
 router.get('/jobs', jobs);
 router.get('/submitted', submitted)
 router.get('/classic', classic)
+router.get('/from', from)

@@ -8,6 +8,7 @@ export enum Stories {
   JOB = 'jobs',
   USER = 'submitted',
   CLASSIC = 'classic',
+  FROM = 'from',
 }
 
 export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';

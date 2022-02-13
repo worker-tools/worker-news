@@ -19,6 +19,7 @@ const x = {
   [Stories.JOB]: '/v0/jobstories',
   [Stories.USER]: '',
   [Stories.CLASSIC]: '',
+  [Stories.FROM]: '',
 };
 
 export async function* stories(api: APIFn, page = 1, type = Stories.TOP) {

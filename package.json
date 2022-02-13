@@ -57,6 +57,7 @@
     "linkedom": "^0.13.2",
     "msgpackr": "^1.5.4",
     "negotiated": "^1.0.2",
+    "parse-domain": "^7.0.0",
     "tiny-request-router": "^1.2.2",
     "type-fest": "^0.21.3",
     "typed-array-utils": "^0.2.2",

@@ -30,6 +30,7 @@ const x = {
   [Stories.JOB]: '/jobs',
   [Stories.USER]: '/submitted',
   [Stories.CLASSIC]: '/classic',
+  [Stories.FROM]: '/from'
 };
 
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
@@ -37,15 +38,16 @@ const elToTagOpen = (el: Element) => `<${el.tagName}${[...el.attributes].map(x =
 const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
 
-type StoriesParams = RequireAtLeastOne<{ p?: number, n?: number, next?: number, id?: string }, 'p' | 'n' | 'id'>;
+type StoriesParams = { p?: number, n?: number, next?: number, id?: string, site?: string };
 
-export async function* stories({ p, n, next, id }: StoriesParams, type = Stories.TOP) {
+export async function* stories({ p, n, next, id, site }: StoriesParams, type = Stories.TOP) {
   const pathname = x[type];
   const url = new ParamsURL(pathname, { 
     ...p ? { p } : {}, 
     ...n ? { n } : {},
     ...next ? { next } : {}, 
     ...id ? { id } : {},
+    ...site ? { site } : {},
   }, API);
   const body = await fetch(url.href)
   if (!body.ok) r2err(body)
