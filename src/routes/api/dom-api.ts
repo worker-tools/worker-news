@@ -8,7 +8,7 @@ import { unescape } from 'html-escaper';
 // Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
 // import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
-import { HTMLRewriter as HR, ElementHandlers, Element, TextChunk } from 'html-rewriter-wasm';
+import { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 
 import { APost, AComment, Quality, Stories, AUser } from './interface';
 import { aMap } from './iter';
@@ -33,7 +33,7 @@ const x = {
 };
 
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);
-const elToTagOpen = (el: Element) => `<${el.tagName} ${[...el.attributes].map(x => `${x[0]}="${x[1]}"`).join(' ')}>`;
+const elToTagOpen = (el: Element) => `<${el.tagName}${[...el.attributes].map(x => ` ${x[0]}="${x[1]}"`).join('')}>`;
 const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
 
@@ -121,13 +121,13 @@ export async function comments(id: number, p?: number): Promise<APost> {
   const url = new ParamsURL('/item', { id, ...p ? { p } : {} }, API).href;
   const body = await fetch(url)
   if (body.ok) return commentsGenerator(body);
-  return await r2err(body);
+  return r2err(body);
 }
 
 export async function* threads(id: string, next?: number) {
   const url = new ParamsURL('/threads', { id, ...next ? { next } : {} }, API).href;
   const body = await fetch(url)
-  if (!body.ok) await r2err(body);
+  if (!body.ok) r2err(body);
   yield* threadsGenerator(body)
 }
 
@@ -213,10 +213,13 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem tr:nth-child(4) > td:nth-child(2)', { 
       text({ text }) { post.text += text }
     })
-    .on('.fatitem tr:nth-child(4) > td:nth-child(2) *:not(form) *', { 
+    // HACK: there's no good way to distinguish link and story submissions.
+    // When it's a link, the reply form is in the same spot as the text is for a story submission, 
+    // so we just ignore all the form elements...
+    .on('.fatitem tr:nth-child(4) > td:nth-child(2) *:not(form):not(input):not(textarea):not(br)', {  // HACK
       element(el) {
         post.text += elToTagOpen(el);
-        el.onEndTag(endTag => { post.text += `</${endTag.name}>`})
+        el.onEndTag(endTag => { post.text += `</${endTag.name}>`});
       }
     })
     .on('.fatitem .comhead > .hnuser', {
@@ -237,7 +240,7 @@ async function commentsGenerator(response: Response) {
         post.type = 'comment'; 
         post.quality = el.getAttribute('class')?.substr('commtext '.length).trim() as Quality; 
       },
-      text(chunk) { post.text += chunk.text }
+      text({ text }) { post.text += text }
     })
     .on('.fatitem .commtext *', {
       element(el) { 
@@ -317,7 +320,7 @@ async function* threadsGenerator(response: Response) {
 export async function user(id: string): Promise<AUser> {
   const url = new ParamsURL('user', { id }, API);
   const response = await fetch(url.href);
-  if (!response.ok) await r2err(response);
+  if (!response.ok) r2err(response);
 
   let user: Partial<AUser> = { id, about: '', submitted: [] };
 
@@ -331,7 +334,7 @@ export async function user(id: string): Promise<AUser> {
       text({ text }) { if (text?.trimStart().match(/^\d/)) user.karma = parseInt(text, 10) }
     })
     .on('tr > td > table[border="0"] > tr:nth-child(4) > td:nth-child(2)', {
-      text(chunk) { user.about += chunk.text }
+      text({ text }) { user.about += text }
     })
     .on('tr > td > table[border="0"] > tr:nth-child(4) > td:nth-child(2) *', {
       element(el) { 
