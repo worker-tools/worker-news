@@ -30,9 +30,10 @@ export const headerEl = ({ op, id, session }: {
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
         <tbody>
           <tr>
-            <td style="width:18px;padding-right:4px"><a href="https://workers.tools"><img
+            <td style="width:18px;padding-right:4px"><a href="https://workers.tools"><picture><source 
+                  srcset="darky18.png" media="(prefers-color-scheme: dark)"><img
                   src="y18.png" width="18" height="18"
-                  style="border:1px transparent solid;"></a></td>
+                  style="border:1px transparent solid;"></picture></a></td>
             <td style="line-height:12pt; height:10px;"><span class="pagetop"><b class="hnname"><a
                     href="news">Worker News</a></b>
                 ${topSel(op === Stories.NEW, html`<a href="newest">new</a>`)}
