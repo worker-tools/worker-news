@@ -4,7 +4,7 @@ import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
 
-import { comments as apiComments, AComment, APost, Stories } from "./api";
+import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api";
 
 import { pageLayout } from './components';
 import { cookies, LoginArgs, session } from "./login";
@@ -81,6 +81,28 @@ export async function* commentTree(kids: AsyncIterable<AComment>): AsyncGenerato
   }
 }
 
+export const pollOptEl = (opt: APollOpt) => {
+  return html`<tr class="athing" id="${opt.id}"><td></td>
+    <td valign="top" class="votelinks"><center><a id="up_${opt.id}" href="https://news.ycombinator.com/item?id=${opt.id}#${opt.id}" onclick="popitup(this,event)">
+      <div class="votearrow" title="upvote"></div></a></center></td><td class="comment"><div style="margin-top:1px;margin-bottom:0px">
+    <font style="color:var(--text-strong)">${opt.text}</font>
+    </div></td></tr><tr><td colspan="2"></td><td class="default"><span class="comhead">
+    <span class="score" id="score_${opt.id}">${opt.score} points</span><span id="unv_${opt.id}"></span></span></td></tr>
+    <tr style="height:7px"></tr>`;
+}
+
+async function* pollOptList(parts: AsyncIterable<APollOpt>): AsyncIterable<HTMLContent> {
+  yield html`<tr style="height:10px"></tr>
+    <tr>
+      <td colspan="2"></td>
+      <td><table border="0">${(async function*() {
+        for await (const item of parts) {
+          yield pollOptEl(item);
+        }
+      })()}</table></td>
+    </tr>`;
+}
+
 // const itemSubtext = ({ id, title, score, by, timeAgo, descendants, dead }: APost) => html`<tr>
 //   <td colspan="2"></td>
 //   <td class="subtext">
@@ -126,7 +148,7 @@ function getItem({ searchParams, session }: LoginArgs)  {
   return new HTMLResponse(pageRenderer(async () => {
     try {
       const post = await postResponse;
-      const { title, text, kids } = post;
+      const { title, text, kids, parts } = post;
       return html`
         <tr id="pagespace" title="${title}" style="height:10px"></tr>
         ${title 
@@ -138,10 +160,17 @@ function getItem({ searchParams, session }: LoginArgs)  {
               <tbody>
                 ${post.type === 'comment' 
                   ? [commentTr(post as AComment, { showParent: true })]
-                  : [aThing(post), subtext(post, undefined, undefined, { showPast: true }), text
-                    ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(text)}</td></tr>`
-                    : '']}
-                ${!post.dead ? replyTr(post) : ''}
+                  : [
+                      aThing(post), 
+                      subtext(post, undefined, undefined, { showPast: true }), 
+                      text 
+                        ? html`<tr style="height:2px"></tr><tr><td colspan="2"></td><td>${unsafeHTML(text)}</td></tr>`
+                        : '',
+                      parts
+                        ? pollOptList(parts)
+                        : '',
+                    ]
+                }${!post.dead ? replyTr(post) : ''}
               </tbody>
             </table>
             <table border="0" class="comment-tree">

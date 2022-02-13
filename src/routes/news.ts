@@ -60,7 +60,9 @@ export const aThing = async ({ type, id, url: href, title, dead }: APost, index?
         <td align="right" valign="top" class="title">${rankEl(index)}</td>
         <td valign="top" class="votelinks"><center>${dead || type === 'job'
           ? html`<img src="s.gif" height="1" width="14">`
-          : upVoted ? '' : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`
+          : upVoted 
+            ? '' 
+            : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`
         }</center></td>
         <td class="title">${dead 
           ? '[flagged]' 

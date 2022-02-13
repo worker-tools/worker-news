@@ -10,13 +10,13 @@ import { unescape } from 'html-escaper';
 // import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 
-import { APost, AComment, Quality, Stories, AUser } from './interface';
+import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser } from './interface';
 import { aMap } from './iter';
 import { blockquotify, consume } from './util';
 import { resolvablePromise } from 'src/vendor/resolvable-promise';
 
-const h2r = (htmlRewriter: HTMLRewriter) => htmlRewriter as unknown as HR;
-const r2h = (hTMLRewriter: HR) => hTMLRewriter as unknown as HTMLRewriter;
+const h2r = (htmlRewriter: HR | HTMLRewriter) => htmlRewriter as unknown as HR;
+const r2h = (hTMLRewriter: HR | HTMLRewriter) => hTMLRewriter as unknown as HTMLRewriter;
 
 const API = 'https://news.ycombinator.com'
 
@@ -186,16 +186,18 @@ async function commentsGenerator(response: Response) {
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data', { returnEvent: 'return' });
+  const opts = eventTargetToAsyncIter<CustomEvent<APollOpt>>(data, 'pollopt', { returnEvent: 'return' });
 
   const moreLink = resolvablePromise<string>();
 
   // console.log(response.status, response.url, ...response.headers, (await response.clone().arrayBuffer()).byteLength)
+  let pollOpt: Partial<APollOpt>;
 
   const rewriter = h2r(new HTMLRewriter())
-    .on('.fatitem .athing[id]', {
+    .on('.fatitem > .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
-    .on('.fatitem .athing[id] > .title > a.titlelink', { 
+    .on('.fatitem > .athing[id] > .title > a.titlelink', { 
       element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
       text({ text }) { post.title += text }
     })
@@ -212,17 +214,33 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem .subtext > a[href^=item]', { 
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
-    .on('.fatitem tr:nth-child(4) > td:nth-child(2)', { 
+    .on('.fatitem > tr:nth-child(4) > td:nth-child(2)', { 
       text({ text }) { post.text += text }
     })
     // HACK: there's no good way to distinguish link and story submissions.
     // When it's a link, the reply form is in the same spot as the text is for a story submission, 
     // so we just ignore all the form elements...
-    .on('.fatitem tr:nth-child(4) > td:nth-child(2) *:not(form):not(input):not(textarea):not(br)', {  // HACK
+    .on('.fatitem > tr:nth-child(4) > td:nth-child(2) *:not(form):not(input):not(textarea):not(br)', {  // HACK
       element(el) {
         post.text += elToTagOpen(el);
         el.onEndTag(endTag => { post.text += `</${endTag.name}>`});
       }
+    })
+    // Poll: item?id=30210378
+    .on('.fatitem > tr:nth-child(6) tr.athing[id]', {
+      element(el) {
+        post.type = 'poll';
+
+        if (pollOpt) data.dispatchEvent(newCustomEvent('pollopt', pollOpt))
+        const id = Number(el.getAttribute('id'));
+        pollOpt = { id, text: '', score: 0 };
+      }
+    })
+    .on('.fatitem > tr:nth-child(6) tr.athing[id] > .comment > div', {
+      text({ text }) { pollOpt.text += text; }
+    })
+    .on('.fatitem > tr:nth-child(6) tr .comhead > .score ', {
+      text({ text }) { if (text?.trimStart().match(/^\d/)) pollOpt.score = parseInt(text, 10) }
     })
     .on('.fatitem .comhead > .hnuser', {
       text({ text }) { post.by += text }
@@ -261,7 +279,7 @@ async function commentsGenerator(response: Response) {
 
   scrapeComments(rewriter, data, '.comment-tree');
     
-  const x = consume(r2h(rewriter).transform(response).body!)
+  const progress = consume(r2h(rewriter).transform(response).body!)
     .then(() => iter.return())
     .catch(err => iter.throw(err));
 
@@ -272,12 +290,18 @@ async function commentsGenerator(response: Response) {
     post.text = await blockquotify('<p>' + post.text)
   } else delete post.text
 
+  post.parts = aMap(opts, ({ detail: pollOpt }) => {
+    pollOpt.poll = post.id!;
+    pollOpt.by = post.by!;
+    return fixPollOpt(pollOpt);
+  })
+
   post.kids = aMap(iter, ({ detail: comment }) => {
     comment.story = post.id;
     return fixComment(comment)
   });
 
-  post.moreLink = Promise.race([moreLink, x.then(() => '')]);
+  post.moreLink = Promise.race([moreLink, progress.then(() => '')]);
 
   return post as APost;
 };
@@ -286,11 +310,16 @@ async function fixComment(comment: Partial<AComment>) {
   if (comment.text?.trim()) {
     comment.text = await blockquotify('<p>' + comment.text)
   } else {
-    // FIXME?
+    // FIXME: is this how it works??
     comment.deleted = true;
     comment.text = ' [flagged] ';
   }
   return comment as AComment;
+}
+
+function fixPollOpt(pollOpt: Partial<APollOpt>) {
+  if (pollOpt.text) pollOpt.text = pollOpt.text.trim(); else delete pollOpt.text;
+  return pollOpt as APollOpt;
 }
 
 async function* threadsGenerator(response: Response) {
