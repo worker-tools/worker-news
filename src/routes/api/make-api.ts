@@ -34,7 +34,7 @@ export async function* stories(api: APIFn, page = 1, type = Stories.TOP) {
     yield <APost>{
       ...p,
       time: new Date(p.time * 1000),
-      text: text != null ? blockquotify(text) : null,
+      text: text != null ? await blockquotify(text) : null,
       url: text != null ? `item?id=${p.id}` : url,
     };
   }
@@ -66,7 +66,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
         ...rest,
         level,
         quality: 'c00', // REST API doesn't support quality..
-        text: text && blockquotify('<p>' + text),
+        text: text && await blockquotify('<p>' + text),
         time: new Date(item.time * 1000),
         kids: crawlCommentTree(kids || [], dict, level + 1),
       };
@@ -106,7 +106,7 @@ export async function comments(api: APIFn, id: number): Promise<APost> {
   }
   // queue.addAll(kids.map(id => () => commentTask(id, queue, dict)));
 
-  const text = post.text != null ? blockquotify('<p>' + post.text) : null;
+  const text = post.text != null ? await blockquotify('<p>' + post.text) : null;
   return {
     ...post,
     time: new Date(post.time * 1000),
@@ -122,6 +122,6 @@ export async function user(api: APIFn, id: string): Promise<AUser> {
   const { about, ...user }: RESTUser = await api(`/v0/user/${id}`);
   return {
     ...user,
-    ...about ? { about: blockquotify('<p>' + about) } : {},
+    ...about ? { about: await blockquotify('<p>' + about) } : {},
   };
 }

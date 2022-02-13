@@ -1,14 +1,14 @@
 /**
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
-import { ParamsURL, urlWithParams } from '@worker-tools/json-fetch';
+import { ParamsURL } from '@worker-tools/json-fetch';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 import { unescape } from 'html-escaper';
 
 // Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
 // Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
 // import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
-import { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
+import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 
 import { APost, AComment, Quality, Stories, AUser } from './interface';
 import { aMap } from './iter';
@@ -269,7 +269,7 @@ async function commentsGenerator(response: Response) {
   await iter.next();
 
   if (post.text?.trim()) {
-    post.text = blockquotify('<p>' + post.text)
+    post.text = await blockquotify('<p>' + post.text)
   } else delete post.text
 
   post.kids = aMap(iter, ({ detail: comment }) => {
@@ -282,9 +282,9 @@ async function commentsGenerator(response: Response) {
   return post as APost;
 };
 
-function fixComment(comment: Partial<AComment>) {
+async function fixComment(comment: Partial<AComment>) {
   if (comment.text?.trim()) {
-    comment.text = blockquotify('<p>' + comment.text)
+    comment.text = await blockquotify('<p>' + comment.text)
   } else {
     // FIXME?
     comment.deleted = true;

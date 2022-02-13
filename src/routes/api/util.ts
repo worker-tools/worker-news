@@ -1,10 +1,52 @@
 import { DOMParser } from 'linkedom';
 import { unescape } from 'html-escaper';
 
+// import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
+// const h2r = (htmlRewriter: HTMLRewriter) => htmlRewriter as unknown as HR;
+// const r2h = (hTMLRewriter: HR) => hTMLRewriter as unknown as HTMLRewriter;
+
 // Primitive support for 
 // Problem: item?id=26520957, item?id=30283264
-export function blockquotify(text: string) {
+export async function blockquotify(text: string) {
   const { protocol, host } = self.location;
+
+  // const newText = await r2h(h2r(new HTMLRewriter())
+  //   .on('p', {
+  //     text(chunk) {
+  //       const text = unescape(chunk.text);
+  //       // console.log(text)
+  //       if (text.startsWith('>')) {
+  //         console.log('!!')
+  //         // const bq = doc.createElement('blockquote')
+  //         // bq.innerHTML = innerHTML.substring(1);
+  //         // const invis = doc.createElement('span'); invis.textContent = '>'; invis.classList.add('sr-only'); 
+  //         // bq.prepend(invis, doc.createTextNode(' '));
+  //         // p.outerHTML = bq.outerHTML;
+  //       }
+  //     },
+  //     element(el) {
+  //       // console.log(el)
+  //       console.log('ok?', el.tagName)
+  //       el.onEndTag(endTag => {
+  //         // el.setInnerContent('foobar')
+  //         // endTag.remove()
+  //         // endTag.remove()
+  //         // endTag.before('<p>foobar</p>')
+  //         // endTag.after('<p>foobar</p>')
+  //       });
+  //     },
+  //   })
+  //   .on('a[href^="http://news.ycombinator.com"], a[href^="https://news.ycombinator.com"]', {
+  //     element(a) {
+  //       const href = a.getAttribute('href')!.replace(/https?:\/\/news.ycombinator.com/g, `${protocol}//${host}`);
+  //       a.setAttribute('href', href)
+  //     },
+  //   })
+  // )
+  //   .transform(new Response(text))
+  //   .text();
+  
+  // return newText;
 
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
