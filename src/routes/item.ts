@@ -159,7 +159,7 @@ function getItem({ searchParams, session }: LoginArgs)  {
             <table class="fatitem" border="0">
               <tbody>
                 ${post.type === 'comment' 
-                  ? [commentTr(post as AComment, { showParent: true })]
+                  ? [commentTr(post as AComment, { showParent: true, showToggle: false })]
                   : [
                       aThing(post), 
                       subtext(post, undefined, undefined, { showPast: true }), 
