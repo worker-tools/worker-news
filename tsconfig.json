@@ -28,9 +28,11 @@
     ],
   },
   "include": [
-    "./typings/*.d.ts",
-    "./src/*.ts",
-    "./src/**/*.ts", "src/routes/.login.ts",
+    "typings/*.d.ts",
+    "src/*.ts",
+    "src/**/*.ts", 
+    "src/routes/.login.ts",
+    "src/routes/.crawl.ts",
   ],
   "exclude": [
     "node_modules/",

@@ -56,7 +56,7 @@ let i = 0;
 async function crawlItem(id: number) {
   if (++i % 100 === 0) console.log(i, id);
   try {
-    const item = await fetch(new URL(`/v0/item/${id}.json`, API).href).then(x => x.json());
+    const item = await fetch(new URL(`/v0/item/${id}.json`, API).href).then(x => x.json() as any);
     await storage.set(`/v0/item/${id}.json`, item);
     // await Promise.all((item.kids ?? []).map(crawlItem))
     for (const kid of item?.kids ?? []) {
