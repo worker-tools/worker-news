@@ -77,6 +77,7 @@
 }
 
 html  { background-color: var(--page-background);}
+
 body  { font-family:var(--font); font-size:10pt; color:var(--text); overflow-y:scroll; }
 td    { font-family:var(--font); font-size:10pt; color:var(--text); }
 
@@ -84,7 +85,7 @@ td    { font-family:var(--font); font-size:10pt; color:var(--text); }
 .subtext td { font-family:var(--font); font-size:  7pt; color:var(--text); }
 
 input    { font-family:monospace; font-size:10pt; }
-textarea { font-family:monospace; font-size:10pt; }
+textarea { font-family:monospace; font-size:10pt; resize:both; }
 blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 9px; }
 hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
 
@@ -94,16 +95,20 @@ a:visited { color:var(--text); text-decoration:none; }
 #hnmain  { background-color: var(--background);}
 #header  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
 #border  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
+
 .default { font-family:var(--font); font-size: 10pt; color:var(--text); }
 .admin   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
 .title   { font-family:var(--font); font-size: 10pt; color:var(--text); overflow:hidden; }
 .subtext { font-family:var(--font); font-size:  7pt; color:var(--text); }
 .yclinks { font-family:var(--font); font-size:  8pt; color:var(--text); }
 .pagetop { font-family:var(--font); font-size: 10pt; color:var(--text-strong); line-height:12px; }
-
 .comhead { font-family:var(--font); font-size:  8pt; color:var(--text); }
 .comment { font-family:var(--font); font-size:  9pt; }
 .hnname  { margin-right: 5px; }
+
+#hnmain { min-width: 796px; }
+
+.title a { word-break: break-word; }
 
 .comment a:link, .comment a:visited { text-decoration: underline; }
 .noshow { display: none; }
@@ -137,7 +142,7 @@ a:visited { color:var(--text); text-decoration:none; }
 
 .pagebreak {page-break-before:always}
 
-pre { overflow: auto; padding: 2px; white-space: pre-wrap; word-wrap: break-word; }
+pre { overflow: auto; padding: 2px; white-space: pre-wrap; overflow-wrap:anywhere; }
 pre:hover { overflow:auto }
 
 .votearrow {
@@ -150,9 +155,7 @@ pre:hover { overflow:auto }
 }
 
 @media (prefers-color-scheme: dark) {
-  .votearrow {
-    background-image: url("darkbluearrow.png");
-  }
+  .votearrow { background-image: url("darkbluearrow.png"); }
 }
 
 .votelinks.nosee div.votearrow.rotate180 {
@@ -165,7 +168,7 @@ table.padtab td { padding:0px 10px }
   .votearrow { background-size: 10px; background-image: url("grayarrow2x.gif"); }
 }
 @media only screen and (-webkit-min-device-pixel-ratio: 2) and (prefers-color-scheme: dark), only screen and (min-device-pixel-ratio: 2) and (prefers-color-scheme: dark) {
-  :root .votearrow { background-image: url("darkbluearrow2x.png"); }
+  .votearrow { background-image: url("darkbluearrow2x.png"); }
 }
 
 .rotate180 {
@@ -228,7 +231,9 @@ and (max-width : 750px) {
   input[type='text'], input[type='number'], textarea { font-size: 16px; width: 90%; }
 }
 
-.comment { max-width: 1215px; overflow: hidden }
+.comment { max-width: 1215px; overflow-wrap:anywhere; }
+
+
 
 @media only screen and (min-width : 300px) and (max-width : 389px) {
   .comment { max-width: 270px; overflow: hidden }
