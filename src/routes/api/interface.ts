@@ -11,6 +11,8 @@ export enum Stories {
   FROM = 'from',
 }
 
+export type StoriesParams = { p?: number, n?: number, next?: number, id?: string, site?: string };
+
 export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
 
 export interface AThing {

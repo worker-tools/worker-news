@@ -10,7 +10,7 @@ import { unescape } from 'html-escaper';
 // import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 
-import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser } from './interface';
+import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams } from './interface';
 import { aMap } from './iter';
 import { blockquotify, consume } from './util';
 import { resolvablePromise } from 'src/vendor/resolvable-promise';
@@ -37,8 +37,6 @@ const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? 
 const elToTagOpen = (el: Element) => `<${el.tagName}${[...el.attributes].map(x => ` ${x[0]}="${x[1]}"`).join('')}>`;
 const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
-
-type StoriesParams = { p?: number, n?: number, next?: number, id?: string, site?: string };
 
 export async function* stories({ p, n, next, id, site }: StoriesParams, type = Stories.TOP) {
   const pathname = x[type];

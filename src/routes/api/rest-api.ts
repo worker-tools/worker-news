@@ -15,7 +15,7 @@
  * It also works in a Service Worker, but due to the limit of 4 (?) open connections per page, it's noticeably slower.
  */
 
-import { Stories } from './interface';
+import { Stories, StoriesParams } from './interface';
 import * as mkAPI from './make-api';
 
 export const API = 'https://hacker-news.firebaseio.com';
@@ -25,18 +25,18 @@ export const api = async <T>(path: string): Promise<T> => {
   return fetch(url.href).then(x => x.json());
 }
 
-export function stories(page = 1, type = Stories.TOP) {
-  return mkAPI.stories(api, page, type);
+export function stories(params: StoriesParams, type = Stories.TOP) {
+  return mkAPI.stories(api, params, type);
 }
 
-export function comments(id: number) {
-  return mkAPI.comments(api, id);
+export function comments(id: number, p?: number) {
+  return mkAPI.comments(api, id, p);
 }
 
 export function user(id: string) {
   return mkAPI.user(api, id);
 }
 
-export function threads() {
-
+export function threads(id: string, next?: number) {
+  return mkAPI.threads(api, id, next);
 }

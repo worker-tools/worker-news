@@ -31,17 +31,15 @@ function threads({ searchParams, session }: LoginArgs)  {
   const next = Number(searchParams.get('next'));
 
   const threadsGen = apiThreads(id, next);
-  const pageRenderer = pageLayout({ title, op: 'threads', id, session })
 
-  return new HTMLResponse(pageRenderer(async () => {
-    try {
-      return html`
-        <tr id="pagespace" title="${title}" style="height:10px"></tr>
-        <tr>
-          <td>
-          </td>
-        </tr>
-        ${async function* () {
+  return new HTMLResponse(pageLayout({ title, op: 'threads', id, session })(async () => {
+    return html`
+      <tr id="pagespace" title="${title}" style="height:10px"></tr>
+      <tr>
+        <td> </td>
+      </tr>
+      ${async function* () {
+        try {
           for await (const item of threadsGen) {
             if (typeof item !== 'string') {
               yield commentEl(item, { showReply: true, showParent: item.level === 0 });
@@ -49,12 +47,12 @@ function threads({ searchParams, session }: LoginArgs)  {
               yield moreLinkEl(item);
             }
           }
-        }}
-        `;
-    } catch (err) {
-      return html`<tr id="pagespace" title="Error" style="height:10px"></tr>
-        <tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`
-    }
+        } catch (err) {
+          console.warn(err)
+          yield html`<tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`;
+        }
+      }}
+      `;
   }));
 }
 

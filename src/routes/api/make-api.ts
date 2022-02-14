@@ -1,4 +1,4 @@
-import { APost, AComment, Stories, AUser } from './interface';
+import { APost, AComment, Stories, StoriesParams, AUser } from './interface';
 import { default as PQueue } from '@qwtel/p-queue-browser';
 import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
 import { blockquotify } from './util';
@@ -22,7 +22,8 @@ const x = {
   [Stories.FROM]: '',
 };
 
-export async function* stories(api: APIFn, page = 1, type = Stories.TOP) {
+export async function* stories(api: APIFn, { p }: StoriesParams, type = Stories.TOP) {
+  const page = p || 1;
   const href = x[type];
   if (!href) throw Error('Unsupported by HN REST API')
 
@@ -86,7 +87,7 @@ const truncateText = (text?: string | null) => {
 
 const stripHTML = (text?: string | null) => text ? text.replace(/(<([^>]+)>)/gi, "") : '';
 
-export async function comments(api: APIFn, id: number): Promise<APost> {
+export async function comments(api: APIFn, id: number, p?: number): Promise<APost> {
   const post: RESTPost = await api(`/v0/item/${id}`);
 
   if (post.type === 'comment') {
@@ -124,4 +125,8 @@ export async function user(api: APIFn, id: string): Promise<AUser> {
     ...user,
     ...about ? { about: await blockquotify('<p>' + about) } : {},
   };
+}
+
+export async function* threads(api: APIFn, id: string, next?: number): AsyncGenerator<AComment> {
+  throw Error('Unsupported by HN REST API')
 }

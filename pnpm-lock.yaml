@@ -2,11 +2,11 @@ lockfileVersion: 5.3
 
 specifiers:
   '@cloudflare/kv-asset-handler': ^0.2.0
-  '@cloudflare/workers-types': ^2.2.2
+  '@cloudflare/workers-types': ^3.3.1
   '@miniflare/html-rewriter': ^2.3.0
   '@qwtel/p-queue-browser': ^6.6.2
   '@types/html-escaper': ^3.0.0
-  '@types/node': ^14.18.10
+  '@types/node': ^17.0.17
   '@worker-tools/cloudflare-kv-storage': ^0.8.0
   '@worker-tools/deno-fetch-event-adapter': ^1.0.5
   '@worker-tools/deno-kv-storage': ^0.4.4
@@ -28,16 +28,16 @@ specifiers:
   html-rewriter-wasm: ^0.4.1
   kv-storage-interface: ^0.2.0
   kv-storage-polyfill: ^2.0.0
-  linkedom: ^0.13.2
+  linkedom: ^0.14.0
   miniflare: ^2.3.0
   msgpackr: ^1.5.4
   negotiated: ^1.0.2
   parse-domain: ^7.0.0
   tiny-request-router: ^1.2.2
-  type-fest: ^0.21.3
+  type-fest: ^2.11.2
   typed-array-utils: ^0.2.2
   typescript: ^4.5.5
-  typeson: ^5.18.2
+  typeson: ^6.1.0
   typeson-registry: ^1.0.0-alpha.39
   uuid-class: ^0.12.3
   whatwg-stream-to-async-iter: ^0.4.1
@@ -67,21 +67,21 @@ dependencies:
   html-rewriter-wasm: 0.4.1
   kv-storage-interface: 0.2.0
   kv-storage-polyfill: 2.0.0
-  linkedom: 0.13.2
+  linkedom: 0.14.0
   msgpackr: 1.5.4
   negotiated: 1.0.2
   parse-domain: 7.0.0
   tiny-request-router: 1.2.2
-  type-fest: 0.21.3
+  type-fest: 2.11.2
   typed-array-utils: 0.2.2
-  typeson: 5.18.2
+  typeson: 6.1.0
   typeson-registry: 1.0.0-alpha.39
   uuid-class: 0.12.3
   whatwg-stream-to-async-iter: 0.4.1
 
 devDependencies:
-  '@cloudflare/workers-types': 2.2.2
-  '@types/node': 14.18.10
+  '@cloudflare/workers-types': 3.3.1
+  '@types/node': 17.0.17
   esbuild: 0.14.21
   miniflare: 2.3.0
   typescript: 4.5.5
@@ -96,6 +96,11 @@ packages:
 
   /@cloudflare/workers-types/2.2.2:
     resolution: {integrity: sha512-kaMn2rueJ0PL1TYVGknTCh0X0x0d9G+FNXAFep7/4uqecEZoQb/63o6rOmMuiqI09zLuHV6xhKRXinokV/MY9A==}
+    dev: false
+
+  /@cloudflare/workers-types/3.3.1:
+    resolution: {integrity: sha512-GJFDgWd8ZHlr/m+Q2mp4xUl0/FIPpR6kf0Ix2C78E9HeJyUCW0c0w2EKCvgEDFFKB2rkzIX3eBqZCnLsbsw8zQ==}
+    dev: true
 
   /@firebase/analytics-compat/0.1.6_3a8edbd84fe033940fab74e08d2e5c21:
     resolution: {integrity: sha512-xvdp4/zwOG1f+v9JSpfCQoPJ98HcJR42cEnZ9pRIQLmUy7L7QceIuaF3m+zVtoqa4agBQnJ1dhe58FshOFKOPw==}
@@ -323,7 +328,7 @@ packages:
       '@firebase/logger': 0.3.2
       '@firebase/util': 1.4.3
       '@firebase/webchannel-wrapper': 0.6.1
-      '@grpc/grpc-js': 1.5.4
+      '@grpc/grpc-js': 1.5.5
       '@grpc/proto-loader': 0.6.9
       node-fetch: 2.6.7
       tslib: 2.3.1
@@ -545,12 +550,12 @@ packages:
     resolution: {integrity: sha512-9FqhNjKQWpQ3fGnSOCovHOm+yhhiorKEqYLAfd525jWavunDJcx8rOW6i6ozAh+FbwcYMkL7b+3j4UR/30MpoQ==}
     dev: false
 
-  /@grpc/grpc-js/1.5.4:
-    resolution: {integrity: sha512-+nJTOsqpFAXnfFrMZ7Too4XXZ/J9O+8jYvSoaunupoC7I7b9H4iex1BRsbTdOmiowfPGJrWit7jUPmbENSUSpw==}
+  /@grpc/grpc-js/1.5.5:
+    resolution: {integrity: sha512-FTd27ItHlsSG/7hp62xgI9YnqSwRbHRSVmDVR8DwOoC+6t8JhHRXe2JL0U8N9GLc0jS0HrtEbO/KP5+G0ebjLQ==}
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.6.9
-      '@types/node': 14.18.10
+      '@types/node': 17.0.17
     dev: false
 
   /@grpc/proto-loader/0.6.9:
@@ -766,8 +771,8 @@ packages:
     resolution: {integrity: sha512-5tXH6Bx/kNGd3MgffdmP4dy2Z+G4eaXw0SE81Tq3BNadtnMR5/ySMzX4SLEzHJzSmPNn4HIdpQsBvXMUykr58w==}
     dev: false
 
-  /@types/node/14.18.10:
-    resolution: {integrity: sha512-6iihJ/Pp5fsFJ/aEDGyvT4pHGmCpq7ToQ/yf4bl5SbVAvwpspYJ+v3jO7n8UyjhQVHTy+KNszOozDdv+O6sovQ==}
+  /@types/node/17.0.17:
+    resolution: {integrity: sha512-e8PUNQy1HgJGV3iU/Bp2+D/DXh3PYeyli8LgIwsQcs1Ar1LoaWHSIT6Rw+H2rNJmiq6SNWiDytfx8+gYj7wDHw==}
 
   /@types/stack-trace/0.0.29:
     resolution: {integrity: sha512-TgfOX+mGY/NyNxJLIbDWrO9DjGoVSW9+aB8H2yy1fy32jsvxijhmyJI9fDFgvz3YP4lvJaq9DzdR/M1bOgVc9g==}
@@ -831,7 +836,7 @@ packages:
     resolution: {integrity: sha512-XnRs0p1avRyE8FAHazivHqKudTFlODOXxmcjdpTvC58fHAG8Zl2rDzI238pixIXd1GCDM85U7NH755jCtEObyg==}
     dependencies:
       '@cloudflare/workers-types': 2.2.2
-      linkedom: 0.13.2
+      linkedom: 0.13.7
       tslib: 2.3.1
       whatwg-stream-to-async-iter: 0.4.1
     dev: false
@@ -1310,7 +1315,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.5
+      minimatch: 3.1.1
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: false
@@ -1417,8 +1422,18 @@ packages:
       immediate: 3.0.6
     dev: false
 
-  /linkedom/0.13.2:
-    resolution: {integrity: sha512-lQPdDnml1Rl/T8QW3j10jJ37LMRcZqryy5kwHDIw9AYMabeE4P6kMp2mqJXWjjeXxJ4ebJC05Qx9Xxs4jWhNMw==}
+  /linkedom/0.13.7:
+    resolution: {integrity: sha512-We9cyPHV/exsrC43KXtItjqSTxwrK9pLpOnG6TLzqXrmqwe/wqd3Gi6eAAU4YCqfTgy79R8g75hY2fS7723XUg==}
+    dependencies:
+      css-select: 4.2.1
+      cssom: 0.5.0
+      html-escaper: 3.0.3
+      htmlparser2: 7.2.0
+      uhyphen: 0.1.0
+    dev: false
+
+  /linkedom/0.14.0:
+    resolution: {integrity: sha512-N5s9tHNdENbTApXc8djgIa898dkTGzWjChkbyU98Vlzi3dAxZ3KArydp8XQ0X1o1uZxx9b3HlXklRkaYCFS53A==}
     dependencies:
       css-select: 4.2.1
       cssom: 0.5.0
@@ -1484,8 +1499,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /minimatch/3.0.5:
-    resolution: {integrity: sha512-tUpxzX0VAzJHjLu0xUfFv1gwVp9ba3IOuRAVH2EGuRW8a5emA2FlACLqiT/lDVtS1W+TGNwqz3sWaNyLgDJWuw==}
+  /minimatch/3.1.1:
+    resolution: {integrity: sha512-reLxBcKUPNBnc/sVtAbxgRVFSegoGeLaSjmphNhcwcolhYLRgtJscn5mRl6YRZNQv40Y7P6JM2YhSIsbL9OB5A==}
     dependencies:
       brace-expansion: 1.1.11
     dev: false
@@ -1618,7 +1633,7 @@ packages:
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
       '@types/long': 4.0.1
-      '@types/node': 14.18.10
+      '@types/node': 17.0.17
       long: 4.0.0
     dev: false
 
@@ -1774,9 +1789,9 @@ packages:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
     dev: false
 
-  /type-fest/0.21.3:
-    resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
-    engines: {node: '>=10'}
+  /type-fest/2.11.2:
+    resolution: {integrity: sha512-reW2Y2Mpn0QNA/5fvtm5doROLwDPu2zOm5RtY7xQQS05Q7xgC8MOZ3yPNaP9m/s/sNjjFQtHo7VCNqYW2iI+Ig==}
+    engines: {node: '>=12.20'}
     dev: false
 
   /typed-array-utils/0.1.0:
