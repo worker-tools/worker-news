@@ -30,7 +30,7 @@
   "include": [
     "./typings/*.d.ts",
     "./src/*.ts",
-    "./src/**/*.ts",
+    "./src/**/*.ts", "src/routes/.login.ts",
   ],
   "exclude": [
     "node_modules/",

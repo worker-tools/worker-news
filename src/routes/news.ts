@@ -8,7 +8,6 @@ import { RouteArgs, router } from "../router";
 import { pageLayout } from './components';
 
 import { stories, APost, Stories } from './api'
-import { cookies, session, LoginArgs, SessionType } from "./login";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -51,10 +50,10 @@ const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
-export const aThing = async ({ type, id, url: href, title, dead }: APost, index?: number, op?: Stories, session?: SessionType) => {
+export const aThing = async ({ type, id, url: href, title, dead }: APost, index?: number, op?: Stories) => {
   try {
     const url = tryURL(href);
-    const upVoted = session?.votes.has(id);
+    const upVoted = false // session?.votes.has(id);
     return html`
       <tr class="athing" id="${id}">
         <td align="right" valign="top" class="title">${rankEl(index)}</td>
@@ -105,10 +104,10 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
   `;
 }
 
-const rowEl = (post: APost, i: number, type: Stories, session?: SessionType) => {
+const rowEl = (post: APost, i: number, type: Stories) => {
   const index = [Stories.JOB, Stories.FROM].includes(type) ? NaN : i;
   return html`
-    ${aThing(post, index, type, session)}
+    ${aThing(post, index, type)}
     ${subtext(post, index, type)}
     <tr class="spacer" style="height:5px"></tr>`;
 }
@@ -131,7 +130,7 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
   <tr><td colspan="2"></td><td>${message}</td></tr>
   <tr style="height:${marginBottom}px"></tr>`;
 
-const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
+const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
@@ -145,7 +144,7 @@ const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
 
   const storiesGen = stories({ p, n, next, id, site }, type);
 
-  return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')!, session })(html`
+  return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
@@ -164,7 +163,7 @@ const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
                   : (p - 1) * 30;
                 for await (const post of storiesGen) {
                   if (typeof post !== 'string') {
-                    yield rowEl(post, i++, type, session);
+                    yield rowEl(post, i++, type);
                   } else if (post) {
                     yield html`<tr class="morespace" style="height:10px"></tr>
                       <tr>
@@ -183,16 +182,16 @@ const mkStories = (type: Stories) => ({ searchParams, session }: LoginArgs) => {
     </tr>`));
 };
 
-export const news = cookies(session(mkStories(Stories.TOP)))
-export const newest = cookies(session(mkStories(Stories.NEW)))
-export const best = cookies(session(mkStories(Stories.BEST)))
-export const show = cookies(session(mkStories(Stories.SHOW)))
-export const showNew = cookies(session(mkStories(Stories.SHOW_NEW)))
-export const ask = cookies(session(mkStories(Stories.ASK)))
-export const jobs = cookies(session(mkStories(Stories.JOB)))
-export const submitted = cookies(session(mkStories(Stories.USER)))
-export const classic = cookies(session(mkStories(Stories.CLASSIC)))
-export const from = cookies(session(mkStories(Stories.FROM)))
+export const news = mkStories(Stories.TOP)
+export const newest = mkStories(Stories.NEW)
+export const best = mkStories(Stories.BEST)
+export const show = mkStories(Stories.SHOW)
+export const showNew = mkStories(Stories.SHOW_NEW)
+export const ask = mkStories(Stories.ASK)
+export const jobs = mkStories(Stories.JOB)
+export const submitted = mkStories(Stories.USER)
+export const classic = mkStories(Stories.CLASSIC)
+export const from = mkStories(Stories.FROM)
 
 router.get('/news', news);
 router.get('/newest', newest);

@@ -6,7 +6,6 @@ import { notFound } from "@worker-tools/response-creators";
 import { RouteArgs, router } from "../router";
 import { user as apiUser } from "./api";
 import { pageLayout } from './components';
-import { cookies, LoginArgs, session } from "./login";
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -20,14 +19,14 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-const user = ({ searchParams, session }: LoginArgs) => {
+const user = ({ searchParams }: RouteArgs) => {
   const un = searchParams.get('id');
   if (!un) return notFound('No such user.');
 
   const userPromise = apiUser(un)
   const title = `Profile: ${un}`;
 
-  return new HTMLResponse(pageLayout({ op: 'user', title, session })(html`
+  return new HTMLResponse(pageLayout({ op: 'user', title })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
@@ -56,4 +55,4 @@ const user = ({ searchParams, session }: LoginArgs) => {
     </tr>`));
 }
 
-router.get('/user', cookies(session(user)));
+router.get('/user', user);

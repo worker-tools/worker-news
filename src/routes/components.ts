@@ -1,6 +1,5 @@
 import { html, HTMLContent } from "@worker-tools/html";
 import { Stories } from "./api/interface";
-import { SessionType } from './login';
 import { user as apiUser } from './api';
 
 const topSel = (wrap: boolean, content: HTMLContent) => wrap
@@ -20,10 +19,9 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
 //   [Stories.FROM]: '/from'
 // };
 
-export const headerEl = ({ op, id, session }: { 
+export const headerEl = ({ op, id }: { 
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string,  
-  session?: SessionType,
 }) => html`
   <tr>
     <td id="header" bgcolor="#ee9b33">
@@ -102,11 +100,10 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const pageLayout = ({ title, op, id, session }: { 
+export const pageLayout = ({ title, op, id }: { 
   title?: string, 
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string 
-  session?: SessionType,
 }) => (content: HTMLContent) => html`
   <html lang="en" op="${op}">
   <head>
@@ -121,7 +118,7 @@ export const pageLayout = ({ title, op, id, session }: {
     <center>
       <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
         <tbody>
-          ${headerEl({ op, id, session })}
+          ${headerEl({ op, id })}
           ${content}
           ${footerEl()}
         </tbody>

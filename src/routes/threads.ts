@@ -7,7 +7,6 @@ import { threads as apiThreads } from "./api";
 
 import { pageLayout } from './components';
 import { commentEl } from "./item";
-import { cookies, LoginArgs, session } from "./login";
 
 export const moreLinkEl = (moreLink: string) => html`
   <tr class="morespace" style="height:10px"></tr>
@@ -23,7 +22,7 @@ export const moreLinkEl = (moreLink: string) => html`
     </td>
   </tr>`;
 
-function threads({ searchParams, session }: LoginArgs)  {
+function threads({ searchParams }: RouteArgs)  {
   const id = searchParams.get('id');
   if (!id) return notFound('No such item.');
   const title = `${id}'s comments`;
@@ -32,7 +31,7 @@ function threads({ searchParams, session }: LoginArgs)  {
 
   const threadsGen = apiThreads(id, next);
 
-  return new HTMLResponse(pageLayout({ title, op: 'threads', id, session })(async () => {
+  return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {
     return html`
       <tr id="pagespace" title="${title}" style="height:10px"></tr>
       <tr>
@@ -56,4 +55,4 @@ function threads({ searchParams, session }: LoginArgs)  {
   }));
 }
 
-router.get('/threads', cookies(session(threads)));
+router.get('/threads', threads);
