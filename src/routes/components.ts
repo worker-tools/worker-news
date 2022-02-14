@@ -125,5 +125,8 @@ export const pageLayout = ({ title, op, id }: {
       </table>
     </center>
     <script type="text/javascript" src="hn.js"></script>
+    ${self.location.hostname === 'news.workers.tools' 
+      ? html`<script defer data-domain="news.workers.tools" src="https://plausible.io/js/plausible.js"></script>` 
+      : ''}
   </body>
   </html>`;

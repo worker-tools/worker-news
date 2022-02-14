@@ -40,5 +40,5 @@ compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
   ]
 
   [env.production.vars]
-    WORKER_LOCATION = 'https://news.qwtel.workers.dev'
+    WORKER_LOCATION = 'https://news.workers.tools'
     CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
