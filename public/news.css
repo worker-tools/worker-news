@@ -64,8 +64,6 @@
 
     --color-from: var(--accent);
     --color-to: var(--accent);
-
-    -webkit-font-smoothing: antialiased;
   }
 
   :root input[type="text"],
