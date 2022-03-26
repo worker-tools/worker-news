@@ -13,6 +13,7 @@ export class ResolvablePromise<T> implements Promise<T> {
   #reject?: Reject;
   #settled = false;
   constructor(executor?: Executor<T> | null) {
+    // super(r => r(<any>void 0));
     this.#promise = new Promise((res, rej) => {
       this.#resolve = res;
       this.#reject = rej;
@@ -25,8 +26,8 @@ export class ResolvablePromise<T> implements Promise<T> {
     if (this.#resolve) this.#resolve(x)
     else throw Error('Cannot resolve ResolvablePromise that was initialized with an executor.');
   }
-  reject(e: any) {
-    if (this.#reject) this.#reject(e)
+  reject(reason?: any) {
+    if (this.#reject) this.#reject(reason)
     else throw Error('Cannot reject ResolvablePromise that was initialized with an executor.');
   }
   get settled() { return this.#settled }
@@ -42,3 +43,7 @@ export class ResolvablePromise<T> implements Promise<T> {
   }
   get [Symbol.toStringTag]() { return 'ResolvablePromise' };
 }
+
+// Vanilla JS inheritance
+// ResolvablePromise.prototype = Object.create(Promise.prototype);
+// ResolvablePromise.prototype.constructor = ResolvablePromise;

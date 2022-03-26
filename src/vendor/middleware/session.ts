@@ -162,7 +162,9 @@ async function getSessionProxy<S extends AnyRec = AnyRec>(
   const sessionId = parseUUID(cookieVal) || new UUID();
   const obj = (await storage.get<S>(sessionId)) || defaultSession;
 
-  /** HACK: Batch calls within the same micro task */
+  // HACK: Batch calls within the same micro task
+  // TODO: Do once at the end of the handler instead. 
+  // Writing to KV Storage is a HTTP request, can't have too many of those in CF workers...
   let nr = 0;
   const persist = () => {
     const capturedNr = ++nr;

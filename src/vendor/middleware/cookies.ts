@@ -1,7 +1,9 @@
 import * as re from '@worker-tools/response-creators';
-import { RequestCookieStore, CookieStore, CookieListItem } from "@worker-tools/request-cookie-store";
+import { RequestCookieStore, CookieStore, CookieListItem, CookieInit, CookieList, CookieStoreDeleteOptions, CookieStoreGetOptions } from "@worker-tools/request-cookie-store";
 import { SignedCookieStore } from "@worker-tools/signed-cookie-store";
 import { EncryptedCookieStore } from "@worker-tools/encrypted-cookie-store";
+import { AllSettledCookieStore } from './all-settled-cookie-store';
+import { unsettle } from '../unsettle';
 
 import { Awaitable } from "../common-types";
 import { BaseContext, Handler } from "./index";
@@ -63,6 +65,9 @@ export const withSignedCookies = (opts: WithCookiesOptions) => {
       signedCookies,
     });
 
+    // Wait for all set cookie promises to settle
+    await unsettle(signedCookieStore.allSettledPromise);
+
     // New `Response` to work around a known limitation in `Headers` class:
     const response = new Response(body, {
       status,
@@ -81,8 +86,8 @@ export const withEncryptedCookies = (opts: WithCookiesOptions) => {
   const keyPromise = EncryptedCookieStore.deriveCryptoKey(opts);
 
   return <X extends BaseContext>(handler: WithEncryptedCookiesHandler<X>): Handler<X> => async (ctx: X): Promise<Response> => {
-    const cookieStore = new RequestCookieStore(ctx.event.request);
-    const encryptedCookieStore = new EncryptedCookieStore(cookieStore, await keyPromise);
+    const cookieStore = new RequestCookieStore(ctx.request);
+    const encryptedCookieStore = new AllSettledCookieStore(new EncryptedCookieStore(cookieStore, await keyPromise));
 
     let encryptedCookies: Cookies;
     try {
@@ -96,6 +101,9 @@ export const withEncryptedCookies = (opts: WithCookiesOptions) => {
       encryptedCookieStore,
       encryptedCookies,
     });
+
+    // Wait until all cookie related promises have settled
+    await unsettle(encryptedCookieStore.allSettledPromise);
 
     // New `Response` to work around a known limitation in `Headers` class:
     const response = new Response(body, {
