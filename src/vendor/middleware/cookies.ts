@@ -6,7 +6,7 @@ import { AllSettledCookieStore } from './all-settled-cookie-store';
 import { unsettle } from '../unsettle';
 
 import { Awaitable } from "../common-types";
-import { BaseContext, Handler } from "./index";
+import { Context, Handler } from "./index";
 import { iterHeadersSetCookieFix } from './headers-set-cookie-fix'
 
 /**
@@ -16,21 +16,26 @@ import { iterHeadersSetCookieFix } from './headers-set-cookie-fix'
  */
 export type Cookies = ReadonlyMap<string, string> & Pick<CookiesMap, 'update'>
 
-export type WithCookies = { cookieStore: CookieStore, cookies: Cookies };
-export type WithSignedCookies = { signedCookieStore: CookieStore, signedCookies: Cookies };
-export type WithEncryptedCookies = { encryptedCookieStore: CookieStore, encryptedCookies: Cookies };
+export type CookiesContext = { cookieStore: CookieStore, cookies: Cookies };
+export type SignedCookiesContext = { signedCookieStore: CookieStore, signedCookies: Cookies };
+export type EncryptedCookiesContext = { encryptedCookieStore: CookieStore, encryptedCookies: Cookies };
 
-export type WithCookiesHandler<X extends BaseContext> = (ctx: X & WithCookies) => Awaitable<Response>;
-export type WithSignedCookiesHandler<X extends BaseContext> = (ctx: X & WithSignedCookies) => Awaitable<Response>;
-export type WithEncryptedCookiesHandler<X extends BaseContext> = (ctx: X & WithEncryptedCookies) => Awaitable<Response>;
+export type CookiesHandler<X extends Context> = Handler<X & CookiesContext>
+export type SignedCookiesHandler<X extends Context> = Handler<X & SignedCookiesContext>;
+export type EncryptedCookiesHandler<X extends Context> = Handler<X & EncryptedCookiesContext>
 
-export interface WithCookiesOptions {
-  secret: string | BufferSource
+// DRY: DeriveOptions
+export interface CookiesOptions {
+  secret: string | BufferSource | JsonWebKey
   salt?: BufferSource
   iterations?: number
+  format?: KeyFormat,
+  hash?: HashAlgorithmIdentifier;
+  hmacHash?: HashAlgorithmIdentifier;
+  length?: number,
 }
 
-export const withCookies = () => <X extends BaseContext>(handler: WithCookiesHandler<X>) => async (ctx: X): Promise<Response> => {
+export const withCookies = () => <X extends Context>(handler: CookiesHandler<X>): Handler<X> => async ctx => {
   const cookieStore = new RequestCookieStore(ctx.event.request);
   const cookies = await CookiesMap.from(cookieStore);
   const { status, statusText, body, headers } = await handler({ ...ctx, cookieStore, cookies });
@@ -45,12 +50,12 @@ export const withCookies = () => <X extends BaseContext>(handler: WithCookiesHan
   return response;
 }
 
-export const withSignedCookies = (opts: WithCookiesOptions) => {
+export const withSignedCookies = (opts: CookiesOptions) => {
   const keyPromise = SignedCookieStore.deriveCryptoKey(opts);
 
-  return <X extends BaseContext>(handler: WithSignedCookiesHandler<X>): Handler<X> => async (ctx: X): Promise<Response> => {
+  return <X extends Context>(handler: SignedCookiesHandler<X>): Handler<X> => async ctx => {
     const cookieStore = new RequestCookieStore(ctx.event.request);
-    const signedCookieStore = new SignedCookieStore(cookieStore, await keyPromise);
+    const signedCookieStore = new AllSettledCookieStore(new SignedCookieStore(cookieStore, await keyPromise));
 
     let signedCookies: Cookies;
     try {
@@ -82,11 +87,11 @@ export const withSignedCookies = (opts: WithCookiesOptions) => {
   };
 }
 
-export const withEncryptedCookies = (opts: WithCookiesOptions) => {
+export const withEncryptedCookies = (opts: CookiesOptions) => {
   const keyPromise = EncryptedCookieStore.deriveCryptoKey(opts);
 
-  return <X extends BaseContext>(handler: WithEncryptedCookiesHandler<X>): Handler<X> => async (ctx: X): Promise<Response> => {
-    const cookieStore = new RequestCookieStore(ctx.request);
+  return <X extends Context>(handler: EncryptedCookiesHandler<X>): Handler<X> => async ctx => {
+    const cookieStore = new RequestCookieStore(ctx.event.request);
     const encryptedCookieStore = new AllSettledCookieStore(new EncryptedCookieStore(cookieStore, await keyPromise));
 
     let encryptedCookies: Cookies;

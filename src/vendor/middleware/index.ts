@@ -1,8 +1,7 @@
 import { Awaitable } from "../common-types";
 
-export type BaseContext = { event: FetchEvent }
-export type BaseHandler = (ctx: BaseContext) => Awaitable<Response>;
-export type Handler<X extends BaseContext> = (ctx: X) => Awaitable<Response>;
+export type Context = { event: FetchEvent, /*waitUntil: (f?: any) => void*/ }
+export type Handler<X extends Context> = (ctx: X) => Awaitable<Response>;
 
 /**
  * @example
@@ -10,7 +9,7 @@ export type Handler<X extends BaseContext> = (ctx: X) => Awaitable<Response>;
  *     return ok();
  *   })))));
  */
-export const adapt = (handler: BaseHandler) => (event: FetchEvent) => handler({ event });
+export const adapt = (handler: (ctx: Context) => Awaitable<Response>) => (event: FetchEvent) => handler({ event });
 
 export * from './basics';
 export * from './content-negotiation';

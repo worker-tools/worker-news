@@ -1,16 +1,16 @@
-import { BaseContext, Handler } from "./index";
+import { Context, Handler } from "./index";
 
 export type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 
-const ORIGIN = 'Origin';
-const REQUEST_METHOD = 'Access-Control-Request-Method';
-const REQUEST_HEADERS = 'Access-Control-Request-Headers';
-const ALLOW_ORIGIN = 'Access-Control-Allow-Origin';
-const ALLOW_METHODS = 'Access-Control-Allow-Methods';
-const ALLOW_HEADERS = 'Access-Control-Allow-Headers';
-const ALLOW_CREDENTIALS = 'Access-Control-Allow-Credentials';
+export const ORIGIN = 'Origin';
+export const REQUEST_METHOD = 'Access-Control-Request-Method';
+export const REQUEST_HEADERS = 'Access-Control-Request-Headers';
+export const ALLOW_ORIGIN = 'Access-Control-Allow-Origin';
+export const ALLOW_METHODS = 'Access-Control-Allow-Methods';
+export const ALLOW_HEADERS = 'Access-Control-Allow-Headers';
+export const ALLOW_CREDENTIALS = 'Access-Control-Allow-Credentials';
 
-interface CORSOptions {
+export interface CORSOptions {
   origin?: string | URL,
   methods?: Method[],
   headers?: string[],
@@ -20,7 +20,7 @@ interface CORSOptions {
 /**
  * A CORS middleware that gives clients exactly the permissions they ask for.
  */
-export const withCORS = (opt: CORSOptions = {}) => <X extends BaseContext>(handler: Handler<X>) => async (ctx: X): Promise<Response> => {
+export const withCORS = (opt: CORSOptions = {}) => <X extends Context>(handler: Handler<X>) => async (ctx: X) => {
   const req = ctx.event.request;
   const res = await handler(ctx);
 

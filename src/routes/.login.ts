@@ -2,7 +2,7 @@ import { html, HTMLResponse } from '@worker-tools/html';
 import { ParamsURL } from '@worker-tools/json-fetch';
 import { StorageArea } from '@worker-tools/kv-storage';
 import { badRequest, found, internalServerError, ok, unauthorized } from '@worker-tools/response-creators';
-import { WithCookies, withCookies, WithSession, withSession } from 'src/vendor/middleware';
+import { CookiesContext, withCookies, SessionContext, withStorageSession } from 'src/vendor/middleware';
 import { FORM, FORM_DATA } from 'src/vendor/middleware/mime';
 
 import { RouteArgs, router } from "../router";
@@ -27,10 +27,10 @@ export type SessionType = {
   votes: Set<number>,
 }
 
-export type LoginArgs = RouteArgs & WithCookies & WithSession<SessionType>
+export type LoginArgs = RouteArgs & CookiesContext & SessionContext<SessionType>
 
 export const cookies = withCookies();
-export const session = withSession<SessionType>({ 
+export const session = withStorageSession<SessionType>({ 
   storage: new StorageArea('logins'),
   expirationTtl: 60 * 60 * 24 * 365 * 15,
   defaultSession: { votes: new Set() }

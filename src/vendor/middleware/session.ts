@@ -4,20 +4,18 @@ import { Base64Decoder, Base64Encoder } from 'base64-encoding';
 import { Encoder as MsgPackEncoder, Decoder as MsgPackDecoder } from 'msgpackr';
 // import { Encoder as CBOREncoder, Decoder as CBORDecoder } from 'cbor-x/browser';
 
-import { BaseContext, Handler, WithCookies, WithSignedCookies } from './index';
+import { Context, Handler, CookiesContext, SignedCookiesContext } from './index';
 import { Awaitable } from '../common-types';
-import { WithEncryptedCookies } from './cookies';
+import { EncryptedCookiesContext } from './cookies';
 import { shortenId, parseUUID } from '../short-id';
 
 type AnyRec = Record<any, any>;
 
-export type WithSession<S extends AnyRec = AnyRec> = { session: S };
+export type SessionContext<S extends AnyRec = AnyRec> = { session: S };
+export type SessionContextDeps = Context & (EncryptedCookiesContext | SignedCookiesContext | CookiesContext);
 
-export type WithCookieSessionDeps = BaseContext & (WithEncryptedCookies | WithSignedCookies | WithCookies);
-export type WithCookieSessionHandler<X extends WithCookieSessionDeps, S> = (ctx: X & WithSession<S>) => Awaitable<Response>;
-
-export type WithSessionDeps = BaseContext & (WithEncryptedCookies | WithSignedCookies | WithCookies);
-export type WithSessionHandler<X extends WithSessionDeps, S> = (ctx: X & WithSession<S>) => Awaitable<Response>;
+export type CookieSessionHandler<X extends SessionContextDeps, S> = (ctx: X & SessionContext<S>) => Awaitable<Response>;
+export type StorageSessionHandler<X extends SessionContextDeps, S> = (ctx: X & SessionContext<S>) => Awaitable<Response>;
 
 export interface CookieSessionOptions<S extends AnyRec = AnyRec> {
   /** You can override the name of the session cookie. Defaults to `sid`. */
@@ -30,7 +28,7 @@ export interface CookieSessionOptions<S extends AnyRec = AnyRec> {
   defaultSession?: S,
 }
 
-export interface SessionOptions<S extends AnyRec = AnyRec> extends CookieSessionOptions<S> {
+export interface StorageSessionOptions<S extends AnyRec = AnyRec> extends CookieSessionOptions<S> {
   /** The storage area where to persist the session objects. */
   storage: StorageArea,
 }
@@ -41,12 +39,12 @@ export interface SessionOptions<S extends AnyRec = AnyRec> extends CookieSession
  * Requires an encrypted or signed cookie store.
  */
 export const withCookieSession = <S extends AnyRec = AnyRec>({ defaultSession = {}, cookieName = 'session', expirationTtl = 5 * 60 }: CookieSessionOptions = {}) =>
-  <X extends WithCookieSessionDeps>(handler: WithCookieSessionHandler<X, S>): Handler<X> =>
-    async (ctx: X): Promise<Response> => {
+  <X extends SessionContextDeps>(handler: CookieSessionHandler<X, S>): Handler<X> =>
+    async ctx => {
       const { event } = ctx;
-      const { encryptedCookies, encryptedCookieStore } = ctx as WithEncryptedCookies;
-      const { signedCookies, signedCookieStore } = ctx as WithSignedCookies;
-      const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as WithCookies;
+      const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
+      const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
+      const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as CookiesContext;
       const cookieStore = encryptedCookieStore || signedCookieStore || baseCookieStore;
       const cookies = encryptedCookies || signedCookies || baseCookies;
 
@@ -88,13 +86,13 @@ export const withCookieSession = <S extends AnyRec = AnyRec>({ defaultSession = 
  * Issues
  * - Will "block" until session object is retrieved from KV => provide "unyielding" version that returns a promise?
  */
-export const withSession = <S extends AnyRec = AnyRec>({ storage, defaultSession = {}, cookieName = 'sid', expirationTtl = 5 * 60 }: SessionOptions) =>
-  <X extends WithSessionDeps>(handler: WithSessionHandler<X, S>): Handler<X> =>
-    async (ctx: X): Promise<Response> => {
+export const withStorageSession = <S extends AnyRec = AnyRec>({ storage, defaultSession = {}, cookieName = 'sid', expirationTtl = 5 * 60 }: StorageSessionOptions) =>
+  <X extends SessionContextDeps>(handler: StorageSessionHandler<X, S>): Handler<X> =>
+    async ctx => {
       const { event } = ctx;
-      const { encryptedCookies, encryptedCookieStore } = ctx as WithEncryptedCookies;
-      const { signedCookies, signedCookieStore } = ctx as WithSignedCookies;
-      const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as WithCookies;
+      const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
+      const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
+      const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as CookiesContext;
       const cookieStore = encryptedCookieStore || signedCookieStore || baseCookieStore;
       const cookies = encryptedCookies || signedCookies || baseCookies;
 
@@ -157,7 +155,7 @@ async function getCookieSessionProxy<S extends AnyRec = AnyRec>(
 async function getSessionProxy<S extends AnyRec = AnyRec>(
   cookieVal: string | null | undefined,
   event: FetchEvent,
-  { storage, expirationTtl, defaultSession }: Required<SessionOptions<S>>,
+  { storage, expirationTtl, defaultSession }: Required<StorageSessionOptions<S>>,
 ): Promise<[UUID, S]> {
   const sessionId = parseUUID(cookieVal) || new UUID();
   const obj = (await storage.get<S>(sessionId)) || defaultSession;
