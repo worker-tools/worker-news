@@ -2,28 +2,21 @@ import { ok } from '@worker-tools/response-creators';
 import { Router, Method, Params } from 'tiny-request-router';
 import { pipe } from 'ts-functional-pipe';
 import { Awaitable } from './vendor/common-types';
-import {
-  adapt,
-  withBasics,
-  withContentNegotiation,
-  withCookies,
-  withCORS,
-  withStorageSession,
-  withSignedCookies,
-  SessionContext,
-  CookieSessionOptions,
-  StorageSessionOptions,
-  SessionContextDeps,
-  CORSOptions,
-  ContentNegotiationOptions,
-  ContentNegotiationResults,
-  BasicsHandler
-} from './vendor/middleware';
-import { Context } from './vendor/middleware2'
-import { addBasics, BasicsContext } from './vendor/middleware2/basics';
-import { addCookies, addEncryptedCookies, addSignedCookies, CookiesContext } from './vendor/middleware2/cookies';
+import { adapt, withBasics, withContentNegotiation, withCookies, withCORS, withStorageSession, } from './vendor/middleware';
+import type { Context } from './vendor/middleware2'
+import { 
+  combine,
+  addBasics, 
+  addContentNegotiation, 
+  addCookieSession, 
+  addCORS, 
+  addCookies, 
+  addEncryptedCookies, 
+  addSignedCookies
+} from './vendor/middleware2'
 
-import { Middleware, WorkerRouter } from './vendor/router';
+import type { Middleware } from './vendor/router';
+import { WorkerRouter } from './vendor/router';
 
 export interface RouteArgs {
   event: FetchEvent;
@@ -200,44 +193,6 @@ function executeEffectsFor(event: FetchEvent, response: Awaitable<Response>) {
 }
 
 
-function addCookieSession<S>(opts: CookieSessionOptions<S>): <X extends SessionContextDeps>(x: Awaitable<X>) => Promise<X & SessionContext<S>>
-function addCookieSession(opts: any) { return (x: any) => { } }
-
-function addStorageSession<S>(opts: StorageSessionOptions<S>): <X extends SessionContextDeps>(x: Awaitable<X>) => Promise<X & SessionContext<S>>
-function addStorageSession(opts: any) { return (x: any) => { } }
-
-const addCORS = (opt: CORSOptions = {}) => async <X extends Context>(ax: Awaitable<X>): Promise<X> => {
-  const x = await ax;
-  registerEffect(x.event, response => {
-    response.headers.set('cors', 'true');
-    return response;
-  })
-  return x;
-}
-
-function addContentNegotiation<
-  CT extends readonly string[],
-  CL extends readonly string[],
-  CE extends readonly string[],
-  CC extends readonly string[],
-  AT extends readonly string[],
-  AL extends readonly string[],
-  AE extends readonly string[],
-  AC extends readonly string[],
-  >(opts?: ContentNegotiationOptions<CT, CL, CE, CC, AT, AL, AE, AC>): <X extends Context>(x: Awaitable<X>) => Promise<X & ContentNegotiationResults<CT[number], CL[number], CE[number], CC[number], AT[number], AL[number], AE[number], AC[number]>>;
-function addContentNegotiation<
-  CT extends readonly string[],
-  CL extends readonly string[],
-  CE extends readonly string[],
-  CC extends readonly string[],
-  AT extends readonly string[],
-  AL extends readonly string[],
-  AE extends readonly string[],
-  AC extends readonly string[],
-  >(opts: any) {
-  return (x: any) => { }
-}
-
 // const enrich = <X extends Context>(fn: (x: Context) => X, handler: (x: X) => Awaitable<Response>) => (event: FetchEvent) => {
 //   return handler(fn({ event }))
 // }
@@ -252,16 +207,16 @@ type YSession = { y: number }
 const acceptJSON = addContentNegotiation(<const>{ types: ['application/json'], accepts: ['application/json'] })
 const acceptENAndDE = addContentNegotiation(<const>{ languages: ['en', 'de'] })
 
-const baseMW = pipe(addBasics, addCookies, acceptJSON)
-const myReusableMW = pipe(addCookies, addCookieSession({ defaultSession: { user: '' } }))
+const baseMW = combine(addBasics, addCookies, acceptJSON)
+const myReusableMW = combine(addCookies, addCookieSession({ defaultSession: { user: '' } }))
 
 const betterRouter = new WorkerRouter(baseMW)
-  .get('/foo', pipe(addSessionX, addCookieSession<YSession>({})), (request, { event, url, cookies, cookieStore, session }) => {
+  .get('/foo', combine(addSessionX, addCookieSession<YSession>({})), (request, { url, cookies, cookieStore, session }) => {
     return ok('')
   })
   .patch('/foobar/:id', (req, { cookies, cookieStore }) => ok(cookies.update(cookieStore).toString()))
   .all('/bar', (request, { url }) => ok(url.toString()))
-  .post('/office', pipe(
+  .post('/office', combine(
     myReusableMW,
     addSignedCookies({ secret: 'password123' }),
     addEncryptedCookies({ secret: 'foobar' })
@@ -269,16 +224,16 @@ const betterRouter = new WorkerRouter(baseMW)
     (request, { session, signedCookies, signedCookieStore, encryptedCookieStore }) => {
       return ok('Yayy')
     })
-  .post('/party', pipe(myReusableMW, addCORS(), acceptENAndDE), (request, { session, cookieStore, cookies, type, accepted, language, effects }) => {
+  .post('/party', combine(myReusableMW, addCORS(), acceptENAndDE), (request, { session, cookieStore, cookies, type, accepted, language, effects }) => {
     cookieStore.set('foo', 'bar')
     return ok()
   })
-  .post('/party', pipe(myReusableMW, addCORS(), acceptENAndDE), myHandler)
+  .post('/party', combine(myReusableMW, addCORS(), acceptENAndDE), myHandler)
   .options('/foo', x => {
     return ok(x.method)
   })
 
-const myMW = pipe(baseMW, myReusableMW, addCORS(), acceptENAndDE)
+const myMW = combine(baseMW, myReusableMW, addCORS(), acceptENAndDE)
 // type MYMW = Awaited<ReturnType<typeof myMW>>;
 
 // export type ContextOf<X extends ((...args: any) => any) | WorkerRouter<any>> = X extends (...args: any) => any

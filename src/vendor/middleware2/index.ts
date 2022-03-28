@@ -12,10 +12,11 @@ export interface Context {
    */
   effects: AppendOnlyList<ResponseEffect>, 
 
-  waitUntil: (f?: any) => void
+  /**
+   * TODO
+   */
+  waitUntil: (f: any) => void
 }
-export type Handler<X extends Context> = (request: Request, ctx: X) => Awaitable<Response>;
-
 export type ResponseEffect = (r: Response) => Awaitable<Response>
 export class EffectsList extends AppendOnlyList<ResponseEffect> {}
 

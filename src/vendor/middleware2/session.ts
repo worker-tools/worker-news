@@ -4,7 +4,7 @@ import { Base64Decoder, Base64Encoder } from 'base64-encoding';
 import { Encoder as MsgPackEncoder, Decoder as MsgPackDecoder } from 'msgpackr';
 // import { Encoder as CBOREncoder, Decoder as CBORDecoder } from 'cbor-x/browser';
 
-import { Context, Handler, CookiesContext, SignedCookiesContext } from './index';
+import { Context, CookiesContext, SignedCookiesContext } from './index';
 import { Awaitable } from '../common-types';
 import { EncryptedCookiesContext } from './cookies';
 import { shortenId, parseUUID } from '../short-id';

@@ -21,6 +21,7 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
+    "strictFunctionTypes": true,
     "allowJs": true,
     "checkJs": true,
     "types": [
