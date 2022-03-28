@@ -23,7 +23,7 @@ export interface CORSOptions {
  */
 export const addCORS = (opt: CORSOptions = {}) => async <X extends Context>(ax: Awaitable<X>): Promise<X> => {
   const x = await ax;
-  const req = x.event.request;
+  const req = x.request;
   x.effects.push(res => {
     const optOrigin = typeof opt.origin === 'string' 
       ? new URL(opt.origin) 

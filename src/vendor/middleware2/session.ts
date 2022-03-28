@@ -41,7 +41,6 @@ export function addCookieSession<S extends ARecord = ARecord>(
 ): <X extends AnyCookieContext>(ax: Awaitable<X>) => Promise<X & SessionContext> {
   return async ax => {
     const ctx = await ax;
-    const { event } = ctx;
     const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
     const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
     const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as CookiesContext;
@@ -51,7 +50,7 @@ export function addCookieSession<S extends ARecord = ARecord>(
 
     const controller = new AbortController();
 
-    const [, session, flag] = await getCookieSessionProxy<S>(cookies.get(cookieName), event, {
+    const [, session, flag] = await getCookieSessionProxy<S>(cookies.get(cookieName), ctx, {
       cookieName,
       expirationTtl,
       defaultSession,
@@ -97,14 +96,13 @@ export function addStorageSession<S extends ARecord = ARecord>(
 ): <X extends AnyCookieContext>(ax: Awaitable<X>) => Promise<X & SessionContext> {
     return async ax => {
       const ctx = await ax;
-      const { event } = ctx;
       const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
       const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
       const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as CookiesContext;
       const cookieStore = encryptedCookieStore || signedCookieStore || baseCookieStore;
       const cookies = encryptedCookies || signedCookies || baseCookies;
 
-      const [id, session, flag] = await getStorageSessionProxy<S>(cookies.get(cookieName), event, {
+      const [id, session, flag] = await getStorageSessionProxy<S>(cookies.get(cookieName), ctx, {
         storage,
         cookieName,
         expirationTtl,
@@ -146,7 +144,7 @@ const parseSessionCookie = <T>(value: string) =>
 
 async function getCookieSessionProxy<S extends ARecord = ARecord>(
   cookieVal: string | null | undefined,
-  _: FetchEvent,
+  _ctx: { waitUntil: (f: any) => void },
   { defaultSession, signal }: CookieSessionOptions & { signal: AbortSignal },
 ): Promise<[null, S, { dirty: boolean }]> {
   const obj = (cookieVal && parseSessionCookie<S>(cookieVal)) || defaultSession;
@@ -174,7 +172,7 @@ async function getCookieSessionProxy<S extends ARecord = ARecord>(
 
 async function getStorageSessionProxy<S extends ARecord = ARecord>(
   cookieVal: string | null | undefined,
-  event: FetchEvent,
+  ctx: { waitUntil: (f: any) => void },
   { storage, expirationTtl, defaultSession }: Required<StorageSessionOptions<S>>,
 ): Promise<[UUID, S, { dirty: boolean }]> {
   const sessionId = parseUUID(cookieVal) || new UUID();
@@ -188,7 +186,7 @@ async function getStorageSessionProxy<S extends ARecord = ARecord>(
   let nr = 0;
   const persist = () => {
     const capturedNr = ++nr;
-    event.waitUntil((async () => {
+    ctx.waitUntil((async () => {
       await new Promise(r => setTimeout(r)); // await end of microtask
       if (capturedNr === nr) { // no other invocations since
         await storage.set(sessionId, obj, { expirationTtl });

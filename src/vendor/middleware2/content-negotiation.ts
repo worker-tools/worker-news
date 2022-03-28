@@ -119,7 +119,7 @@ export function addContentNegotiation<
   // console.log(opts.accepts)
   return async ax => {
     const x = await ax;
-    const headers = x.event.request.headers;
+    const headers = x.request.headers;
 
     const {
       types,

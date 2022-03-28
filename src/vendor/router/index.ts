@@ -43,7 +43,11 @@ export class WorkerRouter<RX extends Context = Context> {
       const handler = middlewareOrHandler as Handler<RX>
       this.#router[method](path, async event => {
         const effects = new EffectsList();
-        const response = handler(event.request, await this.#middleware({ event, effects }));
+        const response = handler(event.request, await this.#middleware({ 
+          request: event.request, 
+          waitUntil: event.waitUntil.bind(event),
+          effects,
+        }));
         return executeEffects(effects, response)
       }, handlerOrOptions);
     } else {
@@ -51,7 +55,11 @@ export class WorkerRouter<RX extends Context = Context> {
       const handler = handlerOrOptions as Handler<X>;
       this.#router[method](path, async event => {
         const effects = new EffectsList();
-        const response = handler(event.request, await middleware(this.#middleware({ event, effects })));
+        const response = handler(event.request, await middleware(this.#middleware({ 
+          request: event.request, 
+          waitUntil: event.waitUntil.bind(event),
+          effects,
+        })));
         return executeEffects(effects, response)
       }, options);
     }

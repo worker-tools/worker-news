@@ -41,7 +41,7 @@ export interface CookiesOptions extends DeriveOptions {
 
 export async function addCookies<X extends Context>(ax: Awaitable<X>): Promise<X & CookiesContext> {
   const x = await ax;
-  const cookieStore = new RequestCookieStore(x.event.request);
+  const cookieStore = new RequestCookieStore(x.request);
   const cookies = await CookiesMap.from(cookieStore);
   x.effects.push(response => {
     const { status, statusText, body, headers } = response;
@@ -65,7 +65,7 @@ export const addSignedCookies = (opts: CookiesOptions) => {
 
   return async <X extends Context>(ax: Awaitable<X>): Promise<X & SignedCookiesContext> => {
     const x = await ax;
-    const request = x.event.request;
+    const request = x.request;
     const cookieStore = new RequestCookieStore(request);
     const signedCookieStore = new MiddlewareCookieStore(new SignedCookieStore(cookieStore, await keyPromise, {
       keyring: opts.keyring
@@ -107,7 +107,7 @@ export const addEncryptedCookies = (opts: CookiesOptions) => {
 
   return async <X extends Context>(ax: Awaitable<X>): Promise<X & EncryptedCookiesContext> => {
     const x = await ax;
-    const request = x.event.request;
+    const request = x.request;
     const cookieStore = new RequestCookieStore(request);
     const encryptedCookieStore = new MiddlewareCookieStore(new EncryptedCookieStore(cookieStore, await keyPromise, {
       keyring: opts.keyring

@@ -19,11 +19,11 @@ export interface BasicsContext {
 
 export async function addBasics<X extends Context>(ax: Awaitable<X>): Promise<X & BasicsContext> {
   const x = await ax;
-  const { request } = x.event;
+  const { request } = x;
   const { headers } = request;
   const method = <Method>request.method;
   const url = new URL(request.url)
   const { pathname, searchParams } = url;
   const userAgent = headers.get('user-agent') ?? '';
-  return Object.assign(x, { request, headers, method, url, pathname, searchParams, userAgent })
+  return Object.assign(x, { headers, method, url, pathname, searchParams, userAgent })
 }
