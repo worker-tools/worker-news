@@ -4,6 +4,7 @@ import { Awaitable } from './vendor/common-types';
 import {
   adapt,
   Context,
+  Handler,
   BasicsContext, 
   withBasics, 
   withContentNegotiation, 
@@ -21,7 +22,8 @@ import {
   ContentNegotiationResults, 
   CookiesOptions, 
   SignedCookiesContext, 
-  EncryptedCookiesContext
+  EncryptedCookiesContext,
+  BasicsHandler
 } from './vendor/middleware';
 
 export interface RouteArgs {
@@ -64,16 +66,18 @@ const basics = withBasics();
 const cookies = withCookies();
 const cors = withCORS()
 const sessionX = withStorageSession<{ x: number }>({ storage: null as any });
-newRouter.get('/hello', adapt(({ event }) => ok('Hello World')))
-newRouter.get('/basic', adapt(basics(({ url }) => ok('Hello World' + url.pathname))))
-newRouter.get('/cookie', adapt(basics(cookies(sessionX(cors(({ url, cookies, session }) => ok('Hello World' + cookies.get('hello'))))))))
+// newRouter.get('/hello', adapt(({ event }) => ok('Hello World')))
+newRouter.get('/basic', adapt(basics((req, { url }) => ok('Hello World' + url.pathname))))
+newRouter.get('/basic', adapt(cookies(basics((req, { url }) => ok('Hello World' + url.pathname)))))
+newRouter.get('/basic', adapt(cookies(sessionX(basics((req, { url, session, cookies }) => ok('Hello World' + url.pathname))))))
+// newRouter.get('/cookie', adapt(basics(cookies(sessionX(cors((req, { url, cookies, session }) => ok('Hello World' + cookies.get('hello'))))))))
 
-const xxx = adapt(basics(cookies(sessionX(cors(({ url, cookies, session }) => ok('Hello World' + cookies.get('hello')))))));
+const xxx = adapt(basics(cookies(sessionX(cors((req, { url, cookies, session }) => ok('Hello World' + cookies.get('hello')))))));
 
 // const fnx = adapt(basics(cookies(({ cookies, url, event }) => ok('Hello World' + cookies.get('hello')))))
-const fnx = (handler: (x: Context & BasicsContext & CookiesContext) => Awaitable<Response>) => adapt(basics(cookies(handler)))
+const fnx = (handler: (r: Request, x: Context & BasicsContext & CookiesContext) => Awaitable<Response>) => adapt(basics(cookies(handler)))
 
-newRouter.get('/fnx', fnx(({ url, cookies }) => ok('aadf')))
+newRouter.get('/fnx', fnx((req, { url, cookies }) => ok('aadf')))
 
 // import { compose, pipeline, pipelineUnary } from 'ts-pipe-compose';
 
@@ -135,26 +139,41 @@ function pipe<TIn extends any[], T1, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<
 function pipe<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
 function pipe(...args: any): any { }
 
-export type Handler<X extends Context> = (ctx: X) => Awaitable<Response>;
+export type HandlerFunc<X extends Context> = Func<[Request, X], Awaitable<Response>>
+type AResponse = Awaitable<Response>
 
-function combine<TIn extends TOut, TOut extends Context>(f0: UnaryFunction<Handler<TIn>, Handler<TOut>>): UnaryFunction<Handler<TIn>, Handler<TOut>>;
-function combine<TIn extends T1, T1 extends TOut, TOut extends Context>(f0: UnaryFunction<Handler<TIn>, Handler<T1>>, f1: UnaryFunction<Handler<T1>, Handler<TOut>>): UnaryFunction<Handler<TIn>, Handler<TOut>>;
-// function combine<TIn extends UnaryFunction<Handler<Context>, Handler<Context>>, T1 extends TIn, TOut extends T1>(f0: UnaryFunction<TIn, T1>, f1: UnaryFunction<T1, TOut>): UnaryFunction<TIn, TOut>;
-// function combine<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
-function combine(...args: any): any { }
+function mwc<TI, TO>(
+  f0: UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>
+): UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>;
+function mwc<TI, T1, TO>(
+  f0: UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, T1], AResponse>>, 
+  f1: UnaryFunction<Func<[Request, T1], AResponse>, Func<[Request, TO], AResponse>>,
+): UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>;
+// function mwc<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
+function mwc(...args: any): any { }
 
-const crs = withCORS()
+// function combine<TIn extends TOut, TOut extends Context>(f0: UnaryFunction<HandlerFunc<TIn>, HandlerFunc<TOut>>): UnaryFunction<HandlerFunc<TIn>, HandlerFunc<TOut>>;
+// function combine<TIn extends T1, T1 extends TOut, TOut extends Context>(f0: UnaryFunction<HandlerFunc<TIn>, HandlerFunc<T1>>, f1: UnaryFunction<HandlerFunc<T1>, HandlerFunc<TOut>>): UnaryFunction<HandlerFunc<TIn>, HandlerFunc<TOut>>;
+// // function combine<TIn extends UnaryFunction<Handler<Context>, Handler<Context>>, T1 extends TIn, TOut extends T1>(f0: UnaryFunction<TIn, T1>, f1: UnaryFunction<T1, TOut>): UnaryFunction<TIn, TOut>;
+// // function combine<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
+// function combine(...args: any): any { }
+
+// const crs = withCORS()
 const bsc = withBasics()
 const ccc = withCookies()
-const fn = combine<Context & BasicsContext & CookiesContext, BasicsContext & Context, Context>(ccc, bsc)
-// const fn = combine(ccc, bsc)
-const hn = fn(({ url, cookies }) => ok(''))
-hn({ event: new FetchEvent('fetch', null as any) })
+// const fn = combine<Context & BasicsContext & CookiesContext, BasicsContext & Context, Context>(ccc, bsc)
+// const fn = pipe(ccc, bsc)
+const fn = mwc(bsc, ccc)
+
+const hn = fn((req, { url }) => ok(''))
+
+// hn(new Request(''), { event: new FetchEvent('fetch', null as any) })
 
 
+adapt(bsc(ccc((request, { cookies, url }) => ok(''))))
 
-// adapt(ccc(bsc(({ event, url, cookies }) => ok())))
-adapt(ccc(bsc(({ event, url, cookies }) => ok())))
+// adapt(ccc(bsc((req, { event, url, cookiesStore }) => ok())))
+// adapt(bsc(ccc((req, { event, url, cookies }) => ok())))
 
 const handlerX = pipe(cookies, basics)
 
@@ -225,7 +244,7 @@ function addContentNegotiation<
 
 const addSessionX = addCookieSession<XSession>({ defaultSession: { x: -1 } })
 
-type HandlerType<X extends Context> = (request: Request, x: X) => Awaitable<Response>
+// type HandlerType<X extends Context> = (request: Request, x: X) => Awaitable<Response>
 type RouterMiddleware<X extends Context> = (x: Context) => X
 type Middleware<RX extends Context, X extends Context> = (x: RX) => X
 
@@ -257,16 +276,16 @@ class WorkerRouter<RX extends Context> {
     }, response);
   }
 
-  private registerRoute<X extends RX>(method: Kind, argsN: number, path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions) {
+  private registerRoute<X extends RX>(method: Kind, argsN: number, path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions) {
     if ((argsN === 2 && typeof handlerOrOptions === 'undefined') || (argsN === 3 && typeof handlerOrOptions === 'object')) {
-      const handler = middlewareOrHandler as HandlerType<RX>
+      const handler = middlewareOrHandler as Handler<RX>
       this.router[method](path, event => {
         const response = handler(event.request, this.middleware({ event }));
         return this.executeEffects(event, response);
       }, handlerOrOptions);
     } else {
       const middleware = middlewareOrHandler as Middleware<RX, X>;
-      const handler = handlerOrOptions as HandlerType<X>;
+      const handler = handlerOrOptions as Handler<X>;
       this.router[method](path, event => {
         const response = handler(event.request, middleware(this.middleware({ event })));
         return this.executeEffects(event, response);
@@ -276,51 +295,51 @@ class WorkerRouter<RX extends Context> {
   }
 
   /** Add a route that matches any method. */
-  all<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  all<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  all<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  all<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  all<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  all<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('all', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
   /** Add a route that matches the GET method. */
-  get<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  get<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  get<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  get<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  get<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  get<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('get', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
   /** Add a route that matches the POST method. */
-  post<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  post<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  post<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  post<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  post<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  post<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('post', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
   /** Add a route that matches the PUT method. */
-  put<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  put<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  put<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  put<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  put<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  put<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('put', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
   /** Add a route that matches the PATCH method. */
-  patch<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  patch<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  patch<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  patch<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  patch<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  patch<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('patch', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
   /** Add a route that matches the DELETE method. */
-  delete<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  delete<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  delete<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  delete<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  delete<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  delete<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('delete', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
   /** Add a route that matches the HEAD method. */
-  head<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  head<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  head<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  head<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  head<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  head<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('head', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
   /** Add a route that matches the OPTIONS method. */
-  options<X extends RX>(path: string, handler: HandlerType<X>, options?: RouteOptions): this;
-  options<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: HandlerType<X>, options?: RouteOptions): this;
-  options<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | HandlerType<X>, handlerOrOptions?: HandlerType<X> | RouteOptions, options?: RouteOptions): this {
+  options<X extends RX>(path: string, handler: Handler<X>, options?: RouteOptions): this;
+  options<X extends RX>(path: string, middleware: Middleware<RX, X>, handler: Handler<X>, options?: RouteOptions): this;
+  options<X extends RX>(path: string, middlewareOrHandler: Middleware<RX, X> | Handler<X>, handlerOrOptions?: Handler<X> | RouteOptions, options?: RouteOptions): this {
     return this.registerRoute('options', arguments.length, path, middlewareOrHandler, handlerOrOptions, options);
   }
 }
@@ -338,6 +357,7 @@ const betterRouter = new WorkerRouter(baseMW)
   .get('/foo', pipe(addSessionX, addCookieSession<YSession>({})), (request, { event, url, cookies, cookieStore, session }) => {
     return ok('')
   })
+  .patch('/foobar/:id', (req, { cookies, cookieStore }) => ok(cookies.update(cookieStore).toString()))
   .all('/bar', (request, { url }) => ok(url.toString()))
   .post('/office', pipe(myReusableMW, addSignedCookies({ secret: 'password123' }), addEncryptedCookies({ secret: 'foobar' })), (request, { session, signedCookies, signedCookieStore, encryptedCookieStore }) => ok())
   .post('/party', pipe(myReusableMW, addCORS(), acceptENAndDE), (request, { session, cookieStore, cookies, type, accepted, language }) => {

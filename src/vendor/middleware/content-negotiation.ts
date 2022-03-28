@@ -2,7 +2,7 @@ import { notAcceptable, unsupportedMediaType } from '@worker-tools/response-crea
 import negotiated from 'negotiated';
 
 import { Awaitable } from '../common-types';
-import { Context } from './index';
+import { Context, Handler } from './index';
 
 const weightSortFn = <X extends { weight: number }>(a: X, b: X) => a.weight >= b.weight ? a : b;
 
@@ -104,9 +104,9 @@ export const withContentNegotiation = <
   AE extends readonly string[],
   AC extends readonly string[],
   >(opts: ContentNegotiationOptions<CT, CL, CE, CC, AT, AL, AE, AC> = {}) =>
-  <X extends Context>(handler: (ctx: X & ContentNegotiationResults<CT[number], CL[number], CE[number], CC[number], AT[number], AL[number], AE[number], AC[number]>) => Awaitable<Response>) =>
-    async (ctx: X) => {
-      const headers = ctx.event.request.headers;
+  <X extends Context>(handler: (req: Request, ctx: X & ContentNegotiationResults<CT[number], CL[number], CE[number], CC[number], AT[number], AL[number], AE[number], AC[number]>) => Awaitable<Response>): Handler<X> =>
+    async (request, ctx) => {
+      const headers = request.headers;
 
       const {
         types,
@@ -156,7 +156,7 @@ export const withContentNegotiation = <
       if (headers.has(ACCEPT_ENCODING) && encodings && !encoding) return notAcceptable();
       if (headers.has(ACCEPT_CHARSET) && charsets && !charset) return notAcceptable();
 
-      const response = await handler({
+      const response = await handler(request, {
         ...ctx,
         type,
         language,

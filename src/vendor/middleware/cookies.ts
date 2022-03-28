@@ -5,9 +5,22 @@ import { EncryptedCookieStore } from "@worker-tools/encrypted-cookie-store";
 import { AllSettledCookieStore } from './all-settled-cookie-store';
 import { unsettle } from '../unsettle';
 
-import { Awaitable } from "../common-types";
 import { Context, Handler } from "./index";
 import { iterHeadersSetCookieFix } from './headers-set-cookie-fix'
+
+export class CookiesMap extends Map<string, string> {
+  static async from(cookieStore: CookieStore) {
+    return new CookiesMap((await cookieStore.getAll()).map(({ name, value }) => [name, value]));
+  }
+
+  /** Updates this cookie map with new values from `cookieStore`. */
+  async update(cookieStore: CookieStore) {
+    super.clear();
+    for (const { name, value } of await cookieStore.getAll()) {
+      super.set(name, value);
+    }
+  }
+}
 
 /**
  * A readonly map of the cookies associated with this request.
@@ -35,10 +48,10 @@ export interface CookiesOptions {
   length?: number,
 }
 
-export const withCookies = () => <X extends Context>(handler: CookiesHandler<X>): Handler<X> => async ctx => {
-  const cookieStore = new RequestCookieStore(ctx.event.request);
+export const withCookies = () => <X extends Context>(handler: CookiesHandler<X>): Handler<X> => async (request, ctx) => {
+  const cookieStore = new RequestCookieStore(request);
   const cookies = await CookiesMap.from(cookieStore);
-  const { status, statusText, body, headers } = await handler({ ...ctx, cookieStore, cookies });
+  const { status, statusText, body, headers } = await handler(request, { ...ctx, cookieStore, cookies });
   const response = new Response(body, {
     status,
     statusText,
@@ -53,8 +66,8 @@ export const withCookies = () => <X extends Context>(handler: CookiesHandler<X>)
 export const withSignedCookies = (opts: CookiesOptions) => {
   const keyPromise = SignedCookieStore.deriveCryptoKey(opts);
 
-  return <X extends Context>(handler: SignedCookiesHandler<X>): Handler<X> => async ctx => {
-    const cookieStore = new RequestCookieStore(ctx.event.request);
+  return <X extends Context>(handler: SignedCookiesHandler<X>): Handler<X> => async (request, ctx) => {
+    const cookieStore = new RequestCookieStore(request);
     const signedCookieStore = new AllSettledCookieStore(new SignedCookieStore(cookieStore, await keyPromise));
 
     let signedCookies: Cookies;
@@ -64,7 +77,7 @@ export const withSignedCookies = (opts: CookiesOptions) => {
       return re.forbidden();
     }
 
-    const { status, statusText, body, headers } = await handler({
+    const { status, statusText, body, headers } = await handler(request, {
       ...ctx,
       signedCookieStore,
       signedCookies,
@@ -90,8 +103,8 @@ export const withSignedCookies = (opts: CookiesOptions) => {
 export const withEncryptedCookies = (opts: CookiesOptions) => {
   const keyPromise = EncryptedCookieStore.deriveCryptoKey(opts);
 
-  return <X extends Context>(handler: EncryptedCookiesHandler<X>): Handler<X> => async ctx => {
-    const cookieStore = new RequestCookieStore(ctx.event.request);
+  return <X extends Context>(handler: EncryptedCookiesHandler<X>): Handler<X> => async (request, ctx) => {
+    const cookieStore = new RequestCookieStore(request);
     const encryptedCookieStore = new AllSettledCookieStore(new EncryptedCookieStore(cookieStore, await keyPromise));
 
     let encryptedCookies: Cookies;
@@ -101,7 +114,7 @@ export const withEncryptedCookies = (opts: CookiesOptions) => {
       return re.forbidden();
     }
 
-    const { status, statusText, body, headers } = await handler({
+    const { status, statusText, body, headers } = await handler(request, {
       ...ctx,
       encryptedCookieStore,
       encryptedCookies,
@@ -122,20 +135,6 @@ export const withEncryptedCookies = (opts: CookiesOptions) => {
 
     return response;
   };
-}
-
-export class CookiesMap extends Map<string, string> {
-  static async from(cookieStore: CookieStore) {
-    return new CookiesMap((await cookieStore.getAll()).map(({ name, value }) => [name, value]));
-  }
-
-  /** Updates this cookie map with new values from `cookieStore`. */
-  async update(cookieStore: CookieStore) {
-    super.clear();
-    for (const { name, value } of await cookieStore.getAll()) {
-      super.set(name, value);
-    }
-  }
 }
 
 export * from '@worker-tools/request-cookie-store';

@@ -14,8 +14,8 @@ type AnyRec = Record<any, any>;
 export type SessionContext<S extends AnyRec = AnyRec> = { session: S };
 export type SessionContextDeps = Context & (EncryptedCookiesContext | SignedCookiesContext | CookiesContext);
 
-export type CookieSessionHandler<X extends SessionContextDeps, S> = (ctx: X & SessionContext<S>) => Awaitable<Response>;
-export type StorageSessionHandler<X extends SessionContextDeps, S> = (ctx: X & SessionContext<S>) => Awaitable<Response>;
+export type CookieSessionHandler<X extends SessionContextDeps, S> = (req: Request, ctx: X & SessionContext<S>) => Awaitable<Response>;
+export type StorageSessionHandler<X extends SessionContextDeps, S> = (req: Request, ctx: X & SessionContext<S>) => Awaitable<Response>;
 
 export interface CookieSessionOptions<S extends AnyRec = AnyRec> {
   /** You can override the name of the session cookie. Defaults to `sid`. */
@@ -40,7 +40,7 @@ export interface StorageSessionOptions<S extends AnyRec = AnyRec> extends Cookie
  */
 export const withCookieSession = <S extends AnyRec = AnyRec>({ defaultSession = {}, cookieName = 'session', expirationTtl = 5 * 60 }: CookieSessionOptions = {}) =>
   <X extends SessionContextDeps>(handler: CookieSessionHandler<X, S>): Handler<X> =>
-    async ctx => {
+    async (request, ctx) => {
       const { event } = ctx;
       const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
       const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
@@ -57,7 +57,7 @@ export const withCookieSession = <S extends AnyRec = AnyRec>({ defaultSession = 
         signal: controller.signal,
       });
 
-      const response = await handler({ ...ctx, session });
+      const response = await handler(request, { ...ctx, session });
 
       if (flag.dirty) await cookieStore.set({
         name: cookieName,
@@ -88,7 +88,7 @@ export const withCookieSession = <S extends AnyRec = AnyRec>({ defaultSession = 
  */
 export const withStorageSession = <S extends AnyRec = AnyRec>({ storage, defaultSession = {}, cookieName = 'sid', expirationTtl = 5 * 60 }: StorageSessionOptions) =>
   <X extends SessionContextDeps>(handler: StorageSessionHandler<X, S>): Handler<X> =>
-    async ctx => {
+    async (request, ctx) => {
       const { event } = ctx;
       const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
       const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
@@ -103,7 +103,7 @@ export const withStorageSession = <S extends AnyRec = AnyRec>({ storage, default
         defaultSession,
       });
 
-      const response = await handler({ ...ctx, session });
+      const response = await handler(request, { ...ctx, session });
 
       await cookieStore.set({
         name: cookieName,

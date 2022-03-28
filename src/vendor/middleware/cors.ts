@@ -20,9 +20,8 @@ export interface CORSOptions {
 /**
  * A CORS middleware that gives clients exactly the permissions they ask for.
  */
-export const withCORS = (opt: CORSOptions = {}) => <X extends Context>(handler: Handler<X>) => async (ctx: X) => {
-  const req = ctx.event.request;
-  const res = await handler(ctx);
+export const withCORS = (opt: CORSOptions = {}) => <X extends Context>(handler: Handler<X>): Handler<X> => async (req, ctx) => {
+  const res = await handler(req, ctx);
 
   const origin = typeof opt.origin === 'string' 
     ? new URL(opt.origin) 
