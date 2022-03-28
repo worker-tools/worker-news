@@ -22,3 +22,5 @@ export function iterHeadersSetCookieFix(headers: Headers): [string, string][] {
       .map(x => [h, x.replace(new RegExp(YE, 'g'), YR)] as [string, string])
     : [[h, v] as [string, string]])
 }
+
+export { iterHeadersSetCookieFix as headersSetCookieFix }

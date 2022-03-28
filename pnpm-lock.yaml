@@ -10,16 +10,17 @@ specifiers:
   '@worker-tools/cloudflare-kv-storage': ^0.8.0
   '@worker-tools/deno-fetch-event-adapter': ^1.0.5
   '@worker-tools/deno-kv-storage': ^0.4.4
-  '@worker-tools/encrypted-cookie-store': ^0.1.5
+  '@worker-tools/encrypted-cookie-store': ^0.2.0
   '@worker-tools/html': ^2.0.0-pre.4
   '@worker-tools/json-fetch': ^2.0.7-pre.1
   '@worker-tools/location-polyfill': ^0.3.2-pre.1
   '@worker-tools/parsed-html-rewriter': ^0.1.9
-  '@worker-tools/request-cookie-store': ^0.4.2
+  '@worker-tools/request-cookie-store': ^0.4.3
   '@worker-tools/response-creators': ^1.0.8
-  '@worker-tools/signed-cookie-store': ^0.1.5
+  '@worker-tools/signed-cookie-store': ^0.2.0
   '@worker-tools/stripe-webhook': ^1.1.4
   base64-encoding: ^0.14.3
+  cookie-store-interface: ^0.1.1
   date-fns: ^2.28.0
   esbuild: ^0.14.28
   event-target-to-async-iter: ^0.2.1
@@ -53,16 +54,17 @@ dependencies:
   '@worker-tools/cloudflare-kv-storage': 0.8.0
   '@worker-tools/deno-fetch-event-adapter': 1.0.5
   '@worker-tools/deno-kv-storage': 0.4.4
-  '@worker-tools/encrypted-cookie-store': 0.1.5
+  '@worker-tools/encrypted-cookie-store': 0.2.0
   '@worker-tools/html': 2.0.0-pre.4
   '@worker-tools/json-fetch': 2.0.7-pre.1
   '@worker-tools/location-polyfill': 0.3.2-pre.1
   '@worker-tools/parsed-html-rewriter': 0.1.9
-  '@worker-tools/request-cookie-store': 0.4.2
+  '@worker-tools/request-cookie-store': 0.4.3
   '@worker-tools/response-creators': 1.0.8
-  '@worker-tools/signed-cookie-store': 0.1.5
+  '@worker-tools/signed-cookie-store': 0.2.0
   '@worker-tools/stripe-webhook': 1.1.4
   base64-encoding: 0.14.3
+  cookie-store-interface: 0.1.1
   date-fns: 2.28.0
   event-target-to-async-iter: 0.2.1
   firebase: 9.6.10
@@ -814,8 +816,8 @@ packages:
       typeson-registry: 1.0.0-alpha.39
     dev: false
 
-  /@worker-tools/encrypted-cookie-store/0.1.5:
-    resolution: {integrity: sha512-al0Z2NRetCvxrVZMPbCzczaTE500InSnj1eIPrB09rJrNMkKD0F5jG/bpiFBkHVUCd9c06X1RMmPVaelImr1Yg==}
+  /@worker-tools/encrypted-cookie-store/0.2.0:
+    resolution: {integrity: sha512-VEM0ZJ/qRR7juFSU+/0mw5Ao93cyvBDPJDyi+vHOL/G7fMKxjVzyUaUKuWMAO+mlAg2BU+RICQmfLsBRqZxUAg==}
     dependencies:
       base64-encoding: 0.14.3
       cookie-store-interface: 0.1.1
@@ -850,8 +852,8 @@ packages:
       whatwg-stream-to-async-iter: 0.4.1
     dev: false
 
-  /@worker-tools/request-cookie-store/0.4.2:
-    resolution: {integrity: sha512-byd/ctmqky1uOX92dtzsXGEMhMUZxePXKrZojyOoklqGEjjiS3WJLWJVvr2iwnQIufy7fmfoq576GltxW34t5Q==}
+  /@worker-tools/request-cookie-store/0.4.3:
+    resolution: {integrity: sha512-gXMZyF4je9KgGW3U6s77TGbLXDAG6KKZfMn6+lrMCvOVm89yt/SQU6jRWhQukUP63f5XAeWxhhvdPvvtYZ14dg==}
     dependencies:
       cookie-store-interface: 0.1.1
     dev: false
@@ -860,8 +862,8 @@ packages:
     resolution: {integrity: sha512-SjIsLSXfBtzGqbahKjP6WvTtvoHK7Biuo6bOpkkgdkyrCAYV2Yaj5PaAcZnqW2tsgQm5iaThXsbtdsVGNPD7+Q==}
     dev: false
 
-  /@worker-tools/signed-cookie-store/0.1.5:
-    resolution: {integrity: sha512-GswjvxKOP2fS8p3fNXK6aekBPT3HK6iftJYGZ0vJ3elnBSOPShqd7j2fTqoYxRm06NrSPAalyIknzlyUR87qcg==}
+  /@worker-tools/signed-cookie-store/0.2.0:
+    resolution: {integrity: sha512-Zz/NCQs2RqSiJ9ufVtzPbkMLfzFlBsjiA61AmL0wjnFQ7yBjk9wPHlgcwhfq4qJzMEPT3dqAV8Jy6YvtHDghhw==}
     dependencies:
       base64-encoding: 0.14.3
       cookie-store-interface: 0.1.1

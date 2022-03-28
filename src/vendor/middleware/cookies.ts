@@ -1,6 +1,6 @@
 import * as re from '@worker-tools/response-creators';
 import { RequestCookieStore, CookieStore, CookieListItem, CookieInit, CookieList, CookieStoreDeleteOptions, CookieStoreGetOptions } from "@worker-tools/request-cookie-store";
-import { SignedCookieStore } from "@worker-tools/signed-cookie-store";
+import { SignedCookieStore, DeriveOptions } from "@worker-tools/signed-cookie-store";
 import { EncryptedCookieStore } from "@worker-tools/encrypted-cookie-store";
 import { AllSettledCookieStore } from './all-settled-cookie-store';
 import { unsettle } from '../unsettle';
@@ -37,16 +37,9 @@ export type CookiesHandler<X extends Context> = Handler<X & CookiesContext>
 export type SignedCookiesHandler<X extends Context> = Handler<X & SignedCookiesContext>;
 export type EncryptedCookiesHandler<X extends Context> = Handler<X & EncryptedCookiesContext>
 
-// DRY: DeriveOptions
-export interface CookiesOptions {
-  secret: string | BufferSource | JsonWebKey
-  salt?: BufferSource
-  iterations?: number
-  format?: KeyFormat,
-  hash?: HashAlgorithmIdentifier;
-  hmacHash?: HashAlgorithmIdentifier;
-  length?: number,
-}
+export interface CookiesOptions extends DeriveOptions {
+  keyring?: readonly CryptoKey[];
+};
 
 export const withCookies = () => <X extends Context>(handler: CookiesHandler<X>): Handler<X> => async (request, ctx) => {
   const cookieStore = new RequestCookieStore(request);

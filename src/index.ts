@@ -1,7 +1,7 @@
 import * as re from '@worker-tools/response-creators';
 import { Method } from 'tiny-request-router'
 
-import { router } from './router';
+import { router, hnRouter } from './router';
 
 import './routes/index';
 
@@ -42,6 +42,8 @@ async function handleRequest(event: FetchEvent) {
 }
 
 self.addEventListener('fetch', (event) => {
+  // @ts-ignore
   event.passThroughOnException?.();
+  // @ts-ignore
   event.respondWith(handleRequest(event));
 });
