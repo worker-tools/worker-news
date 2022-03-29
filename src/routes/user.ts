@@ -1,9 +1,10 @@
 import { html, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
+import { basics } from "src/vendor/middleware2";
 // import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
 
-import { RouteArgs, router } from "../router";
+import { router, RouteArgs } from "../router";
 import { user as apiUser } from "./api";
 import { pageLayout } from './components';
 
@@ -55,4 +56,4 @@ const user = ({ searchParams }: RouteArgs) => {
     </tr>`));
 }
 
-router.get('/user', user);
+router.get('/user', basics(), (_req, x) => user(x))

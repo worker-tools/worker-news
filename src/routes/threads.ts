@@ -1,7 +1,8 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
+import { basics } from "src/vendor/middleware2";
 
-import { RouteArgs, router } from "../router";
+import { router, RouteArgs } from "../router";
 
 import { threads as apiThreads } from "./api";
 
@@ -55,4 +56,4 @@ function threads({ searchParams }: RouteArgs)  {
   }));
 }
 
-router.get('/threads', threads);
+router.get('/threads', basics(), (_req, x) => threads(x))

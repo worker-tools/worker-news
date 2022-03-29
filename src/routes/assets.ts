@@ -5,7 +5,7 @@ import { internalServerError, notFound } from '@worker-tools/response-creators'
 //   event.waitUntil(handleEvent(event))
 // })
 
-export async function handleEvent({ event }: { event: FetchEvent }) {
+export async function handler(_req: Request, event: { request: Request, waitUntil: (_f: any) => void }) {
   const options: Partial<Options> = {}
 
   /**

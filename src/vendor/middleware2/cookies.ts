@@ -10,39 +10,29 @@ import { unsettle } from "../unsettle";
 
 import { Context } from "./index";
 
-export class CookiesMap extends Map<string, string> {
-  static async from(cookieStore: CookieStore) {
-    return new CookiesMap((await cookieStore.getAll()).map(({ name, value }) => [name, value]));
-  }
-
-  /** Updates this cookie map with new values from `cookieStore`. */
-  async update(cookieStore: CookieStore) {
-    super.clear();
-    for (const { name, value } of await cookieStore.getAll()) {
-      super.set(name, value);
-    }
-  }
+export async function cookiesFrom(cookieStore: CookieStore): Promise<Cookies> {
+  return Object.fromEntries((await cookieStore.getAll()).map(({ name, value }) => [name, value]));
 }
 
 /**
- * A readonly map of the cookies associated with this request.
- * This is for reading convenience (no await required) only.
- * Use `CookieStore` for making changes.
+ * An object of the cookies sent with this request.
+ * It is for reading convenience only.
+ * To make changes, use the associated cookie store instead (provided by the middleware along with this object)
  */
-export type Cookies = ReadonlyMap<string, string> & Pick<CookiesMap, 'update'>
+export type Cookies = { readonly [key: string]: string };
 
+export type UnsignedCookiesContext = { unsignedCookieStore: CookieStore, unsignedCookies: Cookies };
 export type CookiesContext = { cookieStore: CookieStore, cookies: Cookies };
-export type SignedCookiesContext = { signedCookieStore: CookieStore, signedCookies: Cookies };
 export type EncryptedCookiesContext = { encryptedCookieStore: CookieStore, encryptedCookies: Cookies };
 
 export interface CookiesOptions extends DeriveOptions {
   keyring?: readonly CryptoKey[];
 };
 
-export async function addCookies<X extends Context>(ax: Awaitable<X>): Promise<X & CookiesContext> {
+export const unsignedCookies = () => async <X extends Context>(ax: Awaitable<X>): Promise<X & UnsignedCookiesContext> => {
   const x = await ax;
-  const cookieStore = new RequestCookieStore(x.request);
-  const cookies = await CookiesMap.from(cookieStore);
+  const unsignedCookieStore = new RequestCookieStore(x.request);
+  const unsignedCookies = await cookiesFrom(unsignedCookieStore);
   x.effects.push(response => {
     const { status, statusText, body, headers } = response;
     return new Response(body, {
@@ -50,20 +40,19 @@ export async function addCookies<X extends Context>(ax: Awaitable<X>): Promise<X
       statusText,
       headers: [
         ...headersSetCookieFix(headers),
-        ...cookieStore.headers,
+        ...unsignedCookieStore.headers,
       ],
     });
   })
-  return Object.assign(x, { cookies, cookieStore })
+  return Object.assign(x, { unsignedCookies, unsignedCookieStore })
 }
 
-
-export const addSignedCookies = (opts: CookiesOptions) => {
+export const cookies = (opts: CookiesOptions) => {
   // TODO: options to provide own cryptokey??
   // TODO: What if secret isn't known at initialization (e.g. Cloudflare Workers)
   const keyPromise = SignedCookieStore.deriveCryptoKey(opts);
 
-  return async <X extends Context>(ax: Awaitable<X>): Promise<X & SignedCookiesContext> => {
+  return async <X extends Context>(ax: Awaitable<X>): Promise<X & CookiesContext> => {
     const x = await ax;
     const request = x.request;
     const cookieStore = new RequestCookieStore(request);
@@ -73,14 +62,14 @@ export const addSignedCookies = (opts: CookiesOptions) => {
 
     let signedCookies: Cookies;
     try {
-      signedCookies = await CookiesMap.from(signedCookieStore);
+      signedCookies = await cookiesFrom(signedCookieStore);
     } catch {
       throw forbidden();
     }
 
     const nx = Object.assign(x, {
-      signedCookieStore,
-      signedCookies,
+      cookieStore: signedCookieStore,
+      cookies: signedCookies,
     })
 
     x.effects.push(async response => {
@@ -115,7 +104,7 @@ export const addEncryptedCookies = (opts: CookiesOptions) => {
 
     let encryptedCookies: Cookies;
     try {
-      encryptedCookies = await CookiesMap.from(encryptedCookieStore);
+      encryptedCookies = await cookiesFrom(encryptedCookieStore);
     } catch {
       throw forbidden();
     }

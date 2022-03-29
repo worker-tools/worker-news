@@ -4,14 +4,14 @@ import { Base64Decoder, Base64Encoder } from 'base64-encoding';
 import { Encoder as MsgPackEncoder, Decoder as MsgPackDecoder } from 'msgpackr';
 // import { Encoder as CBOREncoder, Decoder as CBORDecoder } from 'cbor-x/browser';
 
-import { Context, CookiesContext, SignedCookiesContext } from './index';
+import { Context, UnsignedCookiesContext, CookiesContext } from './index';
 import { Awaitable } from '../common-types';
 import { EncryptedCookiesContext } from './cookies';
 import { shortenId, parseUUID } from '../short-id';
 
 type ARecord = Record<any, any>;
 
-export type AnyCookieContext = Context & (EncryptedCookiesContext | SignedCookiesContext | CookiesContext);
+export type AnyCookieContext = Context & (EncryptedCookiesContext | CookiesContext | UnsignedCookiesContext);
 
 export type SessionContext<S extends ARecord = ARecord> = { session: S };
 
@@ -36,21 +36,21 @@ export interface CookieSessionOptions<S extends ARecord = ARecord> {
  * 
  * Requires a cookie store, preferably encrypted or signed.
  */
-export function addCookieSession<S extends ARecord = ARecord>(
+export function cookieSession<S extends ARecord = ARecord>(
   { defaultSession = {}, cookieName = 'session', expirationTtl = 5 * 60 }: CookieSessionOptions = {}
 ): <X extends AnyCookieContext>(ax: Awaitable<X>) => Promise<X & SessionContext> {
   return async ax => {
     const ctx = await ax;
     const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
-    const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
-    const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as CookiesContext;
+    const { cookies: signedCookies, cookieStore: signedCookieStore } = ctx as CookiesContext;
+    const { unsignedCookies: baseCookies, unsignedCookieStore: baseCookieStore } = ctx as UnsignedCookiesContext;
     // TODO: configure preference?
     const cookieStore = encryptedCookieStore || signedCookieStore || baseCookieStore;
     const cookies = encryptedCookies || signedCookies || baseCookies;
 
     const controller = new AbortController();
 
-    const [, session, flag] = await getCookieSessionProxy<S>(cookies.get(cookieName), ctx, {
+    const [, session, flag] = await getCookieSessionProxy<S>(cookies[cookieName], ctx, {
       cookieName,
       expirationTtl,
       defaultSession,
@@ -91,18 +91,18 @@ export function addCookieSession<S extends ARecord = ARecord>(
  * Issues
  * - Will "block" until session object is retrieved from KV => provide "unyielding" version that returns a promise?
  */
-export function addStorageSession<S extends ARecord = ARecord>(
+export function storageSession<S extends ARecord = ARecord>(
   { storage, defaultSession = {}, cookieName = 'sid', expirationTtl = 5 * 60 }: StorageSessionOptions
 ): <X extends AnyCookieContext>(ax: Awaitable<X>) => Promise<X & SessionContext> {
     return async ax => {
       const ctx = await ax;
       const { encryptedCookies, encryptedCookieStore } = ctx as EncryptedCookiesContext;
-      const { signedCookies, signedCookieStore } = ctx as SignedCookiesContext;
-      const { cookies: baseCookies, cookieStore: baseCookieStore } = ctx as CookiesContext;
-      const cookieStore = encryptedCookieStore || signedCookieStore || baseCookieStore;
-      const cookies = encryptedCookies || signedCookies || baseCookies;
+      const { cookies: signedCookies, cookieStore: signedCookieStore } = ctx as CookiesContext;
+      const { unsignedCookies, unsignedCookieStore } = ctx as UnsignedCookiesContext;
+      const cookieStore = encryptedCookieStore || signedCookieStore || unsignedCookieStore;
+      const cookies = encryptedCookies || signedCookies || unsignedCookies;
 
-      const [id, session, flag] = await getStorageSessionProxy<S>(cookies.get(cookieName), ctx, {
+      const [id, session, flag] = await getStorageSessionProxy<S>(cookies[cookieName], ctx, {
         storage,
         cookieName,
         expirationTtl,
@@ -113,7 +113,7 @@ export function addStorageSession<S extends ARecord = ARecord>(
 
       ctx.effects.push(response => {
         // no await necessary
-        if (!cookies.has(cookieName)) cookieStore.set({
+        if (!cookies[cookieName]) cookieStore.set({
           name: cookieName,
           value: shortenId(id),
           expires: new Date(Date.now() + expirationTtl * 1000),

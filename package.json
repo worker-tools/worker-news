@@ -67,6 +67,7 @@
     "typed-array-utils": "^0.2.2",
     "typeson": "^6.1.0",
     "typeson-registry": "^1.0.0-alpha.39",
+    "urlpattern-polyfill": "^1.0.0-rc5",
     "uuid-class": "^0.12.3",
     "whatwg-stream-to-async-iter": "^0.4.1"
   },

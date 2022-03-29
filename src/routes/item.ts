@@ -1,6 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
+import { basics } from "src/vendor/middleware2/basics";
 
 import { RouteArgs, router } from "../router";
 
@@ -192,4 +193,4 @@ function getItem({ searchParams }: RouteArgs)  {
   }));
 }
 
-router.get('/item', getItem);
+router.get('/item', basics(), (_req, ctx) => getItem(ctx))

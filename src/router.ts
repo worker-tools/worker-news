@@ -1,25 +1,21 @@
 import { ok } from '@worker-tools/response-creators';
 import { Router, Method, Params } from 'tiny-request-router';
-import { pipe } from 'ts-functional-pipe';
 import { Awaitable } from './vendor/common-types';
-import { adapt, withBasics, withContentNegotiation, withCookies, withCORS, withStorageSession, } from './vendor/middleware';
-import type { Context } from './vendor/middleware2'
-import { 
-  combine,
-  addBasics, 
-  addContentNegotiation, 
-  addCookieSession, 
-  addCORS, 
-  addCookies, 
-  addEncryptedCookies, 
-  addSignedCookies
-} from './vendor/middleware2'
+// import { adapt, withBasics, withContentNegotiation, withCookies, withCORS, withStorageSession, } from './vendor/middleware';
+import { contentNegotiation } from './vendor/middleware2'
+// import { 
+//   combine,
+//   addBasics, 
+//   addCookieSession, 
+//   addCORS, 
+//   addCookies, 
+//   addEncryptedCookies, 
+//   addSignedCookies
+// } from './vendor/middleware2'
 
-import type { Middleware } from './vendor/router';
 import { WorkerRouter } from './vendor/router';
 
 export interface RouteArgs {
-  event: FetchEvent;
   request: Request;
   url: URL;
   pathname: string;
@@ -29,48 +25,48 @@ export interface RouteArgs {
   params: Params;
 }
 
-export type RHandler = (args: RouteArgs) => Awaitable<Response>;
+// export type RHandler = (args: RouteArgs) => Awaitable<Response>;
 
-export const router = new Router<RHandler>();
-export const hnRouter = new WorkerRouter(addBasics);
+// export const router = new Router<RHandler>();
+export const router = new WorkerRouter();
 
-hnRouter.get('/foobar', addCookies, async (req, { cookies }) => {
-  cookies.get('foobar')
-  return ok(req.body!)
-})
+// hnRouter.get('/foobar', addCookies, async (req, { cookies }) => {
+//   cookies.get('foobar')
+//   return ok(req.body!)
+// })
 
-const newRouter = new Router<(args: FetchEvent) => Awaitable<Response>>();
-// newRouter.get('/console',
-//   withBasics(
-//     withCookies(
-//       withSignedCookies({ secret: 'foobar' },
-//         withCORS({ origin: '*' },
-//           withContentNegotiation(<const>{
-//             types: ['hello/world', 'foo/bar'],
-//             accepts: ['hello/world', 'foo/bar'],
-//           },
-//             ctx => {
-//               console.log(ctx.url)
-//               console.log(ctx.searchParams)
-//               console.log(ctx.cookies)
-//               console.log(ctx.cookieStore)
-//               console.log(ctx.signedCookies)
-//               console.log(ctx.signedCookieStore)
-//               console.log(ctx.type)
-//               return new Response('console.log')
-//             }))))))
+// const newRouter = new Router<(args: FetchEvent) => Awaitable<Response>>();
+// // newRouter.get('/console',
+// //   withBasics(
+// //     withCookies(
+// //       withSignedCookies({ secret: 'foobar' },
+// //         withCORS({ origin: '*' },
+// //           withContentNegotiation(<const>{
+// //             types: ['hello/world', 'foo/bar'],
+// //             accepts: ['hello/world', 'foo/bar'],
+// //           },
+// //             ctx => {
+// //               console.log(ctx.url)
+// //               console.log(ctx.searchParams)
+// //               console.log(ctx.cookies)
+// //               console.log(ctx.cookieStore)
+// //               console.log(ctx.signedCookies)
+// //               console.log(ctx.signedCookieStore)
+// //               console.log(ctx.type)
+// //               return new Response('console.log')
+// //             }))))))
 
-const basics = withBasics();
-const cookies = withCookies();
-const cors = withCORS()
-const sessionX = withStorageSession<{ x: number }>({ storage: null as any });
-// newRouter.get('/hello', adapt(({ event }) => ok('Hello World')))
-newRouter.get('/basic', adapt(basics((req, { url }) => ok('Hello World' + url.pathname))))
-newRouter.get('/basic', adapt(cookies(basics((req, { url }) => ok('Hello World' + url.pathname)))))
-newRouter.get('/basic', adapt(cookies(sessionX(basics((req, { url, session, cookies }) => ok('Hello World' + url.pathname))))))
-// newRouter.get('/cookie', adapt(basics(cookies(sessionX(cors((req, { url, cookies, session }) => ok('Hello World' + cookies.get('hello'))))))))
+// const basics = withBasics();
+// const cookies = withCookies();
+// const cors = withCORS()
+// const sessionX = withStorageSession<{ x: number }>({ storage: null as any });
+// // newRouter.get('/hello', adapt(({ event }) => ok('Hello World')))
+// newRouter.get('/basic', adapt(basics((req, { url }) => ok('Hello World' + url.pathname))))
+// newRouter.get('/basic', adapt(cookies(basics((req, { url }) => ok('Hello World' + url.pathname)))))
+// newRouter.get('/basic', adapt(cookies(sessionX(basics((req, { url, session, cookies }) => ok('Hello World' + url.pathname))))))
+// // newRouter.get('/cookie', adapt(basics(cookies(sessionX(cors((req, { url, cookies, session }) => ok('Hello World' + cookies.get('hello'))))))))
 
-const xxx = adapt(basics(cookies(sessionX(cors((req, { url, cookies, session }) => ok('Hello World' + cookies.get('hello')))))));
+// const xxx = adapt(basics(cookies(sessionX(cors((req, { url, cookies, session }) => ok('Hello World' + cookies.get('hello')))))));
 
 // const fnx = adapt(basics(cookies(({ cookies, url, event }) => ok('Hello World' + cookies.get('hello')))))
 // const fnx = (handler: (r: Request, x: Context & BasicsContext & CookiesContext) => Awaitable<Response>) => adapt(basics(cookies(handler)))
@@ -128,26 +124,26 @@ const xxx = adapt(basics(cookies(sessionX(cors((req, { url, cookies, session }) 
 
 // const fn = pipe(addBar, addFoo, addLength)
 // const x = fn({ name: 'john' })
-type Func<TArgs extends any[], TOut> = (...args: TArgs) => TOut;
-type UnaryFunction<TIn, TOut> = Func<[TIn], TOut>;
+// type Func<TArgs extends any[], TOut> = (...args: TArgs) => TOut;
+// type UnaryFunction<TIn, TOut> = Func<[TIn], TOut>;
 
 // function pipe<TIn extends any[], TOut>(f0: Func<TIn, TOut>): Func<TIn, TOut>;
 // function pipe<TIn extends any[], T1, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, TOut>): Func<TIn, TOut>;
 // function pipe<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
 // function pipe(...args: any): any { }
 
-export type HandlerFunc<X extends Context> = Func<[Request, X], Awaitable<Response>>
-type AResponse = Awaitable<Response>
+// export type HandlerFunc<X extends Context> = Func<[Request, X], Awaitable<Response>>
+// type AResponse = Awaitable<Response>
 
-function mwc<TI, TO>(
-  f0: UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>
-): UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>;
-function mwc<TI, T1, TO>(
-  f0: UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, T1], AResponse>>,
-  f1: UnaryFunction<Func<[Request, T1], AResponse>, Func<[Request, TO], AResponse>>,
-): UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>;
-// function mwc<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
-function mwc(...args: any): any { }
+// function mwc<TI, TO>(
+//   f0: UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>
+// ): UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>;
+// function mwc<TI, T1, TO>(
+//   f0: UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, T1], AResponse>>,
+//   f1: UnaryFunction<Func<[Request, T1], AResponse>, Func<[Request, TO], AResponse>>,
+// ): UnaryFunction<Func<[Request, TI], AResponse>, Func<[Request, TO], AResponse>>;
+// // function mwc<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
+// function mwc(...args: any): any { }
 
 // function combine<TIn extends TOut, TOut extends Context>(f0: UnaryFunction<HandlerFunc<TIn>, HandlerFunc<TOut>>): UnaryFunction<HandlerFunc<TIn>, HandlerFunc<TOut>>;
 // function combine<TIn extends T1, T1 extends TOut, TOut extends Context>(f0: UnaryFunction<HandlerFunc<TIn>, HandlerFunc<T1>>, f1: UnaryFunction<HandlerFunc<T1>, HandlerFunc<TOut>>): UnaryFunction<HandlerFunc<TIn>, HandlerFunc<TOut>>;
@@ -155,105 +151,108 @@ function mwc(...args: any): any { }
 // // function combine<TIn extends any[], T1, T2, TOut>(f0: Func<TIn, T1>, f1: UnaryFunction<T1, T2>, f2: UnaryFunction<T2, TOut>): Func<TIn, TOut>;
 // function combine(...args: any): any { }
 
-// const crs = withCORS()
-const bsc = withBasics()
-const ccc = withCookies()
-// const fn = combine<Context & BasicsContext & CookiesContext, BasicsContext & Context, Context>(ccc, bsc)
-// const fn = pipe(ccc, bsc)
-const fn = mwc(bsc, ccc)
-
-const hn = fn((req, { url }) => ok(''))
+// // const crs = withCORS()
+// const bsc = withBasics()
+// const ccc = withCookies()
+// // const fn = combine<Context & BasicsContext & CookiesContext, BasicsContext & Context, Context>(ccc, bsc)
+// // const fn = pipe(ccc, bsc)
+// const fn = mwc(bsc, ccc)
+//
+// const hn = fn((req, { url }) => ok(''))
 
 // hn(new Request(''), { event: new FetchEvent('fetch', null as any) })
 
 
-adapt(bsc(ccc((request, { cookies, url }) => ok(''))))
+// adapt(bsc(ccc((request, { cookies, url }) => ok(''))))
 
 // adapt(ccc(bsc((req, { event, url, cookiesStore }) => ok())))
 // adapt(bsc(ccc((req, { event, url, cookies }) => ok())))
 
-const handlerX = pipe(cookies, basics)
 
-
-
-
-
-export type ResponseEffect = (r: Response) => Awaitable<Response>
-const effectsMap = new WeakMap<Event, ResponseEffect[]>()
-export function registerEffect(event: Event, ...effects: ResponseEffect[]) {
-  effectsMap.get(event)?.push(...effects) ?? effectsMap.set(event, effects)
-}
-function executeEffectsFor(event: FetchEvent, response: Awaitable<Response>) {
-  const effects = effectsMap.get(event) ?? []
-  const r = effects.reduceRight(async (response, effect) => {
-    return effect(await response)
-  }, response);
-  effectsMap.delete(event);
-  return r;
-}
+// export type ResponseEffect = (r: Response) => Awaitable<Response>
+// const effectsMap = new WeakMap<Event, ResponseEffect[]>()
+// export function registerEffect(event: Event, ...effects: ResponseEffect[]) {
+//   effectsMap.get(event)?.push(...effects) ?? effectsMap.set(event, effects)
+// }
+// function executeEffectsFor(event: FetchEvent, response: Awaitable<Response>) {
+//   const effects = effectsMap.get(event) ?? []
+//   const r = effects.reduceRight(async (response, effect) => {
+//     return effect(await response)
+//   }, response);
+//   effectsMap.delete(event);
+//   return r;
+// }
 
 
 // const enrich = <X extends Context>(fn: (x: Context) => X, handler: (x: X) => Awaitable<Response>) => (event: FetchEvent) => {
 //   return handler(fn({ event }))
 // }
 
-const addSessionX = addCookieSession<XSession>({ defaultSession: { x: -1 } })
-
 /// ----
 
-type XSession = { x: number }
-type YSession = { y: number }
+// const addSessionX = addCookieSession<XSession>({ defaultSession: { x: -1 } })
 
-const acceptJSON = addContentNegotiation(<const>{ types: ['application/json'], accepts: ['application/json'] })
-const acceptENAndDE = addContentNegotiation(<const>{ languages: ['en', 'de'] })
+// type XSession = { x: number }
+// type YSession = { y: number }
 
-const baseMW = combine(addBasics, addCookies, acceptJSON)
-const myReusableMW = combine(addCookies, addCookieSession({ defaultSession: { user: '' } }))
+// const acceptJSON = addContentNegotiation(<const>{ types: ['application/json'], accepts: ['application/json'] })
+// const acceptENAndDE = addContentNegotiation(<const>{ languages: ['en', 'de'] })
 
-const betterRouter = new WorkerRouter(baseMW)
-  .get('/foo', combine(addSessionX, addCookieSession<YSession>({})), (request, { url, cookies, cookieStore, session }) => {
-    return ok('')
-  })
-  .patch('/foobar/:id', (req, { cookies, cookieStore }) => ok(cookies.update(cookieStore).toString()))
-  .all('/bar', (request, { url }) => ok(url.toString()))
-  .post('/office', combine(
-    myReusableMW,
-    addSignedCookies({ secret: 'password123' }),
-    addEncryptedCookies({ secret: 'foobar' })
-  ),
-    (request, { session, signedCookies, signedCookieStore, encryptedCookieStore }) => {
-      return ok('Yayy')
-    })
-  .post('/party', combine(myReusableMW, addCORS(), acceptENAndDE), (request, { session, cookieStore, cookies, type, accepted, language, effects }) => {
-    cookieStore.set('foo', 'bar')
-    return ok()
-  })
-  .post('/party', combine(myReusableMW, addCORS(), acceptENAndDE), myHandler)
-  .options('/foo', x => {
-    return ok(x.method)
-  })
+// const baseMW = combine(addBasics, addCookies, acceptJSON)
+// const myReusableMW = combine(addCookies, addCookieSession({ defaultSession: { user: '' } }))
 
-const myMW = combine(baseMW, myReusableMW, addCORS(), acceptENAndDE)
-// type MYMW = Awaited<ReturnType<typeof myMW>>;
+// const itemRouter = new WorkerRouter(combine(baseMW, myReusableMW))
+//   .get('/item/:id', (req, { cookies }) => ok())
 
-// export type ContextOf<X extends ((...args: any) => any) | WorkerRouter<any>> = X extends (...args: any) => any
-//   ? Awaited<ReturnType<X>> 
-//   : X extends WorkerRouter<infer RX>
-//     ? RX
-//     : never
-export type ContextOf<X extends ((...args: any) => any)> = X extends (...args: any) => any ? Awaited<ReturnType<X>> : never
+// .all('/item*', itemRouter)
+
+const myJSON = contentNegotiation({ types: ['application/json', 'text/html'], accepts: ['application/json'] })
+const betterRouter = new WorkerRouter()
+  .get('/index', myJSON, (_, { type, accepted }) => ok())
+
+//   .get('/foo', combine(addSessionX, addCookieSession<YSession>({})), (request, { url, cookies, cookieStore, session }) => {
+//     return ok('')
+//   })
+//   .patch('/foobar/:id', (req, { cookies, cookieStore }) => ok(cookies.update(cookieStore).toString()))
+//   .all('/bar', (request, { url }) => ok(url.toString()))
+//   .post('/office', combine(
+//     myReusableMW,
+//     addSignedCookies({ secret: 'password123' }),
+//     addEncryptedCookies({ secret: 'foobar' })
+//   ),
+//     (request, { session, signedCookies, signedCookieStore, encryptedCookieStore }) => {
+//       return ok('Yayy')
+//     })
+//   .post('/party', combine(myReusableMW, addCORS(), acceptENAndDE), (request, { session, cookieStore, cookies, type, accepted, language, effects }) => {
+//     cookieStore.set('foo', 'bar')
+//     return ok()
+//   })
+//   .post('/party', combine(myReusableMW, addCORS(), acceptENAndDE), myHandler)
+//   .options('/foo', x => {
+//     return ok(x.method)
+//   })
+
+// const myMW = combine(baseMW, myReusableMW, addCORS(), acceptENAndDE)
+// // type MYMW = Awaited<ReturnType<typeof myMW>>;
+
+// // export type ContextOf<X extends ((...args: any) => any) | WorkerRouter<any>> = X extends (...args: any) => any
+// //   ? Awaited<ReturnType<X>> 
+// //   : X extends WorkerRouter<infer RX>
+// //     ? RX
+// //     : never
+// export type ContextOf<X extends ((...args: any) => any)> = X extends (...args: any) => any ? Awaited<ReturnType<X>> : never
 
 
-// type BetterRouterType = ContextOf<typeof betterRouter>
-// type MYMW = ContextOf<typeof myMW>
-// type LOL = BetterRouterType & MYMW
+// // type BetterRouterType = ContextOf<typeof betterRouter>
+// // type MYMW = ContextOf<typeof myMW>
+// // type LOL = BetterRouterType & MYMW
 
-async function myHandler(request: Request, { session, cookieStore, cookies, type, accepted, language, effects }: ContextOf<typeof myMW>) {
-  return ok('')
-}
+// async function myHandler(request: Request, { session, cookieStore, cookies, type, accepted, language, effects }: ContextOf<typeof myMW>) {
+//   return ok('')
+// }
 
-// handlerX(({ url, cookies }) => ok('hello' + session.x))
+// // handlerX(({ url, cookies }) => ok('hello' + session.x))
 
-// const fny = pipe(adapt, basics, cookies)
+// // const fny = pipe(adapt, basics, cookies)
 
-// addEventListener('fetch', betterRouter.handle)
+// // addEventListener('fetch', betterRouter.handle)

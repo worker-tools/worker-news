@@ -43,6 +43,7 @@ specifiers:
   typescript: ^4.6.3
   typeson: ^6.1.0
   typeson-registry: ^1.0.0-alpha.39
+  urlpattern-polyfill: ^1.0.0-rc5
   uuid-class: ^0.12.3
   whatwg-stream-to-async-iter: ^0.4.1
 
@@ -84,6 +85,7 @@ dependencies:
   typed-array-utils: 0.2.2
   typeson: 6.1.0
   typeson-registry: 1.0.0-alpha.39
+  urlpattern-polyfill: 1.0.0-rc5
   uuid-class: 0.12.3
   whatwg-stream-to-async-iter: 0.4.1
 
@@ -1870,6 +1872,10 @@ packages:
   /undici/4.13.0:
     resolution: {integrity: sha512-8lk8S/f2V0VUNGf2scU2b+KI2JSzEQLdCyRNRF3XmHu+5jectlSDaPSBCXAHFaUlt1rzngzOBVDgJS9/Gue/KA==}
     engines: {node: '>=12.18'}
+
+  /urlpattern-polyfill/1.0.0-rc5:
+    resolution: {integrity: sha512-OxVmQLKMQbDZX1m8Ljuf26rzMUJ7lm3cnBAicqrB0qmo1qb/koH7EXayeHiZdiyc6Z0OnaHETW2JCoVHgTnGGA==}
+    dev: false
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=}

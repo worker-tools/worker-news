@@ -4,10 +4,11 @@ import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
 
-import { RouteArgs, router } from "../router";
+import { router, RouteArgs } from "../router";
 import { pageLayout } from './components';
 
 import { stories, APost, Stories } from './api'
+import { basics } from "src/vendor/middleware2";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -193,13 +194,13 @@ export const submitted = mkStories(Stories.USER)
 export const classic = mkStories(Stories.CLASSIC)
 export const from = mkStories(Stories.FROM)
 
-router.get('/news', news);
-router.get('/newest', newest);
-router.get('/best', best);
-router.get('/show', show);
-router.get('/shownew', showNew);
-router.get('/ask', ask);
-router.get('/jobs', jobs);
-router.get('/submitted', submitted)
-router.get('/classic', classic)
-router.get('/from', from)
+router.get('/news', basics(), (_req, ctx) => news(ctx))
+router.get('/newest', basics(), (_req, x) => newest(x));
+router.get('/best', basics(), (_req, x) => best(x));
+router.get('/show', basics(), (_req, x) => show(x))
+router.get('/shownew', basics(), (_req, x) => showNew(x))
+router.get('/ask', basics(), (_req, x) => ask(x))
+router.get('/jobs', basics(), (_req, x) => jobs(x))
+router.get('/submitted', basics(), (_req, x) => submitted(x))
+router.get('/classic', basics(), (_req, x) => classic(x))
+router.get('/from', basics(), (_req, x) => from(x))

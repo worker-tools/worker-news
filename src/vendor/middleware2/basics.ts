@@ -10,6 +10,7 @@ export interface BasicsContext {
   pathname: string, 
   searchParams: URLSearchParams,
   userAgent: string,
+  params: { [key: string]: string }
 }
 
 // const mk = (s: URL) => {
@@ -17,13 +18,14 @@ export interface BasicsContext {
 //   return [dirname, filename]
 // }
 
-export async function addBasics<X extends Context>(ax: Awaitable<X>): Promise<X & BasicsContext> {
+export const basics = () => async <X extends Context>(ax: Awaitable<X>): Promise<X & BasicsContext> => {
   const x = await ax;
-  const { request } = x;
+  const { request, match } = x;
   const { headers } = request;
   const method = <Method>request.method;
   const url = new URL(request.url)
   const { pathname, searchParams } = url;
   const userAgent = headers.get('user-agent') ?? '';
-  return Object.assign(x, { headers, method, url, pathname, searchParams, userAgent })
+  const params = match.groups;
+  return Object.assign(x, { headers, method, url, pathname, searchParams, userAgent, params })
 }

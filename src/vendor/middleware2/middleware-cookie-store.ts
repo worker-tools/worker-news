@@ -2,6 +2,7 @@ import {
   CookieStore, CookieListItem, CookieInit, CookieList, CookieStoreDeleteOptions, CookieStoreGetOptions
 } from "@worker-tools/request-cookie-store";
 import { ExtendablePromise } from '../extendable-promise';
+import { Cookies, cookiesFrom } from "./cookies";
 
 function decodeCookieValue(item: CookieListItem): CookieListItem;
 function decodeCookieValue(item: CookieListItem | null): CookieListItem | null;
@@ -65,4 +66,12 @@ export class MiddlewareCookieStore implements CookieStore {
   }
   get settled() { return this.#promise.settled }
   get allSettledPromise() { return this.#promise }
+
+  /**
+   * If you've made changes to the store and would like to access the current cookies as an object, 
+   * it is provided as a promise here (TODO:)
+   */
+  get updatedCookies(): Promise<Cookies> {
+    return cookiesFrom(this)
+  }
 }

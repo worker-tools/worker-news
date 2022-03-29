@@ -25,7 +25,7 @@ async function memoryItem(id: number) {
       await memoryItem(kid);
     }
   } catch (err) {
-    console.log('try later ' + id + ' ' + err.message)
+    console.log('try later ' + id + ' ' + (<any>err).message)
   }
 }
 
