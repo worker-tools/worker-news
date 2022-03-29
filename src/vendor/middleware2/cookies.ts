@@ -4,7 +4,7 @@ import { EncryptedCookieStore } from "@worker-tools/encrypted-cookie-store";
 import { forbidden } from "@worker-tools/response-creators";
 
 import { Awaitable } from "../common-types";
-import { MiddlewareCookieStore } from "./middleware-cookie-store";
+import { MiddlewareCookieStore } from "./utils/middleware-cookie-store";
 import { headersSetCookieFix } from '../middleware/headers-set-cookie-fix'
 import { unsettle } from "../unsettle";
 

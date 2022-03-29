@@ -1,8 +1,8 @@
 import { 
   CookieStore, CookieListItem, CookieInit, CookieList, CookieStoreDeleteOptions, CookieStoreGetOptions
 } from "@worker-tools/request-cookie-store";
-import { ExtendablePromise } from '../extendable-promise';
-import { Cookies, cookiesFrom } from "./cookies";
+import { ExtendablePromise } from '../../extendable-promise';
+import { Cookies, cookiesFrom } from "../cookies";
 
 function decodeCookieValue(item: CookieListItem): CookieListItem;
 function decodeCookieValue(item: CookieListItem | null): CookieListItem | null;
