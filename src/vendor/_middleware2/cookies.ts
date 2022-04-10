@@ -5,7 +5,7 @@ import { forbidden } from "@worker-tools/response-creators";
 
 import { Awaitable } from "../common-types";
 import { MiddlewareCookieStore } from "./utils/middleware-cookie-store";
-import { headersSetCookieFix } from '../middleware/headers-set-cookie-fix'
+import { headersSetCookieFix } from '../_middleware/headers-set-cookie-fix'
 import { unsettle } from "../unsettle";
 
 import { Context } from "./index";

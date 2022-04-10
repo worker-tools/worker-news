@@ -8,9 +8,7 @@ export type BasicsContext = {
   searchParams: URLSearchParams,
 };
 
-export type BasicsHandler<X extends Context> = Handler<X & BasicsContext>
-
-export const withBasics = () => <X extends Context>(handler: BasicsHandler<X>): Handler<X> => (request, ctx) => {
+export const withBasics = () => <X extends Context>(handler: Handler<X & BasicsContext>): Handler<X> => (request, ctx) => {
   const { headers } = request;
   const method = request.method;
   const url = new URL(request.url)

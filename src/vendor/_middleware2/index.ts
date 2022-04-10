@@ -35,3 +35,4 @@ export * from './content-negotiation';
 export * from './cookies';
 export * from './cors';
 export * from './session';
+export * from './caching';

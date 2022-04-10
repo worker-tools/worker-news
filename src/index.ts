@@ -1,3 +1,2 @@
-import { router } from './router';
-import './routes/index';
+import { router } from './routes/index';
 self.addEventListener('fetch', <any>router.fetchEventCallback);

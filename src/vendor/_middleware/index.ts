@@ -1,6 +1,6 @@
 import { Awaitable } from "../common-types";
 
-export type Context = { event: FetchEvent, /*waitUntil: (f?: any) => void*/ }
+export type Context = { readonly event: FetchEvent, /*waitUntil: (f?: any) => void*/ }
 export type Handler<X extends Context> = (request: Request, ctx: X) => Awaitable<Response>;
 
 // /**

@@ -1,19 +1,7 @@
+import { WorkerRouter } from '@worker-tools/router';
+import { contentNegotiation } from '@worker-tools/middleware'
 import { ok } from '@worker-tools/response-creators';
 import { Router, Method, Params } from 'tiny-request-router';
-import { Awaitable } from './vendor/common-types';
-// import { adapt, withBasics, withContentNegotiation, withCookies, withCORS, withStorageSession, } from './vendor/middleware';
-import { contentNegotiation } from './vendor/middleware2'
-// import { 
-//   combine,
-//   addBasics, 
-//   addCookieSession, 
-//   addCORS, 
-//   addCookies, 
-//   addEncryptedCookies, 
-//   addSignedCookies
-// } from './vendor/middleware2'
-
-import { WorkerRouter } from './vendor/router';
 
 export interface RouteArgs {
   request: Request;

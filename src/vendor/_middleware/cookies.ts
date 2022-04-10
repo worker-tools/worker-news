@@ -29,11 +29,10 @@ export class CookiesMap extends Map<string, string> {
  */
 export type Cookies = ReadonlyMap<string, string> & Pick<CookiesMap, 'update'>
 
-export type CookiesContext = { cookieStore: CookieStore, cookies: Cookies };
+export type CookiesContext = { readonly cookieStore: CookieStore, readonly cookies: Cookies };
 export type SignedCookiesContext = { signedCookieStore: CookieStore, signedCookies: Cookies };
 export type EncryptedCookiesContext = { encryptedCookieStore: CookieStore, encryptedCookies: Cookies };
 
-export type CookiesHandler<X extends Context> = Handler<X & CookiesContext>
 export type SignedCookiesHandler<X extends Context> = Handler<X & SignedCookiesContext>;
 export type EncryptedCookiesHandler<X extends Context> = Handler<X & EncryptedCookiesContext>
 
@@ -41,10 +40,10 @@ export interface CookiesOptions extends DeriveOptions {
   keyring?: readonly CryptoKey[];
 };
 
-export const withCookies = () => <X extends Context>(handler: CookiesHandler<X>): Handler<X> => async (request, ctx) => {
+export const withCookies = () => <X extends Context>(handler: Handler<X & CookiesContext>): Handler<X> => async (request, ctx) => {
   const cookieStore = new RequestCookieStore(request);
   const cookies = await CookiesMap.from(cookieStore);
-  const { status, statusText, body, headers } = await handler(request, { ...ctx, cookieStore, cookies });
+  const { status, statusText, body, headers } = await handler(request, { ...ctx, cookieStore, cookies } as any);
   const response = new Response(body, {
     status,
     statusText,

@@ -1,6 +1,6 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
-import { basics } from "src/vendor/middleware2";
+import { basics } from "@worker-tools/middleware";
 
 import { router, RouteArgs } from "../router";
 

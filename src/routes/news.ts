@@ -1,4 +1,5 @@
 import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
+import { basics } from "@worker-tools/middleware";
 import { StorageArea } from "@worker-tools/kv-storage";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -8,7 +9,6 @@ import { router, RouteArgs } from "../router";
 import { pageLayout } from './components';
 
 import { stories, APost, Stories } from './api'
-import { basics } from "src/vendor/middleware2";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];

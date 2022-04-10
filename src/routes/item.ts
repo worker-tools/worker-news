@@ -1,7 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
+import { basics } from "@worker-tools/middleware";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
-import { basics } from "src/vendor/middleware2/basics";
 
 import { RouteArgs, router } from "../router";
 

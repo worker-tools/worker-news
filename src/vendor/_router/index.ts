@@ -3,7 +3,7 @@ import type { URLPatternComponentResult, URLPatternInit, URLPatternResult } from
 import { URLPattern } from 'urlpattern-polyfill';
 
 import { Awaitable } from '../common-types';
-import { Context, EffectsList, executeEffects } from '../middleware2/index';
+import { Context, EffectsList, executeEffects } from '../_middleware2/index';
 import { AppendOnlyList } from '../append-only-list';
 import { Method, MethodWildcard } from 'tiny-request-router';
 import { internalServerError, notFound } from '@worker-tools/response-creators';
@@ -37,6 +37,7 @@ export class WorkerRouter<RX extends Context = Context> {
         const [handler, match] = result;
         return await handler(Object.assign(ctx, { match }));
       } catch (err) {
+        console.error(err);
         if (err instanceof Response) {
           return err; // TODO: customization??
         } else {
