@@ -1,5 +1,7 @@
 /** Quick n' dirty CustomEvent polyfill for Worker Environments. */
 
+self.navigator = self.navigator || { userAgent: 'Cloudflare Workers' }
+
 if (!('CustomEvent' in self)) {
   class CustomEvent<T = any> extends Event {
     readonly detail: T; 

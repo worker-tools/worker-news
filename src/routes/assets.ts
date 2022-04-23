@@ -22,33 +22,42 @@ export async function handler(_req: Request, event: { request: Request, waitUnti
       }
     }
 
-    // console.log('getAssetFromKV')
-    const page = await getAssetFromKV(event, options)
-    // console.log('page', page)
+    let page: Response;
+    if ('__STATIC_CONTENT' in self) {
+      page = await getAssetFromKV(event, options)
+    } else if ('Deno' in globalThis) {
+      const url = new URL(event.request.url);
+      const assetURL = new URL(`../public${url.pathname}`, import.meta.url).href;
+      page = await fetch(assetURL)
+    } else {
+      // TODO
+      throw Error('Not implemented')
+    }
 
     // allow headers to be altered
     const response = new Response(page.body, page)
 
-    response.headers.set('X-XSS-Protection', '1; mode=block')
-    response.headers.set('X-Content-Type-Options', 'nosniff')
-    response.headers.set('X-Frame-Options', 'DENY')
-    response.headers.set('Referrer-Policy', 'unsafe-url')
-    response.headers.set('Feature-Policy', 'none')
+    // response.headers.set('X-XSS-Protection', '1; mode=block')
+    // response.headers.set('X-Content-Type-Options', 'nosniff')
+    // response.headers.set('X-Frame-Options', 'DENY')
+    // response.headers.set('Referrer-Policy', 'unsafe-url')
+    // response.headers.set('Feature-Policy', 'none')
 
     return response
 
   } catch (e) {
+    console.error(e)
     // if an error is thrown try to serve the asset at 404.html
-    if (!DEBUG) {
-      console.warn(e)
-      try {
-        let notFoundResponse = await getAssetFromKV(event, {
-          mapRequestToAsset: req => new Request(`${new URL(req.url).origin}/404.html`, req),
-        })
+    // if (!DEBUG) {
+    //   console.warn(e)
+    //   try {
+    //     let notFoundResponse = await getAssetFromKV(event, {
+    //       mapRequestToAsset: req => new Request(`${new URL(req.url).origin}/404.html`, req),
+    //     })
 
-        return notFound(notFoundResponse.body!, notFoundResponse)
-      } catch (e) {}
-    }
+    //     return notFound(notFoundResponse.body!, notFoundResponse)
+    //   } catch (e) {}
+    // }
 
     return internalServerError(e instanceof Error ? e.message : e as string);
   }

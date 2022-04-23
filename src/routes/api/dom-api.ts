@@ -6,9 +6,6 @@ import { resolvablePromise } from '@worker-tools/resolvable-promise';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 import { unescape } from 'html-escaper';
 
-// Sadly, `ParseHTMLRewriter` is necessary until Cloudflare's native `HTMLRewriter` supports the `innerHTML` handler.
-// Without this, it is (nearly?) impossible to get the `innerHTML` content of an element.
-// import { ParsedHTMLRewriter as HTMLRewriter, ParsedElementHandler } from '@worker-tools/parsed-html-rewriter';
 import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 
 import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams } from './interface';

@@ -1,6 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { basics } from "@worker-tools/middleware";
 import { notFound } from "@worker-tools/response-creators";
+import { renderIconSVG } from '@download/blockies';
 import { formatDistanceToNowStrict } from 'date-fns';
 
 import { RouteArgs, router } from "../router";
@@ -17,6 +18,11 @@ export interface CommOpts {
   showParent?: boolean,
 }
 
+export const identicon = (by: string) => {
+  const img = `data:image/svg+xml;base64,${btoa(renderIconSVG({ seed: by, size: 5.5, scale: 2 }))}`;
+  return html`<img class="identicon" src="${img}" alt="${by}" width="11" height="11"/>`
+}
+
 export const commentTr = (comm: AComment, { showToggle = true, showReply = true, showParent = false }: CommOpts = {}) => {
   const { id, level, by, text, time, quality, deleted, parent, story, storyTitle } = comm;
   const timeAgo = time && formatDistanceToNowStrict(time, { addSuffix: true })
@@ -31,7 +37,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
     <td class="default">
       <div style="margin-top:2px; margin-bottom:-10px;">
         <span class="comhead">
-          <a href="user?id=${by}" class="hnuser">${by}</a> 
+          <a href="user?id=${by}" class="hnuser">${identicon(by)} ${by}</a> 
           <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
           <span id="unv_${id}"></span>
           <span class="navs">

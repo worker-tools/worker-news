@@ -50,6 +50,11 @@ const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
+export const favicon = (url?: { hostname?: string } | null) => {
+  const img = url?.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`
+  return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? 'favicon'}" width="11" height="11"/>`
+}
+
 export const aThing = async ({ type, id, url: href, title, dead }: APost, index?: number, op?: Stories) => {
   try {
     const url = tryURL(href);
@@ -66,7 +71,7 @@ export const aThing = async ({ type, id, url: href, title, dead }: APost, index?
         <td class="title">${dead 
           ? '[flagged]' 
           : html`<a href="${href}"
-            class="storylink">${title}</a>${url?.host === self.location.host ? '' : url ? html`<span
+            class="storylink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? '' : url ? html`<span
             class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
                 class="sitestr">${url.sitebit}</span></a>)</span>` : ''}</td>`
         }</tr>`;

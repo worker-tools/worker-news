@@ -3,7 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@cloudflare/kv-asset-handler': ^0.2.0
   '@cloudflare/workers-types': ^3.5.1
-  '@js-temporal/polyfill': ^0.4.1
+  '@download/blockies': github:qwtel/blockies
   '@miniflare/html-rewriter': ^2.4.0
   '@qwtel/p-queue-browser': ^6.6.2
   '@types/html-escaper': ^3.0.0
@@ -51,7 +51,7 @@ specifiers:
 
 dependencies:
   '@cloudflare/kv-asset-handler': 0.2.0
-  '@js-temporal/polyfill': 0.4.1
+  '@download/blockies': github.com/qwtel/blockies/e4dfe44e09b7b24f0647392b73409354680114f6
   '@miniflare/html-rewriter': 2.4.0
   '@qwtel/p-queue-browser': 6.6.2
   '@types/html-escaper': 3.0.0
@@ -118,14 +118,6 @@ packages:
 
   /@iarna/toml/2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
-
-  /@js-temporal/polyfill/0.4.1:
-    resolution: {integrity: sha512-q45ecIocpa2TLem2jNOsCrDwP/sgKZdSkt+C1Rx07OkdKsdbvVfHcD1iDiK9scxBZrBQ38uJ8VQISXBS70ql1w==}
-    engines: {node: '>=12'}
-    dependencies:
-      jsbi: 4.2.1
-      tslib: 2.3.1
-    dev: false
 
   /@miniflare/cache/2.4.0:
     resolution: {integrity: sha512-tMDXlUVlThgFubJmlxZoKmLK8kBxDmuMbVMt7csHpXegzkuo2TmIsDqBE/C3CRiJ5xeCQgpD6iZtKBu5Zn5fRA==}
@@ -804,10 +796,6 @@ packages:
       ip-regex: 5.0.0
     dev: false
 
-  /jsbi/4.2.1:
-    resolution: {integrity: sha512-YQ9iOZLiRiygDfzpbG8fdovDsjacbUWq/53nnQX9tgIKueMi6sk2Bhs8ZvZ0peV3tG+b7gqixUCYeVJpdownaA==}
-    dev: false
-
   /kleur/4.1.4:
     resolution: {integrity: sha512-8QADVssbrFjivHWQU7KkMgptGTl6WAcSdlbBPY4uNF+mWr6DGcKrvY2w4FQJoXch7+fKMjj0dRrL75vk3k23OA==}
     engines: {node: '>=6'}
@@ -1190,3 +1178,9 @@ packages:
       mustache: 4.2.0
       stack-trace: 0.0.10
     dev: true
+
+  github.com/qwtel/blockies/e4dfe44e09b7b24f0647392b73409354680114f6:
+    resolution: {tarball: https://codeload.github.com/qwtel/blockies/tar.gz/e4dfe44e09b7b24f0647392b73409354680114f6}
+    name: '@download/blockies'
+    version: 1.0.3
+    dev: false
