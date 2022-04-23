@@ -1,4 +1,6 @@
-import { Temporal } from '@js-temporal/polyfill';
+// import { Temporal } from '@js-temporal/polyfill';
+import { basics, caching } from "@worker-tools/middleware";
+
 import { router } from "../router";
 
 import * as assets from './assets';
@@ -7,12 +9,11 @@ import { news } from './news';
 import './item';
 import './user';
 import './threads';
-import { basics, caching } from "@worker-tools/middleware";
 // import './login';
 
 const staticCache = caching({ 
   cacheControl: 'public', 
-  maxAge: Temporal.Duration.from({ years: 1 }) 
+  maxAge: 60 * 60 * 24 * 30 * 12 
 })
 
 router.get('/yc.css', staticCache, () => fetch('https://news.ycombinator.com/yc.css'))
@@ -24,6 +25,6 @@ router.get('/security.html', staticCache, () => fetch('https://news.ycombinator.
 
 router.get('/', basics(), (_req, x) => news(x))
 
-router.get('*', staticCache, assets.handler)
+router.get('*', staticCache, assets.handler as any)
 
 export { router }

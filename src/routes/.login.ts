@@ -2,8 +2,14 @@ import { html, HTMLResponse } from '@worker-tools/html';
 import { ParamsURL } from '@worker-tools/json-fetch';
 import { StorageArea } from '@worker-tools/kv-storage';
 import { badRequest, found, internalServerError, ok, unauthorized } from '@worker-tools/response-creators';
-import { CookiesContext, withCookies, SessionContext, withStorageSession } from 'src/vendor/middleware';
-import { FORM, FORM_DATA } from 'src/vendor/middleware/mime';
+import { 
+  combine,
+  basics,
+  unsignedCookies, 
+  withStorageSession, 
+  CookieSessionContext as SessionContext, 
+  AnyCookieContext as CookiesContext 
+} from '@worker-tools/middleware';
 
 import { RouteArgs, router } from "../router";
 import { consume } from './api/util';
@@ -29,8 +35,9 @@ export type SessionType = {
 
 export type LoginArgs = RouteArgs & CookiesContext & SessionContext<SessionType>
 
-export const cookies = withCookies();
-export const session = withStorageSession<SessionType>({ 
+export const withBasics = basics()
+export const withCookies = unsignedCookies();
+export const withSession = withStorageSession<SessionType>({ 
   storage: new StorageArea('logins'),
   expirationTtl: 60 * 60 * 24 * 365 * 15,
   defaultSession: { votes: new Set() }
@@ -50,7 +57,8 @@ function loginEl(autoFocus: boolean) {
     </table><br/>`;
 }
 
-router.get('/login', cookies(session(({ searchParams, session }) => {
+const loginMW = combine(withBasics, withCookies, withSession)
+router.get('/login', loginMW, (req, { searchParams, session }) => {
   const goto = searchParams.get('goto') ?? 'news';
   if (session.token) found(goto)
   return new HTMLResponse(html`<html lang="en">
@@ -79,11 +87,11 @@ router.get('/login', cookies(session(({ searchParams, session }) => {
       </form>
     </body>
   </html>`);
-})));
+});
 
 const HOSTNAME = 'https://news.ycombinator.com'
 
-router.post('/login', cookies(session(async ({ request, session }) => {
+router.post('/login', loginMW, async (req, { request, session }) => {
   const fd = await request.formData();
   const acct = fd.get('acct') as string;
   const pw = fd.get('pw') as string;
@@ -91,7 +99,7 @@ router.post('/login', cookies(session(async ({ request, session }) => {
 
   const { headers } = await fetch(new URL(`/login`, HOSTNAME).href, {
     method: 'POST',
-    headers: { 'content-type': FORM },
+    headers: { 'content-type': 'x-www-form-urlencoded' },
     body: recordToSearchParams({ acct, pw, goto }),
     redirect: 'manual',
   });
@@ -106,9 +114,9 @@ router.post('/login', cookies(session(async ({ request, session }) => {
   session.token = token;
 
   return found(goto);
-})));
+});
 
-router.get('/logout', cookies(session(async ({ searchParams, session, cookieStore }) => {
+router.get('/logout', loginMW, async (req, { searchParams, session, cookieStore }) => {
   const goto = searchParams.get('goto') ?? 'news';
   if (session.user) {
     delete session.user;
@@ -117,7 +125,7 @@ router.get('/logout', cookies(session(async ({ searchParams, session, cookieStor
     await cookieStore.delete('sid');
   }
   return found(goto)
-})));
+});
 
 async function getAuthToken(id: number, cookie: string) {
   const authResponse = await fetch(new ParamsURL('/item', { id }, HOSTNAME).href, {
@@ -140,7 +148,7 @@ async function getAuthToken(id: number, cookie: string) {
   return auth!;
 }
 
-router.get('/vote', cookies(session(async ({ searchParams, session }) => {
+router.get('/vote', loginMW, async (req, { searchParams, session }) => {
   if (session.user && session.token) {
     const id = Number(searchParams.get('id'));
     const how = searchParams.get('how')
@@ -164,4 +172,4 @@ router.get('/vote', cookies(session(async ({ searchParams, session }) => {
   } else {
     return unauthorized();
   }
-})))
+})

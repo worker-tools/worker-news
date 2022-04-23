@@ -1,6 +1,6 @@
 import { APost, AComment, Stories, StoriesParams, AUser } from './interface';
 import { default as PQueue } from '@qwtel/p-queue-browser';
-import { resolvablePromise, ResolvablePromise } from 'src/vendor/resolvable-promise';
+import { resolvablePromise, ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { blockquotify } from './util';
 
 type APIFn = <T>(path: string) => Promise<T>;

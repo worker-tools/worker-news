@@ -1,2 +1,2 @@
 import { router } from './routes/index';
-self.addEventListener('fetch', <any>router.fetchEventCallback);
+self.addEventListener('fetch', <any>router);

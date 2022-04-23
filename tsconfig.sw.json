@@ -9,7 +9,7 @@
     "module": "ESNext",
     "target": "ES2018",
     "lib": [
-      "ES2020",
+      "ES2021",
       "WebWorker",
       "ESNext.AsyncIterable",
       "DOM",

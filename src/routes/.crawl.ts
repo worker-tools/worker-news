@@ -1,4 +1,5 @@
 import { StorageArea } from '@worker-tools/kv-storage';
+import { basics } from '@worker-tools/middleware';
 import { ok } from '@worker-tools/response-creators';
 import { default as PQueue } from '@qwtel/p-queue-browser';
 
@@ -7,8 +8,8 @@ import { API, api } from './api/_old/api';
 
 const storage = new StorageArea('hn-cache');
 
-router.get('/__headers1', ({ event }) => {
-  event.respondWith(new Response('foo', { 
+router.get('/__headers1', (req, { event }) => {
+  event!.respondWith(new Response('foo', { 
     headers: [['set-cookie', 'foo=bar'], ['set-cookie', 'fizz=buzz']]
   }))
   throw Error();
@@ -41,7 +42,7 @@ router.get('/__rewrite', async () => {
   return ok(text, { headers: [['content-type', 'text/plain']] })
 })
 
-router.get('/__crawl-sliced', async ({ event }) => {
+router.get('/__crawl-sliced', async (req, { event }) => {
   const ids = await api('/v0/topstories.json') as any[];
   await storage.set('/v0/topstories.json', ids);
   await Promise.all((ids.slice(0, 100) ?? []).map(crawlItem))
@@ -137,7 +138,7 @@ async function crawlItem(id: number) {
 //   } while (id != null)
 // }
 
-router.get('/__crawl-pqueue', async ({ event, searchParams }) => {
+router.get('/__crawl-pqueue', basics(), async (req, { event, searchParams }) => {
   try {
     if (DEBUG) i = 0;
     const concurrency = Number(searchParams.get('concurrency') || 100);

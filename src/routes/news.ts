@@ -1,6 +1,5 @@
 import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { basics } from "@worker-tools/middleware";
-import { StorageArea } from "@worker-tools/kv-storage";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
@@ -194,13 +193,14 @@ export const submitted = mkStories(Stories.USER)
 export const classic = mkStories(Stories.CLASSIC)
 export const from = mkStories(Stories.FROM)
 
-router.get('/news', basics(), (_req, ctx) => news(ctx))
-router.get('/newest', basics(), (_req, x) => newest(x));
-router.get('/best', basics(), (_req, x) => best(x));
-router.get('/show', basics(), (_req, x) => show(x))
-router.get('/shownew', basics(), (_req, x) => showNew(x))
-router.get('/ask', basics(), (_req, x) => ask(x))
-router.get('/jobs', basics(), (_req, x) => jobs(x))
-router.get('/submitted', basics(), (_req, x) => submitted(x))
-router.get('/classic', basics(), (_req, x) => classic(x))
-router.get('/from', basics(), (_req, x) => from(x))
+const withBasics = basics()
+router.get('/news', withBasics, (_req, ctx) => news(ctx))
+router.get('/newest', withBasics, (_req, x) => newest(x));
+router.get('/best', withBasics, (_req, x) => best(x));
+router.get('/show', withBasics, (_req, x) => show(x))
+router.get('/shownew', withBasics, (_req, x) => showNew(x))
+router.get('/ask', withBasics, (_req, x) => ask(x))
+router.get('/jobs', withBasics, (_req, x) => jobs(x))
+router.get('/submitted', withBasics, (_req, x) => submitted(x))
+router.get('/classic', withBasics, (_req, x) => classic(x))
+router.get('/from', withBasics, (_req, x) => from(x))

@@ -1,7 +1,4 @@
-import { WorkerRouter } from '@worker-tools/router';
-import { contentNegotiation } from '@worker-tools/middleware'
-import { ok } from '@worker-tools/response-creators';
-import { Router, Method, Params } from 'tiny-request-router';
+import { WorkerRouter, Method } from '@worker-tools/router';
 
 export interface RouteArgs {
   request: Request;
@@ -10,13 +7,41 @@ export interface RouteArgs {
   searchParams: URLSearchParams
   headers: Headers;
   method: Method;
-  params: Params;
+  params: { [key: string]: string | undefined };
 }
+
+export const router = new WorkerRouter();
 
 // export type RHandler = (args: RouteArgs) => Awaitable<Response>;
 
 // export const router = new Router<RHandler>();
-export const router = new WorkerRouter();
+
+// router.any('/test*', combine(
+//   withBasics(), 
+//   withContentTypes({ types: ['foo', 'bar'] }),
+//   withAnyBody({ defaultJSON: { foo: 3 } }),
+// ), (req, x) => {
+//   if (x.accepted === 'application/x-www-form-urlencoded') {
+//     console.log('ehllooo!!', x.bodyParams)
+//   } else if (x.accepted === 'text/plain' || x.accepted === 'text/html') {
+//     console.log(x.query, x.params)
+//   }
+//   return ok(`
+//   <form action="/testform" method="GET">
+//   <div>
+//     <label for="say">What greeting do you want to say?</label>
+//     <input name="say" id="say" value="Hi">
+//   </div>
+//   <div>
+//     <label for="to">Who do you want to say it to?</label>
+//     <input name="to" id="to" value="Mom">
+//   </div>
+//   <div>
+//     <button>Send my greetings</button>
+//   </div>
+// </form>
+// `, { headers: { 'content-type': 'text/html' }})
+// })
 
 // hnRouter.get('/foobar', addCookies, async (req, { cookies }) => {
 //   cookies.get('foobar')
@@ -194,9 +219,9 @@ export const router = new WorkerRouter();
 
 // .all('/item*', itemRouter)
 
-const myJSON = contentNegotiation({ types: ['application/json', 'text/html'], accepts: ['application/json'] })
-const betterRouter = new WorkerRouter()
-  .get('/index', myJSON, (_, { type, accepted }) => ok())
+// const myJSON = withContentNegotiation({ types: ['application/json', 'text/html'], accepts: ['application/json'] })
+// const betterRouter = new WorkerRouter()
+//   .get('/index', myJSON, (_, { type, accepted }) => ok())
 
 //   .get('/foo', combine(addSessionX, addCookieSession<YSession>({})), (request, { url, cookies, cookieStore, session }) => {
 //     return ok('')

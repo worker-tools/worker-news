@@ -2,6 +2,7 @@
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
 import { ParamsURL } from '@worker-tools/json-fetch';
+import { resolvablePromise } from '@worker-tools/resolvable-promise';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 import { unescape } from 'html-escaper';
 
@@ -13,7 +14,6 @@ import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams } from './interface';
 import { aMap } from './iter';
 import { blockquotify, consume } from './util';
-import { resolvablePromise } from 'src/vendor/resolvable-promise';
 
 const h2r = (htmlRewriter: HR | HTMLRewriter) => htmlRewriter as unknown as HR;
 const r2h = (hTMLRewriter: HR | HTMLRewriter) => hTMLRewriter as unknown as HTMLRewriter;

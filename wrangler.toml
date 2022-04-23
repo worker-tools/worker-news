@@ -5,8 +5,8 @@ workers_dev = true
 kv_namespaces = [ 
   { binding = "KV_STORAGE", id = "a713f738814e4de6939b8f9906e01de5", preview_id = "41a0e5dd97134debac212ea90d2d9061" }
 ]
-compatibility_date = "2022-02-09"
-compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
+compatibility_date = "2022-04-05"
+compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag", "global_navigator"]
 
 [site]
   bucket = "./public"
