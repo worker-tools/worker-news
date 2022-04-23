@@ -268,3 +268,5 @@ and (max-width : 750px) {
 .sr-only { clip: rect(1px, 1px, 1px, 1px); -webkit-clip-path: inset(50%); clip-path: inset(50%); height: 1px; overflow: hidden; margin-left: -2px; padding: 0; display: inline-block; position: absolute; width: 1px; white-space: nowrap; }
 #footer a[href$="workers.tools"]:before { content:'⚙︎\a0'; }
 #footer a[href$="workers.cloudflare.com"]:before { content:'〈》'; margin-left: -5px; position: inline-block;}
+
+.identicon { position: relative; top: 1px }
