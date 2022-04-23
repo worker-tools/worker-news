@@ -227,6 +227,7 @@ and (max-width : 750px) {
   .votelinks { min-width: 18px; }
   .votelinks a { display: block; margin-bottom: 9px; }
   input[type='text'], input[type='number'], textarea { font-size: 16px; width: 90%; }
+  .favicon { width: 12px; height: 12px }
 }
 
 .comment { max-width: 1215px; overflow-wrap:anywhere; }
