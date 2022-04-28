@@ -13,14 +13,14 @@ specifiers:
   '@worker-tools/deno-kv-storage': ^0.4.4
   '@worker-tools/encrypted-cookie-store': ^0.2.1
   '@worker-tools/html': ^2.0.0-pre.8
-  '@worker-tools/json-fetch': ^2.0.7-pre.2
+  '@worker-tools/json-fetch': 2.1.0-pre.3
   '@worker-tools/location-polyfill': ^0.4.0
-  '@worker-tools/middleware': ^0.1.0-pre.14
+  '@worker-tools/middleware': ^0.1.0-pre.15
   '@worker-tools/parsed-html-rewriter': ^0.1.11
   '@worker-tools/request-cookie-store': ^0.5.0-pre.9
   '@worker-tools/resolvable-promise': ^0.2.0-pre.4
   '@worker-tools/response-creators': ^1.0.8
-  '@worker-tools/router': ^0.1.0-pre.14
+  '@worker-tools/router': 0.2.0-pre.6
   '@worker-tools/signed-cookie-store': ^0.3.0-pre.7
   '@worker-tools/stripe-webhook': ^1.1.4
   base64-encoding: ^0.14.3
@@ -47,7 +47,7 @@ specifiers:
   typeson-registry: ^1.0.0-alpha.39
   urlpattern-polyfill: ^4.0.3
   uuid-class: ^0.12.3
-  whatwg-stream-to-async-iter: ^0.4.3
+  whatwg-stream-to-async-iter: 0.5.0
 
 dependencies:
   '@cloudflare/kv-asset-handler': 0.2.0
@@ -60,14 +60,14 @@ dependencies:
   '@worker-tools/deno-kv-storage': 0.4.4
   '@worker-tools/encrypted-cookie-store': 0.2.1
   '@worker-tools/html': 2.0.0-pre.8
-  '@worker-tools/json-fetch': 2.0.7-pre.2
+  '@worker-tools/json-fetch': 2.1.0-pre.3
   '@worker-tools/location-polyfill': 0.4.0
-  '@worker-tools/middleware': 0.1.0-pre.14
+  '@worker-tools/middleware': 0.1.0-pre.15
   '@worker-tools/parsed-html-rewriter': 0.1.11
   '@worker-tools/request-cookie-store': 0.5.0-pre.9
   '@worker-tools/resolvable-promise': 0.2.0-pre.4
   '@worker-tools/response-creators': 1.0.8
-  '@worker-tools/router': 0.1.0-pre.14
+  '@worker-tools/router': 0.2.0-pre.6
   '@worker-tools/signed-cookie-store': 0.3.0-pre.7
   '@worker-tools/stripe-webhook': 1.1.4
   base64-encoding: 0.14.3
@@ -91,7 +91,7 @@ dependencies:
   typeson-registry: 1.0.0-alpha.39
   urlpattern-polyfill: 4.0.3
   uuid-class: 0.12.3
-  whatwg-stream-to-async-iter: 0.4.3
+  whatwg-stream-to-async-iter: 0.5.0
 
 devDependencies:
   '@cloudflare/workers-types': 3.7.1
@@ -334,8 +334,8 @@ packages:
       '@worker-tools/stream-response': 0.1.0-pre.0
     dev: false
 
-  /@worker-tools/json-fetch/2.0.7-pre.2:
-    resolution: {integrity: sha512-Tqoul2aG7YEZliIgibZweCR2N5hPLn+dcCpAP2sGbEqoIabWYugU4XVLcIg5GqTpc9Iz00g9zkWVPyMSafTEbw==}
+  /@worker-tools/json-fetch/2.1.0-pre.3:
+    resolution: {integrity: sha512-sxmbDN2TQk7zd8H7h6e7cwQ61i5bbzGrqgMWFyDOdwaNoI4H4J20KewpRnj5PdUXUB/DatiPzNTHSX+aMLfHTg==}
     dev: false
 
   /@worker-tools/location-polyfill/0.4.0:
@@ -344,8 +344,8 @@ packages:
       '@cloudflare/workers-types': 2.2.2
     dev: false
 
-  /@worker-tools/middleware/0.1.0-pre.14:
-    resolution: {integrity: sha512-XqWPn9BBv6utnt5qxj9xjCk50caWFvnNr6c/g09cogYwHQM42CSMEhw71f43bDjyJIbCQcJ1ZnZY9ECfhfd2hw==}
+  /@worker-tools/middleware/0.1.0-pre.15:
+    resolution: {integrity: sha512-DbsnCQNKFI8XkOqSVWMfa/1Y+9873sQcC7/M+O8w4tZMFB4HIOUyVMdbon4coKgAK2gcy2yPTf/evAsJZIijsw==}
     dependencies:
       '@worker-tools/encrypted-cookie-store': 0.3.0-pre.5
       '@worker-tools/extendable-promise': 0.2.0-pre.8
@@ -389,10 +389,10 @@ packages:
     resolution: {integrity: sha512-T5Q4CoW4JGv/kVrbuwTN0C0kgfwFj7j/8LPrScUGnk+2BIXdm9Be2YGtNpMgQRqs263yYHij2YRgFKK8bOdBaQ==}
     dev: false
 
-  /@worker-tools/router/0.1.0-pre.14:
-    resolution: {integrity: sha512-sXYHHp+AC27PYTVNkK91uA0s7BHtfUOXlpq9JPU1RxmBQSTqXA03VgmbjRDhGoVZp8467cdlHmF6QDMFudb/Tw==}
+  /@worker-tools/router/0.2.0-pre.6:
+    resolution: {integrity: sha512-VfDGzi1cEI8Xu4p9EbussIAziz7rhyELCdIeAwS2qkqU/Z2UNe088/OLvD5ipnvGsFTJJxzg+unXK6x9MPVbog==}
     dependencies:
-      '@worker-tools/middleware': 0.1.0-pre.14
+      '@worker-tools/middleware': 0.1.0-pre.15
       '@worker-tools/response-creators': 1.2.0-pre.5
       urlpattern-polyfill: 4.0.3
     dev: false
