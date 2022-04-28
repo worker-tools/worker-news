@@ -66,10 +66,8 @@ export interface APost extends AThing {
   descendants: number | null,
   text: string | null
   quality: Quality,
-  // poll?: Poll[] | null,
   parent?: number,
   story?: number,
   storyTitle?: string,
   moreLink?: Promise<string>,
-  /** @deprecated */ more_comments_id?: string | null;
 }

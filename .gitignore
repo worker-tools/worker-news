@@ -12,3 +12,4 @@ node_modules/
 cert.pem
 *.sqlite
 /sw.js*
+/tmp

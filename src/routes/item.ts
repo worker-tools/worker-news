@@ -205,8 +205,8 @@ router.get('/identicon/:by.svg',
     })
   ), 
   async (req, { params, type, waitUntil, handled }) => {
-    const cache = await caches.open('identicon');
-    const res = await cache.match(req);
+    const cache = await self.caches?.open('identicon');
+    const res = await cache?.match(req);
     if (!res) {
       const svg = renderIconSVG({ seed: params.by ?? '', size: 6, scale: 2 }) 
       const res = new Response(svg, { headers: { 'content-type': type } });
@@ -214,9 +214,10 @@ router.get('/identicon/:by.svg',
         await handled; 
         // FIXME: make it possible to get response (or just headers!?) after middleware applied!?
         res.headers.set('cache-control', 'public, max-age=31536000')
-        return cache.put(req, res) 
+        return cache?.put(req, res) 
       })());
-      return res.clone() // !!
+      // Returning a clone of the response, because this response gets used first (thanks to `await handled`)
+      return res.clone()
     }
 
     // FIXME: how to deal with immutable responses + middleware from cache??

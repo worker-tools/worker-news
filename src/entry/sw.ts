@@ -1,6 +1,8 @@
 import 'urlpattern-polyfill'
-import '@worker-tools/parsed-html-rewriter/polyfill';
-import '../index';
+import './html-rewriter-polyfill'
+
+import { router } from '../routes/index';
+self.addEventListener('fetch', <any>router);
 
 self.addEventListener('install', () => {
   (<any>self).skipWaiting();

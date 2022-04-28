@@ -29,9 +29,8 @@ export async function handler(_req: Request, event: { request: Request, waitUnti
       const url = new URL(event.request.url);
       const assetURL = new URL(`../public${url.pathname}`, import.meta.url).href;
       page = await fetch(assetURL)
-    } else {
-      // TODO
-      throw Error('Not implemented')
+    } else { // Service Worker
+      page = (await self.caches.match(event.request)) ?? await fetch(event.request, { mode: 'cors' })
     }
 
     // allow headers to be altered

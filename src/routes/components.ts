@@ -118,6 +118,10 @@ export const pageLayout = ({ title, op, id }: {
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
+    <script type="module">(async () => {
+      // await navigator.serviceWorker.register('/sw.js')
+      for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+    })()</script>
   </head>
   <body>
     <center>

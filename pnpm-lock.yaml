@@ -13,6 +13,7 @@ specifiers:
   '@worker-tools/deno-kv-storage': ^0.4.4
   '@worker-tools/encrypted-cookie-store': ^0.2.1
   '@worker-tools/html': ^2.0.0-pre.8
+  '@worker-tools/html-rewriter': ^0.1.0-pre.12
   '@worker-tools/json-fetch': 2.1.0-pre.3
   '@worker-tools/location-polyfill': ^0.4.0
   '@worker-tools/middleware': ^0.1.0-pre.15
@@ -60,6 +61,7 @@ dependencies:
   '@worker-tools/deno-kv-storage': 0.4.4
   '@worker-tools/encrypted-cookie-store': 0.2.1
   '@worker-tools/html': 2.0.0-pre.8
+  '@worker-tools/html-rewriter': 0.1.0-pre.12
   '@worker-tools/json-fetch': 2.1.0-pre.3
   '@worker-tools/location-polyfill': 0.4.0
   '@worker-tools/middleware': 0.1.0-pre.15
@@ -266,6 +268,16 @@ packages:
       p-timeout: 4.1.0
     dev: false
 
+  /@stardazed/streams-compression/1.0.0:
+    resolution: {integrity: sha512-SQCiwxdIVJ5xxUBYptN+fc+tJpSDbxQuJ0+3u2SmHjIzr6JIRZ28AVFtFnGy6x6j3UBlaLx73w9rC6UAFxnd1g==}
+    dependencies:
+      '@stardazed/zlib': 1.0.1
+    dev: false
+
+  /@stardazed/zlib/1.0.1:
+    resolution: {integrity: sha512-MS6PCYiRNJ32c69+3NPyL+bu7LpiFDvMcBXnlhQnF8CKMG0R/xRVCCo422NPkQ0+Cox3xKpk5Lc1LfWFS4b3cw==}
+    dev: false
+
   /@types/html-escaper/3.0.0:
     resolution: {integrity: sha512-OcJcvP3Yk8mjYwf/IdXZtTE1tb/u0WF0qa29ER07ZHCYUBZXSN29Z1mBS+/96+kNMGTFUAbSz9X+pHmHpZrTCw==}
     dev: false
@@ -325,6 +337,13 @@ packages:
   /@worker-tools/extendable-promise/0.2.0-pre.8:
     resolution: {integrity: sha512-pr5eBJY21kUyT9QAGaquZRKzsckPgydSonCiRai2uSU1wEP77ZJYfvdLMKwxSJay0fS///9NPNrIJOKyxYuWfA==}
     dependencies:
+      '@worker-tools/resolvable-promise': 0.2.0-pre.4
+    dev: false
+
+  /@worker-tools/html-rewriter/0.1.0-pre.12:
+    resolution: {integrity: sha512-cCBOgJxO0fzDTHs8pt+UuXBlDYTXq5GMBV9ul+WvnlM2YmOZFf9gwVRtSn24fKHH2qA/zwh9/D5w12gtthCV4A==}
+    dependencies:
+      '@stardazed/streams-compression': 1.0.0
       '@worker-tools/resolvable-promise': 0.2.0-pre.4
     dev: false
 
