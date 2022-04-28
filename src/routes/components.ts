@@ -19,6 +19,11 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
 //   [Stories.FROM]: '/from'
 // };
 
+export const identicon = (by: string, size = 11) => {
+  const img = new URL(`/identicon/${by}.svg`, location.origin).href
+  return html`<img class="identicon" src="${img}" alt="${by}" width="${size}" height="${size}"/>`
+}
+
 export const headerEl = ({ op, id }: { 
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string,  

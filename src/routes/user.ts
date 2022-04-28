@@ -6,7 +6,7 @@ import { basics } from "@worker-tools/middleware";
 
 import { router, RouteArgs } from "../router";
 import { user as apiUser } from "./api";
-import { pageLayout } from './components';
+import { pageLayout, identicon } from './components';
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -38,7 +38,7 @@ const user = ({ searchParams }: RouteArgs) => {
               const dt = uo?.created && new Date(uo.created * 1000);
               const [{ value: month },, { value: day },, { value: year }] = numDTF.formatToParts(dt);
               return html`
-                <tr class="athing"><td valign="top">user:</td><td timestamp="${uo.created}"><a href="user?id=${un}" class="hnuser">${un}</a></td></tr>
+                <tr class="athing"><td valign="top">user:</td><td timestamp="${uo.created}"><a href="user?id=${un}" class="hnuser">${identicon(un, 13)} ${un}</a></td></tr>
                 <tr><td valign="top">created:</td><td><a href="front?day=${year}-${month}-${day}&amp;birth=${un}">${dtf.format(dt)}</a></td></tr>
                 <tr><td valign="top">karma:</td><td>${uo.karma}</td></tr>
                 <tr><td valign="top">about:</td><td style="overflow:hidden;">${unsafeHTML(uo.about ?? '')}</td></tr>

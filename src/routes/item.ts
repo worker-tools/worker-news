@@ -8,7 +8,7 @@ import { RouteArgs, router } from "../router";
 
 import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api";
 
-import { pageLayout } from './components';
+import { pageLayout, identicon } from './components';
 import { aThing, subtext } from './news';
 import { moreLinkEl } from "./threads";
 
@@ -16,11 +16,6 @@ export interface CommOpts {
   showToggle?: boolean,
   showReply?: boolean,
   showParent?: boolean,
-}
-
-export const identicon = (by: string) => {
-  const img = new URL(`/identicon/${by}.svg`, location.origin).href
-  return html`<img class="identicon" src="${img}" alt="${by}" width="11" height="11"/>`
 }
 
 export const commentTr = (comm: AComment, { showToggle = true, showReply = true, showParent = false }: CommOpts = {}) => {
@@ -199,6 +194,7 @@ function getItem({ searchParams }: RouteArgs)  {
   }));
 }
 
+router.get('/identicon/dang.svg', () => fetch('https://news.ycombinator.com/y18.gif'))
 router.get('/identicon/:by.svg', 
   combine(
     basics(), 
