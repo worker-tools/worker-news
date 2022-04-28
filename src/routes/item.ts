@@ -1,6 +1,6 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
-import { basics } from "@worker-tools/middleware";
-import { notFound } from "@worker-tools/response-creators";
+import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
+import { notFound, ok } from "@worker-tools/response-creators";
 import { renderIconSVG } from '@download/blockies';
 import { formatDistanceToNowStrict } from 'date-fns';
 
@@ -19,7 +19,7 @@ export interface CommOpts {
 }
 
 export const identicon = (by: string) => {
-  const img = `data:image/svg+xml;base64,${btoa(renderIconSVG({ seed: by, size: 5.5, scale: 2 }))}`;
+  const img = new URL(`/identicon/${by}.svg`, location.origin).href
   return html`<img class="identicon" src="${img}" alt="${by}" width="11" height="11"/>`
 }
 
@@ -198,5 +198,27 @@ function getItem({ searchParams }: RouteArgs)  {
     }
   }));
 }
+
+router.get('/identicon/:by.svg', 
+  combine(
+    basics(), 
+    contentTypes(['image/svg+xml']), 
+    caching({ 
+      cacheControl: 'public', 
+      maxAge: 604800,
+    })
+  ), 
+  async (req, { params, type, waitUntil }) => {
+    const cache: Cache = await (<any>caches).default
+    const res = await cache.match(req);
+    if (!res) {
+      const svg = renderIconSVG({ seed: params.by ?? '', size: 5.5, scale: 2 }) 
+      const res = ok(svg, { headers: { 'content-type': type } });
+      waitUntil?.(cache.put(req, res.clone()))
+      return res
+    }
+    return res
+  },
+)
 
 router.get('/item', basics(), (_req, ctx) => getItem(ctx))
