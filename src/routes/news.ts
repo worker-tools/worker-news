@@ -71,7 +71,7 @@ export const aThing = async ({ type, id, url: href, title, dead }: APost, index?
         <td class="title">${dead 
           ? '[flagged]' 
           : html`<a href="${href}"
-            class="storylink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? '' : url ? html`<span
+            class="titlelink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? '' : url ? html`<span
             class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
                 class="sitestr">${url.sitebit}</span></a>)</span>` : ''}</td>`
         }</tr>`;
