@@ -41,7 +41,7 @@
     "@worker-tools/encrypted-cookie-store": "^0.2.1",
     "@worker-tools/html": "^2.0.0-pre.8",
     "@worker-tools/html-rewriter": "^0.1.0-pre.12",
-    "@worker-tools/json-fetch": "2.1.0-pre.3",
+    "@worker-tools/json-fetch": "2.1.0-pre.4",
     "@worker-tools/location-polyfill": "^0.4.0",
     "@worker-tools/middleware": "^0.1.0-pre.15",
     "@worker-tools/parsed-html-rewriter": "^0.1.11",

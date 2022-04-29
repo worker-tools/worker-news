@@ -2,7 +2,7 @@
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
 import { ParamsURL } from '@worker-tools/json-fetch';
-import { resolvablePromise } from '@worker-tools/resolvable-promise';
+import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 import { unescape } from 'html-escaper';
 
@@ -15,7 +15,7 @@ import { blockquotify, consume } from './util';
 const h2r = (htmlRewriter: HR | HTMLRewriter) => htmlRewriter as unknown as HR;
 const r2h = (hTMLRewriter: HR | HTMLRewriter) => hTMLRewriter as unknown as HTMLRewriter;
 
-const API = 'https://news.ycombinator.com'
+const HN = 'https://news.ycombinator.com'
 
 const x = {
   [Stories.TOP]: '/news',
@@ -35,7 +35,7 @@ const elToTagOpen = (el: Element) => `<${el.tagName}${[...el.attributes].map(x =
 const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
 
-export async function* stories({ p, n, next, id, site }: StoriesParams, type = Stories.TOP) {
+export async function stories({ p, n, next, id, site }: StoriesParams, type = Stories.TOP) {
   const pathname = x[type];
   const url = new ParamsURL(pathname, { 
     ...p ? { p } : {}, 
@@ -43,23 +43,28 @@ export async function* stories({ p, n, next, id, site }: StoriesParams, type = S
     ...next ? { next } : {}, 
     ...id ? { id } : {},
     ...site ? { site } : {},
-  }, API);
+  }, HN);
   const body = await fetch(url.href)
   if (!body.ok) r2err(body)
-  yield* storiesGenerator(body);
+  return storiesGenerator(body);
 }
 
 function newCustomEvent<T>(event: string, detail?: T) {
   return new CustomEvent<T>(event, { detail });
 }
 
-async function* storiesGenerator(response: Response) {
+type StoriesData = { 
+  items: AsyncIterable<APost>, 
+  moreLink: PromiseLike<string> 
+}
+
+async function storiesGenerator(response: Response): Promise<StoriesData> {
   let post: Partial<APost>;
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data', { returnEvent: 'return' });
 
-  const moreLink = resolvablePromise<string>();
+  const moreLink = new ResolvablePromise<string>();
   const rewriter = h2r(new HTMLRewriter())
     .on('.athing[id]', {
       element(el) {
@@ -98,34 +103,33 @@ async function* storiesGenerator(response: Response) {
 
   consume(r2h(rewriter).transform(response).body!)
     .then(() => iter.return())
+    .then(() => moreLink.resolve(''))
     .catch(err => iter.throw(err));
 
-  for await (const { detail: post } of iter) {
-    post.type = post.type || 'story';
-    if (!post.by) { // No users post this = job ads
-      post.type = 'job';
-    }
-    yield post as APost;
+  return {
+    items: aMap(iter, ({ detail: post }) => {
+      post.type = post.type || 'story';
+      if (!post.by) { // No users post this = job ads
+        post.type = 'job';
+      }
+      return post as APost;
+    }),
+    moreLink,
   }
-
-  // Prevent lock...
-  moreLink.resolve('');
-  
-  yield await moreLink;
 }
 
 export async function comments(id: number, p?: number): Promise<APost> {
-  const url = new ParamsURL('/item', { id, ...p ? { p } : {} }, API).href;
+  const url = new ParamsURL('/item', { id, ...p ? { p } : {} }, HN).href;
   const body = await fetch(url)
   if (body.ok) return commentsGenerator(body);
   return r2err(body);
 }
 
-export async function* threads(id: string, next?: number) {
-  const url = new ParamsURL('/threads', { id, ...next ? { next } : {} }, API).href;
+export async function threads(id: string, next?: number) {
+  const url = new ParamsURL('/threads', { id, ...next ? { next } : {} }, HN).href;
   const body = await fetch(url)
   if (!body.ok) r2err(body);
-  yield* threadsGenerator(body)
+  return threadsGenerator(body)
 }
 
 function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
@@ -183,7 +187,7 @@ async function commentsGenerator(response: Response) {
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data', { returnEvent: 'return' });
   const opts = eventTargetToAsyncIter<CustomEvent<APollOpt>>(data, 'pollopt', { returnEvent: 'return' });
 
-  const moreLink = resolvablePromise<string>();
+  const moreLink = new ResolvablePromise<string>();
 
   // console.log(response.status, response.url, ...response.headers, (await response.clone().arrayBuffer()).byteLength)
   let pollOpt: Partial<APollOpt>;
@@ -274,8 +278,9 @@ async function commentsGenerator(response: Response) {
 
   scrapeComments(rewriter, data, '.comment-tree');
     
-  const progress = consume(r2h(rewriter).transform(response).body!)
+  consume(r2h(rewriter).transform(response).body!)
     .then(() => iter.return())
+    .then(() => moreLink.resolve(''))
     .catch(err => iter.throw(err));
 
   // wait for `post` to be populated
@@ -296,7 +301,7 @@ async function commentsGenerator(response: Response) {
     return fixComment(comment)
   });
 
-  post.moreLink = Promise.race([moreLink, progress.then(() => '')]);
+  post.moreLink = moreLink;
 
   return post as APost;
 };
@@ -317,11 +322,12 @@ function fixPollOpt(pollOpt: Partial<APollOpt>) {
   return pollOpt as APollOpt;
 }
 
-async function* threadsGenerator(response: Response) {
+type ThreadsData = { items: AsyncIterable<AComment>, moreLink: Promise<string> }
+async function threadsGenerator(response: Response): Promise<ThreadsData> {
   const target = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data', { returnEvent: 'return' });
 
-  const moreLink = resolvablePromise<string>();
+  const moreLink = new ResolvablePromise<string>();
   const rewriter = h2r(new HTMLRewriter())
     .on('a.morelink[href][rel="next"]', { 
       element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
@@ -331,20 +337,19 @@ async function* threadsGenerator(response: Response) {
 
   consume(r2h(rewriter).transform(response).body!)
     .then(() => iter.return())
-    .catch(err => iter.throw(err));
+    .then(() => moreLink.resolve(''))
+    .catch(e => iter.throw(e));
 
-  for await (const { detail: comment } of iter) {
-    yield fixComment(comment);
+  return {
+    items: aMap(iter, ({ detail: comment }) => {
+      return fixComment(comment)
+    }),
+    moreLink,
   }
-
-  // Prevent lock... FIXME: better solution?
-  moreLink.resolve('');
-
-  yield await moreLink;
 };
 
 export async function user(id: string): Promise<AUser> {
-  const url = new ParamsURL('user', { id }, API);
+  const url = new ParamsURL('user', { id }, HN);
   const response = await fetch(url.href);
   if (!response.ok) r2err(response);
 

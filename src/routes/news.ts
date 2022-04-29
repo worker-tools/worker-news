@@ -147,7 +147,7 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
     .replace('$user', searchParams.get('id')!)
     .replace('$site', searchParams.get('site')!)
 
-  const storiesGen = stories({ p, n, next, id, site }, type);
+  const strs = stories({ p, n, next, id, site }, type);
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
@@ -166,17 +166,15 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
                 let i = (next && n)
                   ? (n - 1) 
                   : (p - 1) * 30;
-                for await (const post of storiesGen) {
-                  if (typeof post !== 'string') {
-                    yield rowEl(post, i++, type);
-                  } else if (post) {
-                    yield html`<tr class="morespace" style="height:10px"></tr>
-                      <tr>
-                        <td colspan="2"></td>
-                        <td class="title"><a href="${post}" class="morelink" rel="next">More</a></td>
-                      </tr>`;
-                  }
+                const { items, moreLink } = await strs;
+                for await (const post of items) {
+                  yield rowEl(post, i++, type);
                 }
+                yield html`<tr class="morespace" style="height:10px"></tr>
+                  <tr>
+                    <td colspan="2"></td>
+                    <td class="title"><a href="${moreLink}" class="morelink" rel="next">More</a></td>
+                  </tr>`;
               } catch (err) {
                 yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err as string}</td></tr>`;
               }

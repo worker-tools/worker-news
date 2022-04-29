@@ -16431,9 +16431,6 @@ ${val.stack}`;
     }
   };
   _ResolvablePromise_promise = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_resolve = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_reject = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_settled = /* @__PURE__ */ new WeakMap(), _a = Symbol.toStringTag;
-  function resolvablePromise() {
-    return new ResolvablePromise();
-  }
 
   // node_modules/.pnpm/@worker-tools+html-rewriter@0.1.0-pre.12/node_modules/@worker-tools/html-rewriter/esm/base64.js
   var __classPrivateFieldGet2 = function(receiver, state, kind, f) {
@@ -20270,9 +20267,6 @@ AA==
 
   // src/entry/html-rewriter-polyfill.ts
   self.HTMLRewriter = HTMLRewriter3;
-
-  // src/index.ts
-  init_env();
 
   // src/routes/index.ts
   init_env();
@@ -24621,21 +24615,21 @@ MTMuMC4x
   // src/routes/api/dom-api.ts
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.3/node_modules/@worker-tools/json-fetch/esm/index.js
+  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/index.js
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.3/node_modules/@worker-tools/json-fetch/esm/search-params-url.js
+  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/search-params-url.js
   init_env();
   var SearchParamsURL = class extends URL {
     constructor(url, params, base2) {
       super(url, base2);
       const iterable = Array.isArray(params) || params instanceof URLSearchParams ? params : typeof params === "string" ? new URLSearchParams(params) : Object.entries(params !== null && params !== void 0 ? params : {});
       for (const [k, v2] of iterable)
-        this.searchParams.append(k, v2.toString());
+        this.searchParams.append(k, "" + v2);
     }
   };
 
-  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.3/node_modules/@worker-tools/json-fetch/esm/index.js
+  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/index.js
   function isBodyInit(b) {
     return b == null || typeof b === "string" || typeof Blob !== "undefined" && b instanceof Blob || typeof ArrayBuffer !== "undefined" && (b instanceof ArrayBuffer || ArrayBuffer.isView(b)) || typeof FormData !== "undefined" && b instanceof FormData || typeof URLSearchParams !== "undefined" && b instanceof URLSearchParams || typeof ReadableStream !== "undefined" && b instanceof ReadableStream;
   }
@@ -29250,7 +29244,7 @@ MTMuMC4x
   // src/routes/api/dom-api.ts
   var h2r = (htmlRewriter) => htmlRewriter;
   var r2h = (hTMLRewriter) => hTMLRewriter;
-  var API = "https://news.ycombinator.com";
+  var HN = "https://news.ycombinator.com";
   var x2 = {
     ["news" /* TOP */]: "/news",
     ["newest" /* NEW */]: "/newest",
@@ -29269,7 +29263,7 @@ MTMuMC4x
   var r2err = (body) => {
     throw Error(`${body.status} ${body.statusText} ${body.url}`);
   };
-  async function* stories({ p, n, next, id, site }, type = "news" /* TOP */) {
+  async function stories({ p, n, next, id, site }, type = "news" /* TOP */) {
     const pathname = x2[type];
     const url = new SearchParamsURL(pathname, {
       ...p ? { p } : {},
@@ -29277,20 +29271,20 @@ MTMuMC4x
       ...next ? { next } : {},
       ...id ? { id } : {},
       ...site ? { site } : {}
-    }, API);
+    }, HN);
     const body = await fetch(url.href);
     if (!body.ok)
       r2err(body);
-    yield* storiesGenerator(body);
+    return storiesGenerator(body);
   }
   function newCustomEvent(event, detail) {
     return new CustomEvent(event, { detail });
   }
-  async function* storiesGenerator(response) {
+  async function storiesGenerator(response) {
     let post;
     const data = new EventTarget();
     const iter = eventTargetToAsyncIterable(data, "data", { returnEvent: "return" });
-    const moreLink = resolvablePromise();
+    const moreLink = new ResolvablePromise();
     const rewriter = h2r(new HTMLRewriter()).on(".athing[id]", {
       element(el) {
         if (post)
@@ -29334,30 +29328,31 @@ MTMuMC4x
         data.dispatchEvent(newCustomEvent("return"));
       }
     });
-    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).catch((err) => iter.throw(err));
-    for await (const { detail: post2 } of iter) {
-      post2.type = post2.type || "story";
-      if (!post2.by) {
-        post2.type = "job";
-      }
-      yield post2;
-    }
-    moreLink.resolve("");
-    yield await moreLink;
+    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).then(() => moreLink.resolve("")).catch((err) => iter.throw(err));
+    return {
+      items: aMap2(iter, ({ detail: post2 }) => {
+        post2.type = post2.type || "story";
+        if (!post2.by) {
+          post2.type = "job";
+        }
+        return post2;
+      }),
+      moreLink
+    };
   }
   async function comments(id, p) {
-    const url = new SearchParamsURL("/item", { id, ...p ? { p } : {} }, API).href;
+    const url = new SearchParamsURL("/item", { id, ...p ? { p } : {} }, HN).href;
     const body = await fetch(url);
     if (body.ok)
       return commentsGenerator(body);
     return r2err(body);
   }
-  async function* threads(id, next) {
-    const url = new SearchParamsURL("/threads", { id, ...next ? { next } : {} }, API).href;
+  async function threads(id, next) {
+    const url = new SearchParamsURL("/threads", { id, ...next ? { next } : {} }, HN).href;
     const body = await fetch(url);
     if (!body.ok)
       r2err(body);
-    yield* threadsGenerator(body);
+    return threadsGenerator(body);
   }
   function scrapeComments(rewriter, data, prefix = "") {
     let comment;
@@ -29422,7 +29417,7 @@ MTMuMC4x
     const data = new EventTarget();
     const iter = eventTargetToAsyncIterable(data, "data", { returnEvent: "return" });
     const opts = eventTargetToAsyncIterable(data, "pollopt", { returnEvent: "return" });
-    const moreLink = resolvablePromise();
+    const moreLink = new ResolvablePromise();
     let pollOpt;
     const rewriter = h2r(new HTMLRewriter()).on(".fatitem > .athing[id]", {
       element(el) {
@@ -29525,7 +29520,7 @@ MTMuMC4x
       }
     });
     scrapeComments(rewriter, data, ".comment-tree");
-    const progress = consume(r2h(rewriter).transform(response).body).then(() => iter.return()).catch((err) => iter.throw(err));
+    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).then(() => moreLink.resolve("")).catch((err) => iter.throw(err));
     await iter.next();
     if (post.text?.trim()) {
       post.text = await blockquotify("<p>" + post.text);
@@ -29540,7 +29535,7 @@ MTMuMC4x
       comment.story = post.id;
       return fixComment(comment);
     });
-    post.moreLink = Promise.race([moreLink, progress.then(() => "")]);
+    post.moreLink = moreLink;
     return post;
   }
   async function fixComment(comment) {
@@ -29559,25 +29554,26 @@ MTMuMC4x
       delete pollOpt.text;
     return pollOpt;
   }
-  async function* threadsGenerator(response) {
+  async function threadsGenerator(response) {
     const target2 = new EventTarget();
     const iter = eventTargetToAsyncIterable(target2, "data", { returnEvent: "return" });
-    const moreLink = resolvablePromise();
+    const moreLink = new ResolvablePromise();
     const rewriter = h2r(new HTMLRewriter()).on('a.morelink[href][rel="next"]', {
       element(el) {
         moreLink.resolve(unescape2(el.getAttribute("href") ?? ""));
       }
     });
     scrapeComments(rewriter, target2, "");
-    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).catch((err) => iter.throw(err));
-    for await (const { detail: comment } of iter) {
-      yield fixComment(comment);
-    }
-    moreLink.resolve("");
-    yield await moreLink;
+    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).then(() => moreLink.resolve("")).catch((e) => iter.throw(e));
+    return {
+      items: aMap2(iter, ({ detail: comment }) => {
+        return fixComment(comment);
+      }),
+      moreLink
+    };
   }
   async function user(id) {
-    const url = new SearchParamsURL("user", { id }, API);
+    const url = new SearchParamsURL("user", { id }, HN);
     const response = await fetch(url.href);
     if (!response.ok)
       r2err(response);
@@ -29703,7 +29699,7 @@ MTMuMC4x
     const id = "submitted" /* USER */ ? searchParams.get("id") : "";
     const site = "from" /* FROM */ ? searchParams.get("site") : "";
     const title = x3[type].replace("$user", searchParams.get("id")).replace("$site", searchParams.get("site"));
-    const storiesGen = stories({ p, n, next, id, site }, type);
+    const strs = stories({ p, n, next, id, site }, type);
     return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get("id") })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
@@ -29719,17 +29715,15 @@ MTMuMC4x
             ${async function* () {
       try {
         let i = next && n ? n - 1 : (p - 1) * 30;
-        for await (const post of storiesGen) {
-          if (typeof post !== "string") {
-            yield rowEl(post, i++, type);
-          } else if (post) {
-            yield html`<tr class="morespace" style="height:10px"></tr>
-                      <tr>
-                        <td colspan="2"></td>
-                        <td class="title"><a href="${post}" class="morelink" rel="next">More</a></td>
-                      </tr>`;
-          }
+        const { items, moreLink } = await strs;
+        for await (const post of items) {
+          yield rowEl(post, i++, type);
         }
+        yield html`<tr class="morespace" style="height:10px"></tr>
+                  <tr>
+                    <td colspan="2"></td>
+                    <td class="title"><a href="${moreLink}" class="morelink" rel="next">More</a></td>
+                  </tr>`;
       } catch (err) {
         yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err}</td></tr>`;
       }
@@ -29857,7 +29851,7 @@ MTMuMC4x
       return notFound2("No such item.");
     const title = `${id}'s comments`;
     const next = Number(searchParams.get("next"));
-    const threadsGen = threads(id, next);
+    const threadsPage = threads(id, next);
     return new HTMLResponse(pageLayout({ title, op: "threads", id })(async () => {
       return html`
       <tr id="pagespace" title="${title}" style="height:10px"></tr>
@@ -29866,13 +29860,11 @@ MTMuMC4x
       </tr>
       ${async function* () {
         try {
-          for await (const item of threadsGen) {
-            if (typeof item !== "string") {
-              yield commentEl(item, { showReply: true, showParent: item.level === 0 });
-            } else if (item) {
-              yield moreLinkEl(item);
-            }
+          const { items, moreLink } = await threadsPage;
+          for await (const item of items) {
+            yield commentEl(item, { showReply: true, showParent: item.level === 0 });
           }
+          yield moreLinkEl(await moreLink);
         } catch (err) {
           console.warn(err);
           yield html`<tr><td>${err instanceof Error ? err.message : err}</td></tr>`;
@@ -29981,7 +29973,8 @@ MTMuMC4x
     </tr>`;
   };
   var _a7;
-  function getItem({ searchParams }) {
+  function getItem(args) {
+    const { searchParams } = args;
     const id = Number(searchParams.get("id"));
     if (Number.isNaN(id))
       return notFound2("No such item.");
@@ -30029,22 +30022,21 @@ MTMuMC4x
     cacheControl: "public",
     maxAge: 31536e3
   })), async (req, { params, type, waitUntil, handled }) => {
-    const cache = await caches.open("identicon");
-    const res = await cache.match(req);
+    const cache = await self.caches?.open("identicon");
+    const res = await cache?.match(req);
     if (!res) {
       const svg = renderIconSVG({ seed: params.by ?? "", size: 6, scale: 2 });
       const res2 = new Response(svg, { headers: { "content-type": type } });
       waitUntil((async () => {
         await handled;
         res2.headers.set("cache-control", "public, max-age=31536000");
-        return cache.put(req, res2);
+        return cache?.put(req, res2);
       })());
       return res2.clone();
     }
-    console.log(res.type);
     return new Response(res.body, res);
   });
-  router.get("/item", basics(), (_req, ctx) => getItem(ctx));
+  router.get("/item", pipe(basics(), contentTypes(["text/html", "application/json"])), (_req, ctx) => getItem(ctx));
 
   // src/routes/user.ts
   init_env();
@@ -30095,24 +30087,21 @@ MTMuMC4x
   router.get("/user", basics(), (_req, x4) => user2(x4));
 
   // src/routes/index.ts
-  var staticCache = caching({
+  router.get("/yc500.gif", () => fetch("https://news.ycombinator.com/yc500.gif"));
+  router.get("/newsfaq.html", () => fetch("https://news.ycombinator.com/newsfaq.html"));
+  router.get("/newsguidelines.html", () => fetch("https://news.ycombinator.com/newsguidelines.html"));
+  router.get("/showhn.html", () => fetch("https://news.ycombinator.com/showhn.html"));
+  router.get("/security.html", () => fetch("https://news.ycombinator.com/security.html"));
+  router.get("/yc.css", () => fetch("https://news.ycombinator.com/yc.css"));
+  router.get("/", basics(), (req, x4) => news(x4));
+  router.get("*", caching({
     cacheControl: "public",
     maxAge: 60 * 60 * 24 * 30 * 12
-  });
-  router.get("/yc.css", staticCache, () => fetch("https://news.ycombinator.com/yc.css"));
-  router.get("/yc500.gif", staticCache, () => fetch("https://news.ycombinator.com/yc500.gif"));
-  router.get("/newsfaq.html", staticCache, () => fetch("https://news.ycombinator.com/newsfaq.html"));
-  router.get("/newsguidelines.html", staticCache, () => fetch("https://news.ycombinator.com/newsguidelines.html"));
-  router.get("/showhn.html", staticCache, () => fetch("https://news.ycombinator.com/showhn.html"));
-  router.get("/security.html", staticCache, () => fetch("https://news.ycombinator.com/security.html"));
-  router.get("/", basics(), (_req, x4) => news(x4));
-  router.get("*", staticCache, handler);
+  }), handler);
   router.external("https://icons.duckduckgo.com/*", (req) => fetch(req));
 
-  // src/index.ts
-  self.addEventListener("fetch", router);
-
   // src/entry/sw.ts
+  self.addEventListener("fetch", router);
   self.addEventListener("install", () => {
     self.skipWaiting();
     console.log("skipWaiting");

@@ -138,13 +138,18 @@ const replyTr = ({ id, type }: APost) => {
 }
 
 // Dead items: 26841031
-function getItem({ searchParams }: RouteArgs)  {
+function getItem(args: RouteArgs): HTMLResponse  {
+  const { searchParams } = args;
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Number(searchParams.get('p'));
 
   const postResponse = apiComments(id, p);
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
+
+  // if ((<any>args).type === 'application/json') {
+  //   return new JSONResponse(jsonStringifyStream(postResponse))
+  // }
 
   return new HTMLResponse(pageRenderer(async () => {
     try {
@@ -225,4 +230,7 @@ router.get('/identicon/:by.svg',
   },
 )
 
-router.get('/item', basics(), (_req, ctx) => getItem(ctx))
+router.get('/item', combine(
+  basics(),
+  contentTypes(['text/html', 'application/json']),
+), (_req, ctx) => getItem(ctx))

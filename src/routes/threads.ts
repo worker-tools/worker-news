@@ -30,7 +30,7 @@ function threads({ searchParams }: RouteArgs)  {
 
   const next = Number(searchParams.get('next'));
 
-  const threadsGen = apiThreads(id, next);
+  const threadsPage = apiThreads(id, next);
 
   return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {
     return html`
@@ -40,13 +40,11 @@ function threads({ searchParams }: RouteArgs)  {
       </tr>
       ${async function* () {
         try {
-          for await (const item of threadsGen) {
-            if (typeof item !== 'string') {
-              yield commentEl(item, { showReply: true, showParent: item.level === 0 });
-            } else if (item) {
-              yield moreLinkEl(item);
-            }
+          const { items, moreLink } = await threadsPage
+          for await (const item of items) {
+             yield commentEl(item, { showReply: true, showParent: item.level === 0 });
           }
+          yield moreLinkEl(await moreLink);
         } catch (err) {
           console.warn(err)
           yield html`<tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`;
