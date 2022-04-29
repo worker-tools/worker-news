@@ -5,7 +5,7 @@ import { internalServerError, notFound } from '@worker-tools/response-creators'
 //   event.waitUntil(handleEvent(event))
 // })
 
-export async function handler(_req: Request, event: { request: Request, waitUntil: (_f: any) => void }) {
+export async function handler(req: Request, event: { request: Request, waitUntil: (_f: any) => void }) {
   const options: Partial<Options> = {}
 
   /**
@@ -18,7 +18,7 @@ export async function handler(_req: Request, event: { request: Request, waitUnti
     if (DEBUG) {
       // customize caching
       options.cacheControl = {
-        bypassCache: true,
+        bypassCache: false,
       }
     }
 
@@ -35,6 +35,11 @@ export async function handler(_req: Request, event: { request: Request, waitUnti
 
     // allow headers to be altered
     const response = new Response(page.body, page)
+
+    if (req.url.endsWith('.js')) response.headers.set('content-type', 'text/javascript')
+    if (req.url.endsWith('.wasm')) response.headers.set('content-type', 'application/wasm')
+    if (req.url.endsWith('.css')) response.headers.set('content-type', 'text/css')
+    if (req.url.endsWith('.html')) response.headers.set('content-type', 'text/html')
 
     // response.headers.set('X-XSS-Protection', '1; mode=block')
     // response.headers.set('X-Content-Type-Options', 'nosniff')

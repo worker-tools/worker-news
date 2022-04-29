@@ -8,12 +8,12 @@
     "postinstall": "npm run build",
     "build": "npm run build-sw && npm run build-cf",
     "watch": "npm run watch-sw & npm run watch-cf",
-    "build-cf": "esbuild src/entry/cf.ts --bundle --target=es2020 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=false",
-    "watch-cf": "esbuild src/entry/cf.ts --bundle --target=es2020 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=true --sourcemap --watch",
-    "build-deno": "npm run build-sw && esbuild src/entry/deno.ts --bundle --format=esm --target=es2020 --outfile=dist/mod.js --define:global=self --tsconfig=tsconfig.deno.json --inject:env.js --define:DEBUG=false ",
-    "watch-deno": "npm run watch-sw & esbuild src/entry/deno.ts --bundle --format=esm --target=es2020 --outfile=dist/mod.js --define:global=self --tsconfig=tsconfig.deno.json --inject:env.js --define:DEBUG=true --sourcemap --watch",
-    "build-sw": "esbuild src/entry/sw.ts --bundle --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --inject:env.js --define:DEBUG=false ",
-    "watch-sw": "esbuild src/entry/sw.ts --bundle --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --inject:env.js --define:DEBUG=true --sourcemap --watch",
+    "build-cf": "esbuild src/entry/cf.ts --bundle --target=es2020 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=false --define:SW=false",
+    "watch-cf": "esbuild src/entry/cf.ts --bundle --target=es2020 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=true --define:SW=false --sourcemap --watch",
+    "build-deno": "npm run build-sw && esbuild src/entry/deno.ts --bundle --format=esm --target=es2020 --outfile=dist/mod.js --define:global=self --tsconfig=tsconfig.deno.json --inject:env.js --define:DEBUG=false --define:SW=false",
+    "watch-deno": "npm run watch-sw & esbuild src/entry/deno.ts --bundle --format=esm --target=es2020 --outfile=dist/mod.js --define:global=self --tsconfig=tsconfig.deno.json --inject:env.js --define:DEBUG=true --define:SW=false --sourcemap --watch",
+    "build-sw": "esbuild src/entry/sw.ts --bundle --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --inject:env.js --define:DEBUG=false --define:SW=true ",
+    "watch-sw": "esbuild src/entry/sw.ts --bundle --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --inject:env.js --define:DEBUG=true --define:SW=true --sourcemap --watch",
     "serve": "miniflare --watch",
     "serve-wrangler": "wrangler dev",
     "serve-deno": "deno run --allow-read --allow-write --allow-net --location=http://localhost:8787 --watch dist/mod.js",
@@ -23,11 +23,11 @@
   "author": "Florian Klampfer <mail@qwtel.com>",
   "license": "MIT",
   "devDependencies": {
-    "@cloudflare/workers-types": "^3.7.1",
-    "@types/node": "^17.0.29",
+    "@cloudflare/workers-types": "^3.8.0",
+    "@types/node": "^17.0.30",
     "esbuild": "^0.14.38",
     "miniflare": "^2.4.0",
-    "typescript": "^4.6.3"
+    "typescript": "^4.6.4"
   },
   "dependencies": {
     "@cloudflare/kv-asset-handler": "^0.2.0",

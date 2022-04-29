@@ -2,12 +2,12 @@ lockfileVersion: 5.3
 
 specifiers:
   '@cloudflare/kv-asset-handler': ^0.2.0
-  '@cloudflare/workers-types': ^3.7.1
+  '@cloudflare/workers-types': ^3.8.0
   '@download/blockies': github:qwtel/blockies
   '@miniflare/html-rewriter': ^2.4.0
   '@qwtel/p-queue-browser': ^6.6.2
   '@types/html-escaper': ^3.0.0
-  '@types/node': ^17.0.29
+  '@types/node': ^17.0.30
   '@worker-tools/cloudflare-kv-storage': ^0.8.0
   '@worker-tools/deno-fetch-event-adapter': ^1.0.5
   '@worker-tools/deno-kv-storage': ^0.4.4
@@ -43,7 +43,7 @@ specifiers:
   ts-pipe-compose: ^0.2.1
   type-fest: ^2.12.2
   typed-array-utils: ^0.2.2
-  typescript: ^4.6.3
+  typescript: ^4.6.4
   typeson: ^6.1.0
   typeson-registry: ^1.0.0-alpha.39
   urlpattern-polyfill: ^4.0.3
@@ -96,11 +96,11 @@ dependencies:
   whatwg-stream-to-async-iter: 0.5.0
 
 devDependencies:
-  '@cloudflare/workers-types': 3.7.1
-  '@types/node': 17.0.29
+  '@cloudflare/workers-types': 3.8.0
+  '@types/node': 17.0.30
   esbuild: 0.14.38
   miniflare: 2.4.0
-  typescript: 4.6.3
+  typescript: 4.6.4
 
 packages:
 
@@ -114,8 +114,8 @@ packages:
     resolution: {integrity: sha512-kaMn2rueJ0PL1TYVGknTCh0X0x0d9G+FNXAFep7/4uqecEZoQb/63o6rOmMuiqI09zLuHV6xhKRXinokV/MY9A==}
     dev: false
 
-  /@cloudflare/workers-types/3.7.1:
-    resolution: {integrity: sha512-GJU304vzbKI9SvEsdBp/ObYClWe+7Fc0vyKPNia1VWi9Cj2WVsRaH2tXaQPMgAhjsFrQLhI3lBAkMhFPhBVliQ==}
+  /@cloudflare/workers-types/3.8.0:
+    resolution: {integrity: sha512-5dBAxHqt3SkBUcK0sFSW6me7KTjJpJ2eiIq8Aha/BfoWyl0G7/BlIT3bOWYSKOejuUq6mKsH4HKVWbJGJhbWog==}
     dev: true
 
   /@iarna/toml/2.2.5:
@@ -282,8 +282,8 @@ packages:
     resolution: {integrity: sha512-OcJcvP3Yk8mjYwf/IdXZtTE1tb/u0WF0qa29ER07ZHCYUBZXSN29Z1mBS+/96+kNMGTFUAbSz9X+pHmHpZrTCw==}
     dev: false
 
-  /@types/node/17.0.29:
-    resolution: {integrity: sha512-tx5jMmMFwx7wBwq/V7OohKDVb/JwJU5qCVkeLMh1//xycAJ/ESuw9aJ9SEtlCZDYi2pBfe4JkisSoAtbOsBNAA==}
+  /@types/node/17.0.30:
+    resolution: {integrity: sha512-oNBIZjIqyHYP8VCNAV9uEytXVeXG2oR0w9lgAXro20eugRQfY002qr3CUl6BAe+Yf/z3CRjPdz27Pu6WWtuSRw==}
     dev: true
 
   /@types/stack-trace/0.0.29:
@@ -1104,8 +1104,8 @@ packages:
     resolution: {integrity: sha512-xq2oNAgDAZKsmzu7KQXDe9cLKiOYZn+6h5VMzcg1BmiiGPlCxMu1mh+tiWzydfIFGdNBs8/WS78ZPkTdHhnxlg==}
     dev: false
 
-  /typescript/4.6.3:
-    resolution: {integrity: sha512-yNIatDa5iaofVozS/uQJEl3JRWLKKGJKh6Yaiv0GLGSuhpFJe7P3SbHZ8/yjAHRQwKRoA6YZqlfjXWmVzoVSMw==}
+  /typescript/4.6.4:
+    resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true

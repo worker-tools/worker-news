@@ -22,7 +22,7 @@ export interface CommOpts {
 
 export const commentTr = (comm: AComment, { showToggle = true, showReply = true, showParent = false }: CommOpts = {}) => {
   const { id, level, by, text, time, quality, deleted, parent, story, storyTitle } = comm;
-  const timeAgo = time && formatDistanceToNowStrict(time, { addSuffix: true })
+  const timeAgo = time && formatDistanceToNowStrict(new Date(time), { addSuffix: true })
   return html`<tr>
     <td class="ind" indent="${level ?? 0}"><img src="s.gif" height="1" width="${(level ?? 0) * 40}"></td>
     <td valign="top" class="votelinks">
@@ -35,7 +35,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
       <div style="margin-top:2px; margin-bottom:-10px;">
         <span class="comhead">
           <a href="user?id=${by}" class="hnuser">${identicon(by)} ${by}</a> 
-          <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
+          <span class="age" title="${time && new Date(time).toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
           <span id="unv_${id}"></span>
           <span class="navs">
             <span class="par">${showParent ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
@@ -160,16 +160,15 @@ export async function jsonStringifyStream(_obj: Awaitable<Record<PropertyKey, an
 }
 
 // Dead items: 26841031
-async function getItem(args: RouteArgs)  {
-  const { searchParams } = args;
+async function getItem({ searchParams, type: contentType, url }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Number(searchParams.get('p'));
 
-  const postResponse = apiComments(id, p);
+  const postResponse = apiComments(id, p, { url });
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
-  if (args.type === 'application/json') {
+  if (contentType === 'application/json') {
     return new JSONResponse(await jsonStringifyStream(await postResponse))
   }
 
@@ -224,7 +223,7 @@ router.get('/identicon/dang.svg', req => fetch('https://news.ycombinator.com/y18
 router.get('/identicon/:by.svg', 
   combine(
     basics(), 
-    contentTypes(['image/svg+xml']), 
+    contentTypes(['image/svg+xml', '*/*']), 
     caching({ 
       cacheControl: 'public', 
       maxAge: 31536000,
@@ -235,7 +234,7 @@ router.get('/identicon/:by.svg',
     const res = await cache?.match(req);
     if (!res) {
       const svg = renderIconSVG({ seed: params.by ?? '', size: 6, scale: 2 }) 
-      const res = new Response(svg, { headers: { 'content-type': type } });
+      const res = new Response(svg, { headers: { 'content-type': type, 'content-length': ''+svg.length } });
       waitUntil((async () => { 
         await handled; 
         // FIXME: make it possible to get response (or just headers!?) after middleware applied!?

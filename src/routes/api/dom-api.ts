@@ -8,7 +8,7 @@ import { unescape } from 'html-escaper';
 
 import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 
-import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams } from './interface';
+import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface';
 import { aMap } from './iter';
 import { blockquotify, consume } from './util';
 
@@ -35,15 +35,9 @@ const elToTagOpen = (el: Element) => `<${el.tagName}${[...el.attributes].map(x =
 const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
 
-export async function stories({ p, n, next, id, site }: StoriesParams, type = Stories.TOP) {
+export async function stories(params: StoriesParams, type = Stories.TOP) {
   const pathname = x[type];
-  const url = new ParamsURL(pathname, { 
-    ...p ? { p } : {}, 
-    ...n ? { n } : {},
-    ...next ? { next } : {}, 
-    ...id ? { id } : {},
-    ...site ? { site } : {},
-  }, HN);
+  const url = new ParamsURL(pathname, params, HN);
   const body = await fetch(url.href)
   if (!body.ok) r2err(body)
   return storiesGenerator(body);
@@ -51,11 +45,6 @@ export async function stories({ p, n, next, id, site }: StoriesParams, type = St
 
 function newCustomEvent<T>(event: string, detail?: T) {
   return new CustomEvent<T>(event, { detail });
-}
-
-type StoriesData = { 
-  items: AsyncIterable<APost>, 
-  moreLink: PromiseLike<string> 
 }
 
 async function storiesGenerator(response: Response): Promise<StoriesData> {
@@ -329,7 +318,6 @@ function fixPollOpt(pollOpt: Partial<APollOpt>) {
   return pollOpt as APollOpt;
 }
 
-type ThreadsData = { items: AsyncIterable<AComment>, moreLink: Promise<string> }
 async function threadsGenerator(response: Response): Promise<ThreadsData> {
   const target = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data', { returnEvent: 'return' });

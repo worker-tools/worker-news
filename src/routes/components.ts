@@ -110,8 +110,10 @@ export const pageLayout = ({ title, op, id }: {
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string 
 }) => (content: HTMLContent) => html`
+  <!DOCTYPE html>
   <html lang="en" op="${op}">
   <head>
+    <meta charset="UTF-8">
     <meta name="referrer" content="origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="news.css">
@@ -119,8 +121,9 @@ export const pageLayout = ({ title, op, id }: {
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {
-      // await navigator.serviceWorker.register('/sw.js')
-      for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+      const regis = await navigator.serviceWorker.register('/sw.js')
+      regis.addEventListener('updatefound', () => { console.log('update found')})
+      // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
     })()</script>
   </head>
   <body>

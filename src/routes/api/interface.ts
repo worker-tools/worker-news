@@ -12,6 +12,14 @@ export enum Stories {
 }
 
 export type StoriesParams = { p?: number, n?: number, next?: number, id?: string, site?: string };
+export type StoriesData = { 
+  items: AsyncIterable<APost>, 
+  moreLink: PromiseLike<string> 
+}
+export type ThreadsData = { 
+  items: AsyncIterable<AComment>, 
+  moreLink: Promise<string> 
+}
 
 export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
 
@@ -19,7 +27,7 @@ export interface AThing {
   type: Type,
   id: number,
   by: string,
-  time?: Date,
+  time?: number | string | Date,
   kids?: AsyncIterable<AComment>,
   parts?: AsyncIterable<APollOpt>,
   dead?: boolean,
@@ -28,7 +36,7 @@ export interface AThing {
 
 export interface AUser {
   about?: string,
-  created?: number,
+  created?: number | string | Date,
   id: string,
   karma: number,
   submitted: number[],

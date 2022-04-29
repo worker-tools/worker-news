@@ -84,7 +84,7 @@ export const aThing = async ({ type, id, url: href, title, dead, deleted }: APos
 
 export const subtext = (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
   const { type, id, title, time, score, by, descendants, dead } = post;
-  const timeAgo = time && formatDistanceToNowStrict(time, { addSuffix: true })
+  const timeAgo = time && formatDistanceToNowStrict(new Date(time), { addSuffix: true })
   return html`
     <tr>
       <td colspan="2"></td>
@@ -95,7 +95,7 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
         ${type !== 'job'
           ? html`<a href="user?id=${by}" class="hnuser">${showPast ? identicon(by, 9): ''} ${by}</a>` 
           : ''}
-        <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
+        <span class="age" title="${time && new Date(time).toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
         <span id="unv_${id}"></span>
         ${showPast
           ? html`| <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a>`
@@ -137,7 +137,7 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
   <tr><td colspan="2"></td><td>${message}</td></tr>
   <tr style="height:${marginBottom}px"></tr>`;
 
-const mkStories = (type: Stories) => async ({ searchParams, type: contentType }: RouteArgs) => {
+const mkStories = (type: Stories) => async ({ searchParams, type: contentType, url }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
@@ -149,7 +149,7 @@ const mkStories = (type: Stories) => async ({ searchParams, type: contentType }:
     .replace('$user', searchParams.get('id')!)
     .replace('$site', searchParams.get('site')!)
 
-  const storiesPage = stories({ p, n, next, id, site }, type);
+  const storiesPage = stories({ p, n, next, id, site }, type, { url });
 
   if (contentType === 'application/json') {
     return new JSONResponse(await jsonStringifyStream(storiesPage))

@@ -22,11 +22,11 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-const user = async ({ searchParams, type }: RouteArgs) => {
+const user = async ({ searchParams, type, url }: RouteArgs) => {
   const un = searchParams.get('id');
   if (!un) return notFound('No such user.');
 
-  const userPromise = apiUser(un)
+  const userPromise = apiUser(un, { url })
   const title = `Profile: ${un}`;
 
   if (type === 'application/json') {
@@ -40,7 +40,7 @@ const user = async ({ searchParams, type }: RouteArgs) => {
           ${async () => {
             try {
               const uo = await userPromise;
-              const dt = uo?.created && new Date(uo.created * 1000);
+              const dt = typeof uo?.created === 'number' ? new Date(uo.created * 1000) : new Date(uo.created ?? 0)
               const [{ value: month },, { value: day },, { value: year }] = numDTF.formatToParts(dt);
               return html`
                 <tr class="athing"><td valign="top">user:</td><td timestamp="${uo.created}"><a href="user?id=${un}" class="hnuser">${identicon(un, 13)} ${un}</a></td></tr>
