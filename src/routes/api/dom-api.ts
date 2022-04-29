@@ -181,11 +181,12 @@ function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
 }
 
 async function commentsGenerator(response: Response) {
-  const post: Partial<APost> = { title: '', score: 0, by: '', descendants: 0, text: '', storyTitle: '' };
+  const post: Partial<APost> = { title: '', score: 0, by: '', descendants: 0, text: '', storyTitle: '', dead: true };
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data', { returnEvent: 'return' });
   const opts = eventTargetToAsyncIter<CustomEvent<APollOpt>>(data, 'pollopt', { returnEvent: 'return' });
+  let hasParts = undefined;
 
   const moreLink = new ResolvablePromise<string>();
 
@@ -216,6 +217,9 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem > tr:nth-child(4) > td:nth-child(2)', { 
       text({ text }) { post.text += text }
     })
+    .on('.fatitem form', {
+      element() { post.dead = false }
+    })
     // HACK: there's no good way to distinguish link and story submissions.
     // When it's a link, the reply form is in the same spot as the text is for a story submission, 
     // so we just ignore all the form elements...
@@ -228,6 +232,7 @@ async function commentsGenerator(response: Response) {
     // Poll: item?id=30210378
     .on('.fatitem > tr:nth-child(6) tr.athing[id]', {
       element(el) {
+        hasParts = true;
         post.type = 'poll';
 
         if (pollOpt) data.dispatchEvent(newCustomEvent('pollopt', pollOpt))
@@ -290,14 +295,16 @@ async function commentsGenerator(response: Response) {
     post.text = await blockquotify('<p>' + post.text)
   } else delete post.text
 
-  post.parts = aMap(opts, ({ detail: pollOpt }) => {
+  post.parts = hasParts && aMap(opts, ({ detail: pollOpt }) => {
     pollOpt.poll = post.id!;
     pollOpt.by = post.by!;
+    pollOpt.dead = post.dead;
     return fixPollOpt(pollOpt);
   })
 
   post.kids = aMap(iter, ({ detail: comment }) => {
     comment.story = post.id;
+    comment.dead = post.dead;
     return fixComment(comment)
   });
 

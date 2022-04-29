@@ -47,15 +47,15 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
       <div class="comment">
         <span class="commtext ${quality}">
           ${deleted ? '[flagged]' : text ? unsafeHTML(text) : ' '}
-          ${showReply && !deleted ? html`<div class="reply">
+          <div class="reply">
             <p>
-              <font size="1">
+              ${showReply && !deleted ? html`<font size="1">
                 ${/*<u><a href="reply?id=${id}&amp;goto=item%3Fid%3D${comm.story}%23${id}">reply</a></u>*/''}
                 ${/*<span style="cursor:default;opacity:0.33" title="Not implemented">reply</span>*/''}
                 <u><a onclick="popitup(this,event,850,300)" href="https://news.ycombinator.com/item?id=${id}#${id}">reply</a></u>
-              </font>
+              </font>` : ''}
             </p>
-          </div>`: ''}
+          </div>
         </span>
       </div>
     </td>
@@ -63,7 +63,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
 }
 
 export const commentEl = (comment: AComment, commOpts: CommOpts = {}) => {
-  if (comment.dead) return '';
+  // if (comment.dead) return '';
   return html`<tr class="athing comtr" id="${comment.id}">
     <td>
       <table border="0">
@@ -75,10 +75,10 @@ export const commentEl = (comment: AComment, commOpts: CommOpts = {}) => {
   </tr>`;
 }
 
-export async function* commentTree(kids: AsyncIterable<AComment>): AsyncGenerator<HTMLContent> {
+export async function* commentTree(kids: AsyncIterable<AComment>, parent: { dead: boolean }): AsyncGenerator<HTMLContent> {
   for await (const item of kids) {
-    yield commentEl(item);
-    if (item.kids) yield* commentTree(item.kids);
+    yield commentEl(item, { showReply: !parent.dead });
+    if (item.kids) yield* commentTree(item.kids, parent);
   }
 }
 
@@ -156,7 +156,6 @@ function getItem(args: RouteArgs): HTMLResponse  {
       const post = await postResponse;
       const { title, text, kids, parts } = post;
       return html`
-        <tr id="pagespace" title="${title}" style="height:10px"></tr>
         ${title 
           ? html`<script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` 
           : ''}
@@ -181,7 +180,7 @@ function getItem(args: RouteArgs): HTMLResponse  {
             </table>
             <table border="0" class="comment-tree">
               <tbody>
-                ${kids && commentTree(kids)}
+                ${kids && commentTree(kids, post)}
                 ${async () => {
                   const moreLink = await post.moreLink;
                   return moreLink
@@ -199,7 +198,7 @@ function getItem(args: RouteArgs): HTMLResponse  {
   }));
 }
 
-router.get('/identicon/dang.svg', () => fetch('https://news.ycombinator.com/y18.gif'))
+router.get('/identicon/dang.svg', req => fetch('https://news.ycombinator.com/y18.gif', req))
 router.get('/identicon/:by.svg', 
   combine(
     basics(), 

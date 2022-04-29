@@ -128,6 +128,7 @@ export const pageLayout = ({ title, op, id }: {
       <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
         <tbody>
           ${headerEl({ op, id })}
+          <tr id="pagespace" title="${title}" style="height:10px"></tr>
           ${content}
           ${footerEl()}
         </tbody>

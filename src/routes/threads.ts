@@ -34,7 +34,6 @@ function threads({ searchParams }: RouteArgs)  {
 
   return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {
     return html`
-      <tr id="pagespace" title="${title}" style="height:10px"></tr>
       <tr>
         <td> </td>
       </tr>

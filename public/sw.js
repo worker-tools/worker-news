@@ -24607,7 +24607,7 @@ MTMuMC4x
     <center>
       <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
         <tbody>
-          `, "\n          ", "\n          ", '\n        </tbody>\n      </table>\n    </center>\n    <script type="text/javascript" src="hn.js"><\/script>\n    ', "\n  </body>\n  </html>"])), op, title ? `${title} | Worker News` : "Worker News", headerEl({ op, id }), content, footerEl(), self.location.hostname === "news.workers.tools" ? html(_a6 || (_a6 = __template(['<script defer data-domain="news.workers.tools" src="https://plausible.io/js/plausible.js"><\/script>']))) : "");
+          `, '\n          <tr id="pagespace" title="', '" style="height:10px"></tr>\n          ', "\n          ", '\n        </tbody>\n      </table>\n    </center>\n    <script type="text/javascript" src="hn.js"><\/script>\n    ', "\n  </body>\n  </html>"])), op, title ? `${title} | Worker News` : "Worker News", headerEl({ op, id }), title, content, footerEl(), self.location.hostname === "news.workers.tools" ? html(_a6 || (_a6 = __template(['<script defer data-domain="news.workers.tools" src="https://plausible.io/js/plausible.js"><\/script>']))) : "");
 
   // src/routes/api/index.ts
   init_env();
@@ -29413,10 +29413,11 @@ MTMuMC4x
     });
   }
   async function commentsGenerator(response) {
-    const post = { title: "", score: 0, by: "", descendants: 0, text: "", storyTitle: "" };
+    const post = { title: "", score: 0, by: "", descendants: 0, text: "", storyTitle: "", dead: true };
     const data = new EventTarget();
     const iter = eventTargetToAsyncIterable(data, "data", { returnEvent: "return" });
     const opts = eventTargetToAsyncIterable(data, "pollopt", { returnEvent: "return" });
+    let hasParts = void 0;
     const moreLink = new ResolvablePromise();
     let pollOpt;
     const rewriter = h2r(new HTMLRewriter()).on(".fatitem > .athing[id]", {
@@ -29452,6 +29453,10 @@ MTMuMC4x
       text({ text }) {
         post.text += text;
       }
+    }).on(".fatitem form", {
+      element() {
+        post.dead = false;
+      }
     }).on(".fatitem > tr:nth-child(4) > td:nth-child(2) *:not(form):not(input):not(textarea):not(br)", {
       element(el) {
         post.text += elToTagOpen(el);
@@ -29461,6 +29466,7 @@ MTMuMC4x
       }
     }).on(".fatitem > tr:nth-child(6) tr.athing[id]", {
       element(el) {
+        hasParts = true;
         post.type = "poll";
         if (pollOpt)
           data.dispatchEvent(newCustomEvent("pollopt", pollOpt));
@@ -29526,13 +29532,15 @@ MTMuMC4x
       post.text = await blockquotify("<p>" + post.text);
     } else
       delete post.text;
-    post.parts = aMap2(opts, ({ detail: pollOpt2 }) => {
+    post.parts = hasParts && aMap2(opts, ({ detail: pollOpt2 }) => {
       pollOpt2.poll = post.id;
       pollOpt2.by = post.by;
+      pollOpt2.dead = post.dead;
       return fixPollOpt(pollOpt2);
     });
     post.kids = aMap2(iter, ({ detail: comment }) => {
       comment.story = post.id;
+      comment.dead = post.dead;
       return fixComment(comment);
     });
     post.moreLink = moreLink;
@@ -29631,15 +29639,15 @@ MTMuMC4x
     const img = url?.hostname && url.hostname !== self.location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`;
     return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? "favicon"}" width="11" height="11"/>`;
   };
-  var aThing = async ({ type, id, url: href, title, dead }, index, op) => {
+  var aThing = async ({ type, id, url: href, title, dead, deleted }, index, op) => {
     try {
       const url = tryURL(href);
       const upVoted = false;
       return html`
       <tr class="athing" id="${id}">
         <td align="right" valign="top" class="title">${rankEl(index)}</td>
-        <td valign="top" class="votelinks"><center>${dead || type === "job" ? html`<img src="s.gif" height="1" width="14">` : upVoted ? "" : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`}</center></td>
-        <td class="title">${dead ? "[flagged]" : html`<a href="${href}"
+        <td valign="top" class="votelinks"><center>${type === "job" ? html`<img src="s.gif" height="1" width="14">` : upVoted ? "" : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`}</center></td>
+        <td class="title">${deleted ? "[flagged]" : html`<a href="${href}"
             class="titlelink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? "" : url ? html`<span
             class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
                 class="sitestr">${url.sitebit}</span></a>)</span>` : ""}</td>`}</tr>`;
@@ -29699,9 +29707,8 @@ MTMuMC4x
     const id = "submitted" /* USER */ ? searchParams.get("id") : "";
     const site = "from" /* FROM */ ? searchParams.get("site") : "";
     const title = x3[type].replace("$user", searchParams.get("id")).replace("$site", searchParams.get("site"));
-    const strs = stories({ p, n, next, id, site }, type);
+    const storiesPage = stories({ p, n, next, id, site }, type);
     return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get("id") })(html`
-    <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
@@ -29715,7 +29722,7 @@ MTMuMC4x
             ${async function* () {
       try {
         let i = next && n ? n - 1 : (p - 1) * 30;
-        const { items, moreLink } = await strs;
+        const { items, moreLink } = await storiesPage;
         for await (const post of items) {
           yield rowEl(post, i++, type);
         }
@@ -29854,7 +29861,6 @@ MTMuMC4x
     const threadsPage = threads(id, next);
     return new HTMLResponse(pageLayout({ title, op: "threads", id })(async () => {
       return html`
-      <tr id="pagespace" title="${title}" style="height:10px"></tr>
       <tr>
         <td> </td>
       </tr>
@@ -29900,23 +29906,21 @@ MTMuMC4x
       <div class="comment">
         <span class="commtext ${quality}">
           ${deleted ? "[flagged]" : text ? unsafeHTML(text) : " "}
-          ${showReply && !deleted ? html`<div class="reply">
+          <div class="reply">
             <p>
-              <font size="1">
+              ${showReply && !deleted ? html`<font size="1">
                 ${""}
                 ${""}
                 <u><a onclick="popitup(this,event,850,300)" href="https://news.ycombinator.com/item?id=${id}#${id}">reply</a></u>
-              </font>
+              </font>` : ""}
             </p>
-          </div>` : ""}
+          </div>
         </span>
       </div>
     </td>
   </tr>`;
   };
   var commentEl = (comment, commOpts = {}) => {
-    if (comment.dead)
-      return "";
     return html`<tr class="athing comtr" id="${comment.id}">
     <td>
       <table border="0">
@@ -29927,11 +29931,11 @@ MTMuMC4x
     </td>
   </tr>`;
   };
-  async function* commentTree(kids) {
+  async function* commentTree(kids, parent) {
     for await (const item of kids) {
-      yield commentEl(item);
+      yield commentEl(item, { showReply: !parent.dead });
       if (item.kids)
-        yield* commentTree(item.kids);
+        yield* commentTree(item.kids, parent);
     }
   }
   var pollOptEl = (opt) => {
@@ -29986,7 +29990,6 @@ MTMuMC4x
         const post = await postResponse;
         const { title, text, kids, parts } = post;
         return html`
-        <tr id="pagespace" title="${title}" style="height:10px"></tr>
         ${title ? html(_a7 || (_a7 = __template(["<script>document.title = document.title.replace('", "', decodeURIComponent(document.getElementById('pagespace').title))<\/script>"])), PLACEHOLDER) : ""}
         <tr>
           <td>
@@ -30002,7 +30005,7 @@ MTMuMC4x
             </table>
             <table border="0" class="comment-tree">
               <tbody>
-                ${kids && commentTree(kids)}
+                ${kids && commentTree(kids, post)}
                 ${async () => {
           const moreLink = await post.moreLink;
           return moreLink ? moreLinkEl(moreLink) : html`<br/><br/>`;
@@ -30017,7 +30020,7 @@ MTMuMC4x
       }
     }));
   }
-  router.get("/identicon/dang.svg", () => fetch("https://news.ycombinator.com/y18.gif"));
+  router.get("/identicon/dang.svg", (req) => fetch("https://news.ycombinator.com/y18.gif", req));
   router.get("/identicon/:by.svg", pipe(basics(), contentTypes(["image/svg+xml"]), caching({
     cacheControl: "public",
     maxAge: 31536e3
@@ -30057,7 +30060,6 @@ MTMuMC4x
     const userPromise = user(un);
     const title = `Profile: ${un}`;
     return new HTMLResponse(pageLayout({ op: "user", title })(html`
-    <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0"><tbody>
@@ -30087,12 +30089,12 @@ MTMuMC4x
   router.get("/user", basics(), (_req, x4) => user2(x4));
 
   // src/routes/index.ts
-  router.get("/yc500.gif", () => fetch("https://news.ycombinator.com/yc500.gif"));
-  router.get("/newsfaq.html", () => fetch("https://news.ycombinator.com/newsfaq.html"));
-  router.get("/newsguidelines.html", () => fetch("https://news.ycombinator.com/newsguidelines.html"));
-  router.get("/showhn.html", () => fetch("https://news.ycombinator.com/showhn.html"));
-  router.get("/security.html", () => fetch("https://news.ycombinator.com/security.html"));
-  router.get("/yc.css", () => fetch("https://news.ycombinator.com/yc.css"));
+  router.get("/yc500.gif", (req) => fetch("https://news.ycombinator.com/yc500.gif", req));
+  router.get("/newsfaq.html", (req) => fetch("https://news.ycombinator.com/newsfaq.html", req));
+  router.get("/newsguidelines.html", (req) => fetch("https://news.ycombinator.com/newsguidelines.html", req));
+  router.get("/showhn.html", (req) => fetch("https://news.ycombinator.com/showhn.html", req));
+  router.get("/security.html", (req) => fetch("https://news.ycombinator.com/security.html", req));
+  router.get("/yc.css", (req) => fetch("https://news.ycombinator.com/yc.css", req));
   router.get("/", basics(), (req, x4) => news(x4));
   router.get("*", caching({
     cacheControl: "public",

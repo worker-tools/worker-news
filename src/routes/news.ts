@@ -55,20 +55,20 @@ export const favicon = (url?: { hostname?: string } | null) => {
   return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? 'favicon'}" width="11" height="11"/>`
 }
 
-export const aThing = async ({ type, id, url: href, title, dead }: APost, index?: number, op?: Stories) => {
+export const aThing = async ({ type, id, url: href, title, dead, deleted }: APost, index?: number, op?: Stories) => {
   try {
     const url = tryURL(href);
     const upVoted = false // session?.votes.has(id);
     return html`
       <tr class="athing" id="${id}">
         <td align="right" valign="top" class="title">${rankEl(index)}</td>
-        <td valign="top" class="votelinks"><center>${dead || type === 'job'
+        <td valign="top" class="votelinks"><center>${type === 'job'
           ? html`<img src="s.gif" height="1" width="14">`
           : upVoted 
             ? '' 
             : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`
         }</center></td>
-        <td class="title">${dead 
+        <td class="title">${deleted 
           ? '[flagged]' 
           : html`<a href="${href}"
             class="titlelink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? '' : url ? html`<span
@@ -147,10 +147,9 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
     .replace('$user', searchParams.get('id')!)
     .replace('$site', searchParams.get('site')!)
 
-  const strs = stories({ p, n, next, id, site }, type);
+  const storiesPage = stories({ p, n, next, id, site }, type);
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
-    <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
@@ -166,7 +165,7 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
                 let i = (next && n)
                   ? (n - 1) 
                   : (p - 1) * 30;
-                const { items, moreLink } = await strs;
+                const { items, moreLink } = await storiesPage;
                 for await (const post of items) {
                   yield rowEl(post, i++, type);
                 }

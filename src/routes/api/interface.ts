@@ -22,6 +22,8 @@ export interface AThing {
   time?: Date,
   kids?: AsyncIterable<AComment>,
   parts?: AsyncIterable<APollOpt>,
+  dead?: boolean,
+  deleted?: boolean,
 }
 
 export interface AUser {
@@ -41,8 +43,6 @@ export interface AComment extends AThing {
   parent: number,
   story?: number,
   storyTitle?: string,
-  dead?: boolean,
-  deleted?: boolean,
 }
 
 export interface APollOpt extends AThing {
@@ -60,7 +60,7 @@ export interface APollOpt extends AThing {
 export type Type = 'job' | 'story' | 'comment' | 'poll' | 'pollopt';
 export interface APost extends AThing {
   title: string,
-  dead: boolean
+  dead: boolean,
   url: string
   score: number | null,
   descendants: number | null,

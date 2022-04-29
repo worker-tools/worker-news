@@ -11,12 +11,12 @@ import './user';
 import './threads';
 // import './login';
 
-router.get('/yc500.gif', () => fetch('https://news.ycombinator.com/yc500.gif'))
-router.get('/newsfaq.html', () => fetch('https://news.ycombinator.com/newsfaq.html'))
-router.get('/newsguidelines.html', () => fetch('https://news.ycombinator.com/newsguidelines.html'))
-router.get('/showhn.html', () => fetch('https://news.ycombinator.com/showhn.html'))
-router.get('/security.html', () => fetch('https://news.ycombinator.com/security.html'))
-router.get('/yc.css', () => fetch('https://news.ycombinator.com/yc.css'))
+router.get('/yc500.gif', req => fetch('https://news.ycombinator.com/yc500.gif', req))
+router.get('/newsfaq.html', req => fetch('https://news.ycombinator.com/newsfaq.html', req))
+router.get('/newsguidelines.html', req => fetch('https://news.ycombinator.com/newsguidelines.html', req))
+router.get('/showhn.html', req => fetch('https://news.ycombinator.com/showhn.html', req))
+router.get('/security.html', req => fetch('https://news.ycombinator.com/security.html', req))
+router.get('/yc.css', req => fetch('https://news.ycombinator.com/yc.css', req))
 
 router.get('/', basics(), (req, x) => news(x))
 
