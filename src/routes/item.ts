@@ -1,16 +1,18 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
+import { JSONResponse } from '@worker-tools/json-fetch';
 import { renderIconSVG } from '@download/blockies';
 import { formatDistanceToNowStrict } from 'date-fns';
 
-import { RouteArgs, router } from "../router";
+import { mw, RouteArgs, router } from "../router";
 
 import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api";
 
 import { pageLayout, identicon } from './components';
 import { aThing, subtext } from './news';
 import { moreLinkEl } from "./threads";
+import { Awaitable } from "src/vendor/common-types";
 
 export interface CommOpts {
   showToggle?: boolean,
@@ -137,8 +139,28 @@ const replyTr = ({ id, type }: APost) => {
     </tr>`;
 }
 
+// FIXME
+async function buffer<T>(iter: AsyncIterable<T>): Promise<T[]> {
+  const chunks: T[] = []
+  for await (const x of iter) chunks.push(x)
+  return chunks;
+}
+
+// FIXME
+export async function jsonStringifyStream(_obj: Awaitable<Record<PropertyKey, any>>) {
+  const obj = await _obj
+  for (const [key, value] of Object.entries(obj)) {
+    if (value != null && typeof value === 'object' && Symbol.asyncIterator in value) {
+      obj[key] = await buffer(value)
+    } else {
+      obj[key] = await value
+    }
+  }
+  return obj;
+}
+
 // Dead items: 26841031
-function getItem(args: RouteArgs): HTMLResponse  {
+async function getItem(args: RouteArgs)  {
   const { searchParams } = args;
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
@@ -147,9 +169,9 @@ function getItem(args: RouteArgs): HTMLResponse  {
   const postResponse = apiComments(id, p);
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
-  // if ((<any>args).type === 'application/json') {
-  //   return new JSONResponse(jsonStringifyStream(postResponse))
-  // }
+  if (args.type === 'application/json') {
+    return new JSONResponse(await jsonStringifyStream(await postResponse))
+  }
 
   return new HTMLResponse(pageRenderer(async () => {
     try {
@@ -229,7 +251,4 @@ router.get('/identicon/:by.svg',
   },
 )
 
-router.get('/item', combine(
-  basics(),
-  contentTypes(['text/html', 'application/json']),
-), (_req, ctx) => getItem(ctx))
+router.get('/item', mw, (_req, ctx) => getItem(ctx))

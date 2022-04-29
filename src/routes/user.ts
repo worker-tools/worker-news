@@ -1,12 +1,14 @@
 import { html, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
-import { basics } from "@worker-tools/middleware";
+import { basics, combine, contentTypes } from "@worker-tools/middleware";
 // import { notFound } from "@worker-tools/response-creators";
 // import { formatDistanceToNowStrict } from 'date-fns';
 
-import { router, RouteArgs } from "../router";
+import { router, RouteArgs, mw } from "../router";
 import { user as apiUser } from "./api";
 import { pageLayout, identicon } from './components';
+import { JSONResponse } from "@worker-tools/json-fetch";
+import { jsonStringifyStream } from "./item";
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -20,12 +22,16 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-const user = ({ searchParams }: RouteArgs) => {
+const user = async ({ searchParams, type }: RouteArgs) => {
   const un = searchParams.get('id');
   if (!un) return notFound('No such user.');
 
   const userPromise = apiUser(un)
   const title = `Profile: ${un}`;
+
+  if (type === 'application/json') {
+    return new JSONResponse(await jsonStringifyStream(userPromise))
+  }
 
   return new HTMLResponse(pageLayout({ op: 'user', title })(html`
     <tr>
@@ -55,4 +61,4 @@ const user = ({ searchParams }: RouteArgs) => {
     </tr>`));
 }
 
-router.get('/user', basics(), (_req, x) => user(x))
+router.get('/user', mw, (_req, x) => user(x))

@@ -7364,6 +7364,69 @@
     }
   });
 
+  // node_modules/.pnpm/p-timeout@4.1.0/node_modules/p-timeout/index.js
+  var require_p_timeout = __commonJS({
+    "node_modules/.pnpm/p-timeout@4.1.0/node_modules/p-timeout/index.js"(exports, module) {
+      "use strict";
+      init_env();
+      var TimeoutError2 = class extends Error {
+        constructor(message) {
+          super(message);
+          this.name = "TimeoutError";
+        }
+      };
+      var pTimeout2 = (promise, milliseconds, fallback, options) => {
+        let timer;
+        const cancelablePromise = new Promise((resolve, reject) => {
+          if (typeof milliseconds !== "number" || milliseconds < 0) {
+            throw new TypeError("Expected `milliseconds` to be a positive number");
+          }
+          if (milliseconds === Infinity) {
+            resolve(promise);
+            return;
+          }
+          options = {
+            customTimers: { setTimeout, clearTimeout },
+            ...options
+          };
+          timer = options.customTimers.setTimeout.call(void 0, () => {
+            if (typeof fallback === "function") {
+              try {
+                resolve(fallback());
+              } catch (error) {
+                reject(error);
+              }
+              return;
+            }
+            const message = typeof fallback === "string" ? fallback : `Promise timed out after ${milliseconds} milliseconds`;
+            const timeoutError2 = fallback instanceof Error ? fallback : new TimeoutError2(message);
+            if (typeof promise.cancel === "function") {
+              promise.cancel();
+            }
+            reject(timeoutError2);
+          }, milliseconds);
+          (async () => {
+            try {
+              resolve(await promise);
+            } catch (error) {
+              reject(error);
+            } finally {
+              options.customTimers.clearTimeout.call(void 0, timer);
+            }
+          })();
+        });
+        cancelablePromise.clear = () => {
+          clearTimeout(timer);
+          timer = void 0;
+        };
+        return cancelablePromise;
+      };
+      module.exports = pTimeout2;
+      module.exports.default = pTimeout2;
+      module.exports.TimeoutError = TimeoutError2;
+    }
+  });
+
   // node_modules/.pnpm/entities@3.0.1/node_modules/entities/lib/decode_codepoint.js
   var require_decode_codepoint = __commonJS({
     "node_modules/.pnpm/entities@3.0.1/node_modules/entities/lib/decode_codepoint.js"(exports) {
@@ -9178,9 +9241,9 @@
       exports.decodeXML = getStrictDecoder(xml_json_1.default);
       exports.decodeHTMLStrict = getStrictDecoder(entities_json_1.default);
       function getStrictDecoder(map) {
-        var replace3 = getReplacer(map);
+        var replace2 = getReplacer(map);
         return function(str) {
-          return String(str).replace(strictEntityRe, replace3);
+          return String(str).replace(strictEntityRe, replace2);
         };
       }
       var sorter = function(a, b) {
@@ -9198,18 +9261,18 @@
           }
         }
         var re = new RegExp("&(?:" + keys2.join("|") + "|#[xX][\\da-fA-F]+;?|#\\d+;?)", "g");
-        var replace3 = getReplacer(entities_json_1.default);
+        var replace2 = getReplacer(entities_json_1.default);
         function replacer(str) {
           if (str.substr(-1) !== ";")
             str += ";";
-          return replace3(str);
+          return replace2(str);
         }
         return function(str) {
           return String(str).replace(re, replacer);
         };
       }();
       function getReplacer(map) {
-        return function replace3(str) {
+        return function replace2(str) {
           if (str.charAt(1) === "#") {
             var secondChar = str.charAt(2);
             if (secondChar === "X" || secondChar === "x") {
@@ -12245,7 +12308,7 @@
         if (a === boolbase_1.falseFunc || b === boolbase_1.trueFunc) {
           return b;
         }
-        return function combine(elem) {
+        return function combine2(elem) {
           return a(elem) || b(elem);
         };
       }
@@ -12455,7 +12518,7 @@
         var state = "selector";
         var index;
         var j = i;
-        var buffer = "";
+        var buffer2 = "";
         var SIGNIFICANT_WHITESPACE = {
           "selector": true,
           "value": true
@@ -12478,7 +12541,7 @@
                   case "\f":
                     break;
                   default:
-                    buffer += " ";
+                    buffer2 += " ";
                     break;
                 }
               }
@@ -12489,7 +12552,7 @@
               if (!index) {
                 throw '" is missing';
               }
-              buffer += ruleText.slice(i, index);
+              buffer2 += ruleText.slice(i, index);
               i = index - 1;
               break;
             case "'":
@@ -12498,7 +12561,7 @@
               if (!index) {
                 throw "' is missing";
               }
-              buffer += ruleText.slice(i, index);
+              buffer2 += ruleText.slice(i, index);
               i = index - 1;
               break;
             case "/":
@@ -12511,23 +12574,23 @@
                   i = index + 1;
                 }
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case "{":
               if (state === "selector") {
-                styleRule.selectorText = buffer.trim();
-                buffer = "";
+                styleRule.selectorText = buffer2.trim();
+                buffer2 = "";
                 state = "name";
               }
               break;
             case ":":
               if (state === "name") {
-                name = buffer.trim();
-                buffer = "";
+                name = buffer2.trim();
+                buffer2 = "";
                 state = "value";
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case "!":
@@ -12535,33 +12598,33 @@
                 priority = "important";
                 i += "important".length;
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case ";":
               if (state === "value") {
-                styleRule.style.setProperty(name, buffer.trim(), priority);
+                styleRule.style.setProperty(name, buffer2.trim(), priority);
                 priority = "";
-                buffer = "";
+                buffer2 = "";
                 state = "name";
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case "}":
               if (state === "value") {
-                styleRule.style.setProperty(name, buffer.trim(), priority);
+                styleRule.style.setProperty(name, buffer2.trim(), priority);
                 priority = "";
-                buffer = "";
+                buffer2 = "";
               } else if (state === "name") {
                 break;
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               state = "selector";
               break;
             default:
-              buffer += character;
+              buffer2 += character;
               break;
           }
         }
@@ -12676,7 +12739,7 @@
         set: function(cssText) {
           var i = 0;
           var state = "";
-          var buffer = "";
+          var buffer2 = "";
           var index;
           for (var character; character = cssText.charAt(i); i++) {
             switch (character) {
@@ -12688,14 +12751,14 @@
                 if (state === "after-import") {
                   state = "url";
                 } else {
-                  buffer += character;
+                  buffer2 += character;
                 }
                 break;
               case "@":
                 if (!state && cssText.indexOf("@import", i) === i) {
                   state = "after-import";
                   i += "import".length;
-                  buffer = "";
+                  buffer2 = "";
                 }
                 break;
               case "u":
@@ -12740,14 +12803,14 @@
                 break;
               case ";":
                 if (state === "media") {
-                  if (buffer) {
-                    this.media.mediaText = buffer.trim();
+                  if (buffer2) {
+                    this.media.mediaText = buffer2.trim();
                   }
                 }
                 break;
               default:
                 if (state === "media") {
-                  buffer += character;
+                  buffer2 += character;
                 }
                 break;
             }
@@ -13271,7 +13334,7 @@
         var i = 0;
         var state = "before-selector";
         var index;
-        var buffer = "";
+        var buffer2 = "";
         var valueParenthesisDepth = 0;
         var SIGNIFICANT_WHITESPACE = {
           "selector": true,
@@ -13310,7 +13373,7 @@
             case "\n":
             case "\f":
               if (SIGNIFICANT_WHITESPACE[state]) {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case '"':
@@ -13321,7 +13384,7 @@
                   parseError('Unmatched "');
                 }
               } while (token[index - 2] === "\\");
-              buffer += token.slice(i, index);
+              buffer2 += token.slice(i, index);
               i = index - 1;
               switch (state) {
                 case "before-value":
@@ -13340,7 +13403,7 @@
                   parseError("Unmatched '");
                 }
               } while (token[index - 2] === "\\");
-              buffer += token.slice(i, index);
+              buffer2 += token.slice(i, index);
               i = index - 1;
               switch (state) {
                 case "before-value":
@@ -13361,10 +13424,10 @@
                   i = index + 1;
                 }
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               if (state === "importRule-begin") {
-                buffer += " ";
+                buffer2 += " ";
                 state = "importRule";
               }
               break;
@@ -13374,40 +13437,40 @@
                 documentRule = new CSSOM.CSSDocumentRule();
                 documentRule.__starts = i;
                 i += "-moz-document".length;
-                buffer = "";
+                buffer2 = "";
                 break;
               } else if (token.indexOf("@media", i) === i) {
                 state = "atBlock";
                 mediaRule = new CSSOM.CSSMediaRule();
                 mediaRule.__starts = i;
                 i += "media".length;
-                buffer = "";
+                buffer2 = "";
                 break;
               } else if (token.indexOf("@supports", i) === i) {
                 state = "conditionBlock";
                 supportsRule = new CSSOM.CSSSupportsRule();
                 supportsRule.__starts = i;
                 i += "supports".length;
-                buffer = "";
+                buffer2 = "";
                 break;
               } else if (token.indexOf("@host", i) === i) {
                 state = "hostRule-begin";
                 i += "host".length;
                 hostRule = new CSSOM.CSSHostRule();
                 hostRule.__starts = i;
-                buffer = "";
+                buffer2 = "";
                 break;
               } else if (token.indexOf("@import", i) === i) {
                 state = "importRule-begin";
                 i += "import".length;
-                buffer += "@import";
+                buffer2 += "@import";
                 break;
               } else if (token.indexOf("@font-face", i) === i) {
                 state = "fontFaceRule-begin";
                 i += "font-face".length;
                 fontFaceRule = new CSSOM.CSSFontFaceRule();
                 fontFaceRule.__starts = i;
-                buffer = "";
+                buffer2 = "";
                 break;
               } else {
                 atKeyframesRegExp.lastIndex = i;
@@ -13418,37 +13481,37 @@
                   keyframesRule.__starts = i;
                   keyframesRule._vendorPrefix = matchKeyframes[1];
                   i += matchKeyframes[0].length - 1;
-                  buffer = "";
+                  buffer2 = "";
                   break;
                 } else if (state === "selector") {
                   state = "atRule";
                 }
               }
-              buffer += character;
+              buffer2 += character;
               break;
             case "{":
               if (state === "selector" || state === "atRule") {
-                styleRule.selectorText = buffer.trim();
+                styleRule.selectorText = buffer2.trim();
                 styleRule.style.__starts = i;
-                buffer = "";
+                buffer2 = "";
                 state = "before-name";
               } else if (state === "atBlock") {
-                mediaRule.media.mediaText = buffer.trim();
+                mediaRule.media.mediaText = buffer2.trim();
                 if (parentRule) {
                   ancestorRules.push(parentRule);
                 }
                 currentScope = parentRule = mediaRule;
                 mediaRule.parentStyleSheet = styleSheet;
-                buffer = "";
+                buffer2 = "";
                 state = "before-selector";
               } else if (state === "conditionBlock") {
-                supportsRule.conditionText = buffer.trim();
+                supportsRule.conditionText = buffer2.trim();
                 if (parentRule) {
                   ancestorRules.push(parentRule);
                 }
                 currentScope = parentRule = supportsRule;
                 supportsRule.parentStyleSheet = styleSheet;
-                buffer = "";
+                buffer2 = "";
                 state = "before-selector";
               } else if (state === "hostRule-begin") {
                 if (parentRule) {
@@ -13456,7 +13519,7 @@
                 }
                 currentScope = parentRule = hostRule;
                 hostRule.parentStyleSheet = styleSheet;
-                buffer = "";
+                buffer2 = "";
                 state = "before-selector";
               } else if (state === "fontFaceRule-begin") {
                 if (parentRule) {
@@ -13464,65 +13527,65 @@
                 }
                 fontFaceRule.parentStyleSheet = styleSheet;
                 styleRule = fontFaceRule;
-                buffer = "";
+                buffer2 = "";
                 state = "before-name";
               } else if (state === "keyframesRule-begin") {
-                keyframesRule.name = buffer.trim();
+                keyframesRule.name = buffer2.trim();
                 if (parentRule) {
                   ancestorRules.push(parentRule);
                   keyframesRule.parentRule = parentRule;
                 }
                 keyframesRule.parentStyleSheet = styleSheet;
                 currentScope = parentRule = keyframesRule;
-                buffer = "";
+                buffer2 = "";
                 state = "keyframeRule-begin";
               } else if (state === "keyframeRule-begin") {
                 styleRule = new CSSOM.CSSKeyframeRule();
-                styleRule.keyText = buffer.trim();
+                styleRule.keyText = buffer2.trim();
                 styleRule.__starts = i;
-                buffer = "";
+                buffer2 = "";
                 state = "before-name";
               } else if (state === "documentRule-begin") {
-                documentRule.matcher.matcherText = buffer.trim();
+                documentRule.matcher.matcherText = buffer2.trim();
                 if (parentRule) {
                   ancestorRules.push(parentRule);
                   documentRule.parentRule = parentRule;
                 }
                 currentScope = parentRule = documentRule;
                 documentRule.parentStyleSheet = styleSheet;
-                buffer = "";
+                buffer2 = "";
                 state = "before-selector";
               }
               break;
             case ":":
               if (state === "name") {
-                name = buffer.trim();
-                buffer = "";
+                name = buffer2.trim();
+                buffer2 = "";
                 state = "before-value";
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case "(":
               if (state === "value") {
-                if (buffer.trim() === "expression") {
+                if (buffer2.trim() === "expression") {
                   var info = new CSSOM.CSSValueExpression(token, i).parse();
                   if (info.error) {
                     parseError(info.error);
                   } else {
-                    buffer += info.expression;
+                    buffer2 += info.expression;
                     i = info.idx;
                   }
                 } else {
                   state = "value-parenthesis";
                   valueParenthesisDepth = 1;
-                  buffer += character;
+                  buffer2 += character;
                 }
               } else if (state === "value-parenthesis") {
                 valueParenthesisDepth++;
-                buffer += character;
+                buffer2 += character;
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case ")":
@@ -13531,45 +13594,45 @@
                 if (valueParenthesisDepth === 0)
                   state = "value";
               }
-              buffer += character;
+              buffer2 += character;
               break;
             case "!":
               if (state === "value" && token.indexOf("!important", i) === i) {
                 priority = "important";
                 i += "important".length;
               } else {
-                buffer += character;
+                buffer2 += character;
               }
               break;
             case ";":
               switch (state) {
                 case "value":
-                  styleRule.style.setProperty(name, buffer.trim(), priority);
+                  styleRule.style.setProperty(name, buffer2.trim(), priority);
                   priority = "";
-                  buffer = "";
+                  buffer2 = "";
                   state = "before-name";
                   break;
                 case "atRule":
-                  buffer = "";
+                  buffer2 = "";
                   state = "before-selector";
                   break;
                 case "importRule":
                   importRule = new CSSOM.CSSImportRule();
                   importRule.parentStyleSheet = importRule.styleSheet.parentStyleSheet = styleSheet;
-                  importRule.cssText = buffer + character;
+                  importRule.cssText = buffer2 + character;
                   styleSheet.cssRules.push(importRule);
-                  buffer = "";
+                  buffer2 = "";
                   state = "before-selector";
                   break;
                 default:
-                  buffer += character;
+                  buffer2 += character;
                   break;
               }
               break;
             case "}":
               switch (state) {
                 case "value":
-                  styleRule.style.setProperty(name, buffer.trim(), priority);
+                  styleRule.style.setProperty(name, buffer2.trim(), priority);
                   priority = "";
                 case "before-name":
                 case "name":
@@ -13579,7 +13642,7 @@
                   }
                   styleRule.parentStyleSheet = styleSheet;
                   currentScope.cssRules.push(styleRule);
-                  buffer = "";
+                  buffer2 = "";
                   if (currentScope.constructor === CSSOM.CSSKeyframesRule) {
                     state = "keyframeRule-begin";
                   } else {
@@ -13611,7 +13674,7 @@
                     currentScope = styleSheet;
                     parentRule = null;
                   }
-                  buffer = "";
+                  buffer2 = "";
                   state = "before-selector";
                   break;
               }
@@ -13633,7 +13696,7 @@
                   state = "importRule";
                   break;
               }
-              buffer += character;
+              buffer2 += character;
               break;
           }
         }
@@ -15143,7 +15206,7 @@
     DocumentEnd: () => DocumentEnd,
     Element: () => Element,
     EndTag: () => EndTag,
-    HTMLRewriter: () => HTMLRewriter2,
+    HTMLRewriter: () => HTMLRewriter,
     TextChunk: () => TextChunk,
     default: () => html_rewriter_default
   });
@@ -15338,7 +15401,7 @@
   }
   function diffstr(A, B) {
     var _a8;
-    function unescape3(string) {
+    function unescape2(string) {
       return string.replaceAll("\b", "\\b").replaceAll("\f", "\\f").replaceAll("	", "\\t").replaceAll("\v", "\\v").replaceAll(/\r\n|\r|\n/g, (str) => str === "\r" ? "\\r" : str === "\n" ? "\\n\n" : "\\r\\n\r\n");
     }
     function tokenize(string, { wordDiff = false } = {}) {
@@ -15377,8 +15440,8 @@
         return result;
       });
     }
-    const diffResult = diff(tokenize(`${unescape3(A)}
-`), tokenize(`${unescape3(B)}
+    const diffResult = diff(tokenize(`${unescape2(A)}
+`), tokenize(`${unescape2(B)}
 `));
     const added = [], removed = [];
     for (const result of diffResult) {
@@ -16075,9 +16138,9 @@ ${val.stack}`;
       return this;
     }
   };
-  var HTMLRewriter2 = class {
+  var HTMLRewriter = class {
     static __wrap(ptr) {
-      const obj = Object.create(HTMLRewriter2.prototype);
+      const obj = Object.create(HTMLRewriter.prototype);
       obj.ptr = ptr;
       return obj;
     }
@@ -16093,7 +16156,7 @@ ${val.stack}`;
     constructor(output_sink, options) {
       try {
         var ret = wasm2.htmlrewriter_new(addBorrowedObject(output_sink), isLikeNone(options) ? 0 : addHeapObject(options));
-        return HTMLRewriter2.__wrap(ret);
+        return HTMLRewriter.__wrap(ret);
       } finally {
         heap[stack_pointer++] = void 0;
       }
@@ -16431,6 +16494,9 @@ ${val.stack}`;
     }
   };
   _ResolvablePromise_promise = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_resolve = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_reject = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_settled = /* @__PURE__ */ new WeakMap(), _a = Symbol.toStringTag;
+  function resolvablePromise() {
+    return new ResolvablePromise();
+  }
 
   // node_modules/.pnpm/@worker-tools+html-rewriter@0.1.0-pre.12/node_modules/@worker-tools/html-rewriter/esm/base64.js
   var __classPrivateFieldGet2 = function(receiver, state, kind, f) {
@@ -16449,7 +16515,7 @@ ${val.stack}`;
   var WASM = {};
   var initialized = new ResolvablePromise();
   var executing = false;
-  var HTMLRewriter3 = class {
+  var HTMLRewriter2 = class {
     constructor() {
       _HTMLRewriter_elementHandlers.set(this, []);
       _HTMLRewriter_documentHandlers.set(this, []);
@@ -20266,7 +20332,7 @@ AA==
 `;
 
   // src/entry/html-rewriter-polyfill.ts
-  self.HTMLRewriter = HTMLRewriter3;
+  self.HTMLRewriter = HTMLRewriter2;
 
   // src/routes/index.ts
   init_env();
@@ -22421,8 +22487,8 @@ MTMuMC4x
         }
       };
     }
-    useBuffer(buffer) {
-      target = buffer;
+    useBuffer(buffer2) {
+      target = buffer2;
       targetView = new DataView(target.buffer, target.byteOffset, target.byteLength);
       position2 = 0;
     }
@@ -22537,8 +22603,8 @@ MTMuMC4x
     target2[position3++] = type;
     target2.set(new Uint8Array(typedArray.buffer, typedArray.byteOffset, typedArray.byteLength), position3);
   }
-  function writeBuffer(buffer, allocateForWrite) {
-    let length = buffer.byteLength;
+  function writeBuffer(buffer2, allocateForWrite) {
+    let length = buffer2.byteLength;
     var target2, position3;
     if (length < 256) {
       var { target: target2, position: position3 } = allocateForWrite(length + 2);
@@ -22555,7 +22621,7 @@ MTMuMC4x
       targetView2.setUint32(position3, length);
       position3 += 4;
     }
-    target2.set(buffer, position3);
+    target2.set(buffer2, position3);
   }
   function writeExtensionData(result, target2, position3, type) {
     let length = result.length;
@@ -23057,6 +23123,7 @@ MTMuMC4x
   };
 
   // src/router.ts
+  var mw = pipe(basics(), contentTypes(["text/html", "application/json"]));
   var router = new WorkerRouter();
 
   // src/routes/assets.ts
@@ -24612,190 +24679,286 @@ MTMuMC4x
   // src/routes/api/index.ts
   init_env();
 
-  // src/routes/api/dom-api.ts
+  // src/routes/api/rest-api.ts
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/index.js
+  // src/routes/api/make-api.ts
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/search-params-url.js
+  // node_modules/.pnpm/@qwtel+p-queue-browser@6.6.2/node_modules/@qwtel/p-queue-browser/dist/index.js
   init_env();
-  var SearchParamsURL = class extends URL {
-    constructor(url, params, base2) {
-      super(url, base2);
-      const iterable = Array.isArray(params) || params instanceof URLSearchParams ? params : typeof params === "string" ? new URLSearchParams(params) : Object.entries(params !== null && params !== void 0 ? params : {});
-      for (const [k, v2] of iterable)
-        this.searchParams.append(k, "" + v2);
+  var import_p_timeout = __toESM(require_p_timeout());
+
+  // node_modules/.pnpm/@qwtel+p-queue-browser@6.6.2/node_modules/@qwtel/p-queue-browser/dist/priority-queue.js
+  init_env();
+
+  // node_modules/.pnpm/@qwtel+p-queue-browser@6.6.2/node_modules/@qwtel/p-queue-browser/dist/lower-bound.js
+  init_env();
+  function lowerBound(array, value, comparator) {
+    let first = 0;
+    let count = array.length;
+    while (count > 0) {
+      const step = Math.trunc(count / 2);
+      let it = first + step;
+      if (comparator(array[it], value) <= 0) {
+        first = ++it;
+        count -= step + 1;
+      } else {
+        count = step;
+      }
     }
-  };
-
-  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/index.js
-  function isBodyInit(b) {
-    return b == null || typeof b === "string" || typeof Blob !== "undefined" && b instanceof Blob || typeof ArrayBuffer !== "undefined" && (b instanceof ArrayBuffer || ArrayBuffer.isView(b)) || typeof FormData !== "undefined" && b instanceof FormData || typeof URLSearchParams !== "undefined" && b instanceof URLSearchParams || typeof ReadableStream !== "undefined" && b instanceof ReadableStream;
+    return first;
   }
-  var JSONRequest = class extends Request {
-    constructor(input, init2, replacer, space) {
-      const { headers: _headers, body: _body, ..._init } = init2 || {};
-      let isBI;
-      const body = (isBI = isBodyInit(_body)) ? _body : JSON.stringify(_body, replacer, space);
-      const headers = new Headers(_headers);
-      if (!headers.has("Content-Type") && !isBI)
-        headers.set("Content-Type", JSONRequest.contentType);
-      if (!headers.has("Accept"))
-        headers.set("Accept", JSONRequest.accept);
-      super(input instanceof URL ? input.href : input, { headers, body, ..._init });
-    }
-  };
-  Object.defineProperty(JSONRequest, "contentType", {
-    enumerable: true,
-    configurable: true,
-    writable: true,
-    value: "application/json;charset=UTF-8"
-  });
-  Object.defineProperty(JSONRequest, "accept", {
-    enumerable: true,
-    configurable: true,
-    writable: true,
-    value: "application/json, text/plain, */*"
-  });
-  var JSONResponse = class extends Response {
-    constructor(body, init2, replacer, space) {
-      const { headers: _headers, ..._init } = init2 || {};
-      let isBI;
-      const _body = (isBI = isBodyInit(body)) ? body : JSON.stringify(body, replacer, space);
-      const headers = new Headers(_headers);
-      if (!headers.has("Content-Type") && !isBI)
-        headers.set("Content-Type", JSONResponse.contentType);
-      super(_body, { headers, ..._init });
-    }
-  };
-  Object.defineProperty(JSONResponse, "contentType", {
-    enumerable: true,
-    configurable: true,
-    writable: true,
-    value: "application/json;charset=UTF-8"
-  });
 
-  // node_modules/.pnpm/event-target-to-async-iter@0.2.1/node_modules/event-target-to-async-iter/index.js
-  init_env();
-  function newAbortError() {
-    return new DOMException("eventTargetToAsyncIter was aborted via AbortSignal", "AbortError");
-  }
-  var AsyncIteratorPrototype = Object.getPrototypeOf(Object.getPrototypeOf(async function* () {
-  }).prototype);
-  function eventTargetToAsyncIterable(target2, event, options) {
-    const signal = options === null || options === void 0 ? void 0 : options.signal;
-    if (signal === null || signal === void 0 ? void 0 : signal.aborted)
-      throw newAbortError();
-    const returnEvent = options === null || options === void 0 ? void 0 : options.returnEvent;
-    const unconsumedEvents = [];
-    const unconsumedPromises = [];
-    let error = null;
-    let finished = false;
-    const iterator = Object.setPrototypeOf({
-      next() {
-        const value = unconsumedEvents.shift();
-        if (value) {
-          return Promise.resolve({ value, done: false });
+  // node_modules/.pnpm/@qwtel+p-queue-browser@6.6.2/node_modules/@qwtel/p-queue-browser/dist/priority-queue.js
+  var PriorityQueue = class {
+    constructor() {
+      this._queue = [];
+    }
+    enqueue(run2, options) {
+      options = Object.assign({ priority: 0 }, options);
+      const element = {
+        priority: options.priority,
+        run: run2
+      };
+      if (this.size && this._queue[this.size - 1].priority >= options.priority) {
+        this._queue.push(element);
+        return;
+      }
+      const index = lowerBound(this._queue, element, (a, b) => b.priority - a.priority);
+      this._queue.splice(index, 0, element);
+    }
+    dequeue() {
+      const item = this._queue.shift();
+      return item === null || item === void 0 ? void 0 : item.run;
+    }
+    filter(options) {
+      return this._queue.filter((element) => element.priority === options.priority).map((element) => element.run);
+    }
+    get size() {
+      return this._queue.length;
+    }
+  };
+
+  // node_modules/.pnpm/@qwtel+p-queue-browser@6.6.2/node_modules/@qwtel/p-queue-browser/dist/index.js
+  var empty = () => {
+  };
+  var timeoutError = new import_p_timeout.TimeoutError();
+  var PQueue = class extends EventTarget {
+    constructor(options) {
+      var _a8, _b3, _c, _d;
+      super();
+      this._intervalCount = 0;
+      this._intervalEnd = 0;
+      this._pendingCount = 0;
+      this._resolveEmpty = empty;
+      this._resolveIdle = empty;
+      options = Object.assign({ carryoverConcurrencyCount: false, intervalCap: Number.POSITIVE_INFINITY, interval: 0, concurrency: Number.POSITIVE_INFINITY, autoStart: true, queueClass: PriorityQueue }, options);
+      if (!(typeof options.intervalCap === "number" && options.intervalCap >= 1)) {
+        throw new TypeError(`Expected \`intervalCap\` to be a number from 1 and up, got \`${(_b3 = (_a8 = options.intervalCap) === null || _a8 === void 0 ? void 0 : _a8.toString()) !== null && _b3 !== void 0 ? _b3 : ""}\` (${typeof options.intervalCap})`);
+      }
+      if (options.interval === void 0 || !(Number.isFinite(options.interval) && options.interval >= 0)) {
+        throw new TypeError(`Expected \`interval\` to be a finite number >= 0, got \`${(_d = (_c = options.interval) === null || _c === void 0 ? void 0 : _c.toString()) !== null && _d !== void 0 ? _d : ""}\` (${typeof options.interval})`);
+      }
+      this._carryoverConcurrencyCount = options.carryoverConcurrencyCount;
+      this._isIntervalIgnored = options.intervalCap === Number.POSITIVE_INFINITY || options.interval === 0;
+      this._intervalCap = options.intervalCap;
+      this._interval = options.interval;
+      this._queue = new options.queueClass();
+      this._queueClass = options.queueClass;
+      this.concurrency = options.concurrency;
+      this._timeout = options.timeout;
+      this._throwOnTimeout = options.throwOnTimeout === true;
+      this._isPaused = options.autoStart === false;
+    }
+    addEventListener(a, x4, y) {
+      super.addEventListener(a, x4, y);
+    }
+    removeEventListener(a, b, c2) {
+      super.removeEventListener(a, b, c2);
+    }
+    get _doesIntervalAllowAnother() {
+      return this._isIntervalIgnored || this._intervalCount < this._intervalCap;
+    }
+    get _doesConcurrentAllowAnother() {
+      return this._pendingCount < this._concurrency;
+    }
+    _next() {
+      this._pendingCount--;
+      this._tryToStartAnother();
+      this.dispatchEvent(new Event("next"));
+    }
+    _resolvePromises() {
+      this._resolveEmpty();
+      this._resolveEmpty = empty;
+      if (this._pendingCount === 0) {
+        this._resolveIdle();
+        this._resolveIdle = empty;
+        this.dispatchEvent(new Event("idle"));
+      }
+    }
+    _onResumeInterval() {
+      this._onInterval();
+      this._initializeIntervalIfNeeded();
+      this._timeoutId = void 0;
+    }
+    _isIntervalPaused() {
+      const now = Date.now();
+      if (this._intervalId === void 0) {
+        const delay = this._intervalEnd - now;
+        if (delay < 0) {
+          this._intervalCount = this._carryoverConcurrencyCount ? this._pendingCount : 0;
+        } else {
+          if (this._timeoutId === void 0) {
+            this._timeoutId = setTimeout(() => {
+              this._onResumeInterval();
+            }, delay);
+          }
+          return true;
         }
-        if (error) {
-          const p = Promise.reject(error);
-          error = null;
-          return p;
+      }
+      return false;
+    }
+    _tryToStartAnother() {
+      if (this._queue.size === 0) {
+        if (this._intervalId) {
+          clearInterval(this._intervalId);
         }
-        if (finished) {
-          return Promise.resolve({ value: void 0, done: true });
+        this._intervalId = void 0;
+        this._resolvePromises();
+        return false;
+      }
+      if (!this._isPaused) {
+        const canInitializeInterval = !this._isIntervalPaused();
+        if (this._doesIntervalAllowAnother && this._doesConcurrentAllowAnother) {
+          const job = this._queue.dequeue();
+          if (!job) {
+            return false;
+          }
+          this.dispatchEvent(new Event("active"));
+          job();
+          if (canInitializeInterval) {
+            this._initializeIntervalIfNeeded();
+          }
+          return true;
         }
-        return new Promise((resolve, reject) => {
-          unconsumedPromises.push({ resolve, reject });
-        });
-      },
-      return() {
-        target2.removeEventListener(event, eventHandler);
-        target2.removeEventListener("error", errorHandler);
-        if (returnEvent)
-          target2.removeEventListener(returnEvent, returnHandler);
-        if (signal) {
-          signal.removeEventListener("abort", abortListener);
-        }
-        finished = true;
-        for (const promise of unconsumedPromises) {
-          promise.resolve({ value: void 0, done: true });
-        }
-        return Promise.resolve({ value: void 0, done: true });
-      },
-      throw(err) {
-        error = err;
-        target2.removeEventListener(event, eventHandler);
-        target2.removeEventListener("error", errorHandler);
-        return Promise.reject(err);
-      },
-      [Symbol.asyncIterator]() {
+      }
+      return false;
+    }
+    _initializeIntervalIfNeeded() {
+      if (this._isIntervalIgnored || this._intervalId !== void 0) {
+        return;
+      }
+      this._intervalId = setInterval(() => {
+        this._onInterval();
+      }, this._interval);
+      this._intervalEnd = Date.now() + this._interval;
+    }
+    _onInterval() {
+      if (this._intervalCount === 0 && this._pendingCount === 0 && this._intervalId) {
+        clearInterval(this._intervalId);
+        this._intervalId = void 0;
+      }
+      this._intervalCount = this._carryoverConcurrencyCount ? this._pendingCount : 0;
+      this._processQueue();
+    }
+    _processQueue() {
+      while (this._tryToStartAnother()) {
+      }
+    }
+    get concurrency() {
+      return this._concurrency;
+    }
+    set concurrency(newConcurrency) {
+      if (!(typeof newConcurrency === "number" && newConcurrency >= 1)) {
+        throw new TypeError(`Expected \`concurrency\` to be a number from 1 and up, got \`${newConcurrency}\` (${typeof newConcurrency})`);
+      }
+      this._concurrency = newConcurrency;
+      this._processQueue();
+    }
+    async add(fn, options = {}) {
+      return new Promise((resolve, reject) => {
+        const run2 = async () => {
+          this._pendingCount++;
+          this._intervalCount++;
+          try {
+            const operation = this._timeout === void 0 && options.timeout === void 0 ? fn() : (0, import_p_timeout.default)(Promise.resolve(fn()), options.timeout === void 0 ? this._timeout : options.timeout, () => {
+              if (options.throwOnTimeout === void 0 ? this._throwOnTimeout : options.throwOnTimeout) {
+                reject(timeoutError);
+              }
+              return void 0;
+            });
+            resolve(await operation);
+          } catch (error) {
+            reject(error);
+          }
+          this._next();
+        };
+        this._queue.enqueue(run2, options);
+        this._tryToStartAnother();
+        this.dispatchEvent(new Event("add"));
+      });
+    }
+    async addAll(functions, options) {
+      return Promise.all(functions.map(async (function_) => this.add(function_, options)));
+    }
+    start() {
+      if (!this._isPaused) {
         return this;
       }
-    }, AsyncIteratorPrototype);
-    target2.addEventListener(event, eventHandler);
-    if (event !== "error") {
-      target2.addEventListener("error", errorHandler);
+      this._isPaused = false;
+      this._processQueue();
+      return this;
     }
-    if (returnEvent && event !== returnEvent) {
-      target2.addEventListener(returnEvent, returnHandler);
+    pause() {
+      this._isPaused = true;
     }
-    if (signal) {
-      signal.addEventListener("abort", abortListener, { once: true });
+    clear() {
+      this._queue = new this._queueClass();
     }
-    return iterator;
-    function abortListener() {
-      errorHandler(newAbortError());
-    }
-    function eventHandler(ev) {
-      const promise = unconsumedPromises.shift();
-      if (promise) {
-        promise.resolve({ value: ev, done: false });
-      } else {
-        unconsumedEvents.push(ev);
+    async onEmpty() {
+      if (this._queue.size === 0) {
+        return;
       }
+      return new Promise((resolve) => {
+        const existingResolve = this._resolveEmpty;
+        this._resolveEmpty = () => {
+          existingResolve();
+          resolve();
+        };
+      });
     }
-    function errorHandler(err) {
-      finished = true;
-      const toError = unconsumedPromises.shift();
-      if (toError) {
-        toError.reject(err);
-      } else {
-        error = err;
+    async onIdle() {
+      if (this._pendingCount === 0 && this._queue.size === 0) {
+        return;
       }
-      iterator.return();
+      return new Promise((resolve) => {
+        const existingResolve = this._resolveIdle;
+        this._resolveIdle = () => {
+          existingResolve();
+          resolve();
+        };
+      });
     }
-    function returnHandler() {
-      iterator.return();
+    get size() {
+      return this._queue.size;
     }
-  }
-
-  // node_modules/.pnpm/html-escaper@3.0.3/node_modules/html-escaper/esm/index.js
-  init_env();
-  var { replace } = "";
-  var es = /&(?:amp|#38|lt|#60|gt|#62|apos|#39|quot|#34);/g;
-  var unes = {
-    "&amp;": "&",
-    "&#38;": "&",
-    "&lt;": "<",
-    "&#60;": "<",
-    "&gt;": ">",
-    "&#62;": ">",
-    "&apos;": "'",
-    "&#39;": "'",
-    "&quot;": '"',
-    "&#34;": '"'
+    sizeBy(options) {
+      return this._queue.filter(options).length;
+    }
+    get pending() {
+      return this._pendingCount;
+    }
+    get isPaused() {
+      return this._isPaused;
+    }
+    get timeout() {
+      return this._timeout;
+    }
+    set timeout(milliseconds) {
+      this._timeout = milliseconds;
+    }
   };
-  var cape = (m) => unes[m];
-  var unescape2 = (un) => replace.call(un, es, cape);
-
-  // src/routes/api/iter.ts
-  init_env();
-  async function* aMap2(as, f) {
-    for await (const a of as)
-      yield f(a);
-  }
 
   // src/routes/api/util.ts
   init_env();
@@ -25983,7 +26146,7 @@ MTMuMC4x
 
   // node_modules/.pnpm/linkedom@0.14.7/node_modules/linkedom/esm/shared/text-escaper.js
   init_env();
-  var { replace: replace2 } = "";
+  var { replace } = "";
   var ca = /[<>&\xA0]/g;
   var esca = {
     "\xA0": "&nbsp;",
@@ -25992,7 +26155,7 @@ MTMuMC4x
     ">": "&gt;"
   };
   var pe = (m) => esca[m];
-  var escape = (es2) => replace2.call(es2, ca, pe);
+  var escape = (es) => replace.call(es, ca, pe);
 
   // node_modules/.pnpm/linkedom@0.14.7/node_modules/linkedom/esm/interface/text.js
   var Text = class extends CharacterData {
@@ -29226,541 +29389,181 @@ MTMuMC4x
     }
     return doc.toString();
   }
-  async function consume(r2, signal) {
-    const reader = r2.getReader();
-    if (!signal) {
-      while (!(await reader.read()).done) {
-      }
-    } else {
-      const aborted = signal.aborted ? Promise.resolve() : new Promise((res) => signal.addEventListener("abort", res, { once: true }));
-      while (await Promise.race([
-        reader.read().then((x4) => !x4.done),
-        aborted.then(() => false)
-      ])) {
-      }
-    }
-  }
 
-  // src/routes/api/dom-api.ts
-  var h2r = (htmlRewriter) => htmlRewriter;
-  var r2h = (hTMLRewriter) => hTMLRewriter;
-  var HN = "https://news.ycombinator.com";
+  // src/routes/api/make-api.ts
+  var CONCURRENCY = 128;
+  var PAGE = 30;
   var x2 = {
-    ["news" /* TOP */]: "/news",
-    ["newest" /* NEW */]: "/newest",
-    ["best" /* BEST */]: "/best",
-    ["show" /* SHOW */]: "/show",
-    ["shownew" /* SHOW_NEW */]: "/shownew",
-    ["ask" /* ASK */]: "/ask",
-    ["jobs" /* JOB */]: "/jobs",
-    ["submitted" /* USER */]: "/submitted",
-    ["classic" /* CLASSIC */]: "/classic",
-    ["from" /* FROM */]: "/from"
+    ["news" /* TOP */]: `/v0/topstories`,
+    ["newest" /* NEW */]: "/v0/newstories",
+    ["best" /* BEST */]: "/v0/beststories",
+    ["show" /* SHOW */]: "/v0/showstories",
+    ["shownew" /* SHOW_NEW */]: "",
+    ["ask" /* ASK */]: "/v0/askstories",
+    ["jobs" /* JOB */]: "/v0/jobstories",
+    ["submitted" /* USER */]: "",
+    ["classic" /* CLASSIC */]: "",
+    ["from" /* FROM */]: ""
   };
-  var extractId = (href) => Number(/item\?id=(\d+)/.exec(href ?? "")?.[1]);
-  var elToTagOpen = (el) => `<${el.tagName}${[...el.attributes].map((x4) => ` ${x4[0]}="${x4[1]}"`).join("")}>`;
-  var elToDate = (el) => new Date(unescape2(el.getAttribute("title") ?? "") + ".000+00:00");
-  var r2err = (body) => {
-    throw Error(`${body.status} ${body.statusText} ${body.url}`);
-  };
-  async function stories({ p, n, next, id, site }, type = "news" /* TOP */) {
-    const pathname = x2[type];
-    const url = new SearchParamsURL(pathname, {
-      ...p ? { p } : {},
-      ...n ? { n } : {},
-      ...next ? { next } : {},
-      ...id ? { id } : {},
-      ...site ? { site } : {}
-    }, HN);
-    const body = await fetch(url.href);
-    if (!body.ok)
-      r2err(body);
-    return storiesGenerator(body);
-  }
-  function newCustomEvent(event, detail) {
-    return new CustomEvent(event, { detail });
-  }
-  async function storiesGenerator(response) {
-    let post;
-    const data = new EventTarget();
-    const iter = eventTargetToAsyncIterable(data, "data", { returnEvent: "return" });
-    const moreLink = new ResolvablePromise();
-    const rewriter = h2r(new HTMLRewriter()).on(".athing[id]", {
-      element(el) {
-        if (post)
-          data.dispatchEvent(newCustomEvent("data", post));
-        const id = Number(el.getAttribute("id"));
-        post = { id, title: "", score: 0, by: "", descendants: 0, story: post?.story };
-      }
-    }).on(".athing[id] > .title > a.titlelink", {
-      element(link) {
-        post.url = unescape2(link.getAttribute("href") ?? "");
-      },
-      text({ text }) {
-        post.title += text;
-      }
-    }).on(".subtext > .score", {
-      text({ text }) {
-        if (text?.trimStart().match(/^\d/))
-          post.score = parseInt(text, 10);
-      }
-    }).on(".subtext > .hnuser", {
-      text({ text }) {
-        post.by += text;
-      }
-    }).on(".subtext > .age[title]", {
-      element(el) {
-        post.time = elToDate(el);
-      }
-    }).on(".subtext > a[href^=item]", {
-      text({ text }) {
-        if (text?.trimStart().match(/^\d/))
-          post.descendants = parseInt(text, 10);
-      }
-    }).on(".morelink[href]", {
-      element(el) {
-        moreLink.resolve(unescape2(el.getAttribute("href") ?? ""));
-      }
-    }).on(".yclinks", {
-      element() {
-        if (post)
-          data.dispatchEvent(newCustomEvent("data", post));
-        data.dispatchEvent(newCustomEvent("return"));
-      }
-    });
-    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).then(() => moreLink.resolve("")).catch((err) => iter.throw(err));
-    return {
-      items: aMap2(iter, ({ detail: post2 }) => {
-        post2.type = post2.type || "story";
-        if (!post2.by) {
-          post2.type = "job";
-        }
-        return post2;
-      }),
-      moreLink
-    };
-  }
-  async function comments(id, p) {
-    const url = new SearchParamsURL("/item", { id, ...p ? { p } : {} }, HN).href;
-    const body = await fetch(url);
-    if (body.ok)
-      return commentsGenerator(body);
-    return r2err(body);
-  }
-  async function threads(id, next) {
-    const url = new SearchParamsURL("/threads", { id, ...next ? { next } : {} }, HN).href;
-    const body = await fetch(url);
-    if (!body.ok)
-      r2err(body);
-    return threadsGenerator(body);
-  }
-  function scrapeComments(rewriter, data, prefix = "") {
-    let comment;
-    return rewriter.on(`${prefix} .athing.comtr[id]`, {
-      element(thing) {
-        if (comment)
-          data.dispatchEvent(newCustomEvent("data", comment));
-        const id = Number(thing.getAttribute("id"));
-        comment = { id, type: "comment", by: "", text: "", storyTitle: "" };
-      }
-    }).on(`${prefix} .athing.comtr[id] .ind[indent]`, {
-      element(el) {
-        comment.level = Number(el.getAttribute("indent"));
-      }
-    }).on(`${prefix} .athing.comtr[id] .hnuser`, {
-      text({ text }) {
-        comment.by += text;
-      }
-    }).on(`${prefix} .athing.comtr[id] .age[title]`, {
-      element(el) {
-        comment.time = elToDate(el);
-      }
-    }).on(`${prefix} .athing.comtr[id] a.togg[id][n]`, {
-      element(el) {
-        comment.descendants = Number(el.getAttribute("n")) - 1;
-      }
-    }).on(`${prefix} .athing.comtr[id] .onstory > a[href]`, {
-      element(a) {
-        comment.story = extractId(a.getAttribute("href"));
-      },
-      text({ text }) {
-        comment.storyTitle += text;
-      }
-    }).on(`${prefix} .athing.comtr[id] .commtext`, {
-      element(el) {
-        comment.quality = el.getAttribute("class")?.substr("commtext ".length).trim();
-      },
-      text(chunk) {
-        comment.text += chunk.text;
-      }
-    }).on(`${prefix} .athing.comtr[id] .commtext *`, {
-      element(el) {
-        comment.text += elToTagOpen(el);
-        el.onEndTag((endTag) => {
-          comment.text += `</${endTag.name}>`;
-        });
-      }
-    }).on(`${prefix} .athing.comtr[id] .comment .reply`, {
-      element(el) {
-        el.remove();
-      }
-    }).on(".yclinks", {
-      element() {
-        if (comment)
-          data.dispatchEvent(newCustomEvent("data", comment));
-        data.dispatchEvent(newCustomEvent("return"));
-      }
-    });
-  }
-  async function commentsGenerator(response) {
-    const post = { title: "", score: 0, by: "", descendants: 0, text: "", storyTitle: "", dead: true };
-    const data = new EventTarget();
-    const iter = eventTargetToAsyncIterable(data, "data", { returnEvent: "return" });
-    const opts = eventTargetToAsyncIterable(data, "pollopt", { returnEvent: "return" });
-    let hasParts = void 0;
-    const moreLink = new ResolvablePromise();
-    let pollOpt;
-    const rewriter = h2r(new HTMLRewriter()).on(".fatitem > .athing[id]", {
-      element(el) {
-        post.id = Number(el.getAttribute("id"));
-      }
-    }).on(".fatitem > .athing[id] > .title > a.titlelink", {
-      element(link) {
-        post.url = unescape2(link.getAttribute("href") ?? "");
-      },
-      text({ text }) {
-        post.title += text;
-      }
-    }).on(".fatitem .subtext > .score", {
-      text({ text }) {
-        if (text?.trimStart().match(/^\d/))
-          post.score = parseInt(text, 10);
-      }
-    }).on(".fatitem .subtext > .hnuser", {
-      text({ text }) {
-        post.by += text;
-      }
-    }).on(".fatitem .subtext > .age[title]", {
-      element(el) {
-        post.time = elToDate(el);
-      }
-    }).on(".fatitem .subtext > a[href^=item]", {
-      text({ text }) {
-        if (text?.trimStart().match(/^\d/))
-          post.descendants = parseInt(text, 10);
-      }
-    }).on(".fatitem > tr:nth-child(4) > td:nth-child(2)", {
-      text({ text }) {
-        post.text += text;
-      }
-    }).on(".fatitem form", {
-      element() {
-        post.dead = false;
-      }
-    }).on(".fatitem > tr:nth-child(4) > td:nth-child(2) *:not(form):not(input):not(textarea):not(br)", {
-      element(el) {
-        post.text += elToTagOpen(el);
-        el.onEndTag((endTag) => {
-          post.text += `</${endTag.name}>`;
-        });
-      }
-    }).on(".fatitem > tr:nth-child(6) tr.athing[id]", {
-      element(el) {
-        hasParts = true;
-        post.type = "poll";
-        if (pollOpt)
-          data.dispatchEvent(newCustomEvent("pollopt", pollOpt));
-        const id = Number(el.getAttribute("id"));
-        pollOpt = { id, text: "", score: 0 };
-      }
-    }).on(".fatitem > tr:nth-child(6) tr.athing[id] > .comment > div", {
-      text({ text }) {
-        pollOpt.text += text;
-      }
-    }).on(".fatitem > tr:nth-child(6) tr .comhead > .score ", {
-      text({ text }) {
-        if (text?.trimStart().match(/^\d/))
-          pollOpt.score = parseInt(text, 10);
-      }
-    }).on(".fatitem .comhead > .hnuser", {
-      text({ text }) {
-        post.by += text;
-      }
-    }).on(".fatitem .comhead > .age[title]", {
-      element(el) {
-        post.time = elToDate(el);
-      }
-    }).on('.fatitem .comhead > .navs > a[href^="item"]', {
-      element(a) {
-        post.parent = extractId(a.getAttribute("href"));
-      }
-    }).on(".fatitem .comhead > .onstory > a[href]", {
-      element(a) {
-        post.story = extractId(a.getAttribute("href"));
-      },
-      text({ text }) {
-        post.storyTitle += text;
-      }
-    }).on(".fatitem .commtext", {
-      element(el) {
-        post.type = "comment";
-        post.quality = el.getAttribute("class")?.substr("commtext ".length).trim();
-      },
-      text({ text }) {
-        post.text += text;
-      }
-    }).on(".fatitem .commtext *", {
-      element(el) {
-        post.text += elToTagOpen(el);
-        el.onEndTag((endTag) => {
-          post.text += `</${endTag.name}>`;
-        });
-      }
-    }).on(".comment-tree", {
-      element() {
-        data.dispatchEvent(newCustomEvent("data", post));
-      }
-    }).on('a.morelink[href][rel="next"]', {
-      element(el) {
-        moreLink.resolve(unescape2(el.getAttribute("href") ?? ""));
-      }
-    });
-    scrapeComments(rewriter, data, ".comment-tree");
-    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).then(() => moreLink.resolve("")).catch((err) => iter.throw(err));
-    await iter.next();
-    if (post.text?.trim()) {
-      post.text = await blockquotify("<p>" + post.text);
-    } else
-      delete post.text;
-    post.parts = hasParts && aMap2(opts, ({ detail: pollOpt2 }) => {
-      pollOpt2.poll = post.id;
-      pollOpt2.by = post.by;
-      pollOpt2.dead = post.dead;
-      return fixPollOpt(pollOpt2);
-    });
-    post.kids = aMap2(iter, ({ detail: comment }) => {
-      comment.story = post.id;
-      comment.dead = post.dead;
-      return fixComment(comment);
-    });
-    post.moreLink = moreLink;
-    return post;
-  }
-  async function fixComment(comment) {
-    if (comment.text?.trim()) {
-      comment.text = await blockquotify("<p>" + comment.text);
-    } else {
-      comment.deleted = true;
-      comment.text = " [flagged] ";
+  async function* stories(api2, { p }, type = "news" /* TOP */) {
+    const page = p || 1;
+    const href = x2[type];
+    if (!href)
+      throw Error("Unsupported by HN REST API");
+    const ps = (await api2(href)).slice(PAGE * (page - 1), PAGE * page).map((id) => api2(`/v0/item/${id}`));
+    for await (const { kids, text, url, ...p2 } of ps) {
+      yield {
+        ...p2,
+        time: new Date(p2.time * 1e3),
+        text: text != null ? await blockquotify(text) : null,
+        url: text != null ? `item?id=${p2.id}` : url
+      };
     }
-    return comment;
+    yield page !== 1 ? `${type}?p=${page}` : type;
   }
-  function fixPollOpt(pollOpt) {
-    if (pollOpt.text)
-      pollOpt.text = pollOpt.text.trim();
-    else
-      delete pollOpt.text;
-    return pollOpt;
+  async function commentTask(api2, id, queue, dict) {
+    const x4 = await api2(`/v0/item/${id}`);
+    dict.get(x4.id)?.resolve(x4);
+    const kids = x4.kids ?? [];
+    for (const kid of kids) {
+      dict.set(kid, resolvablePromise());
+      queue.add(() => commentTask(api2, kid, queue, dict));
+    }
   }
-  async function threadsGenerator(response) {
-    const target2 = new EventTarget();
-    const iter = eventTargetToAsyncIterable(target2, "data", { returnEvent: "return" });
-    const moreLink = new ResolvablePromise();
-    const rewriter = h2r(new HTMLRewriter()).on('a.morelink[href][rel="next"]', {
-      element(el) {
-        moreLink.resolve(unescape2(el.getAttribute("href") ?? ""));
+  async function* crawlCommentTree(kids, dict, level = 0) {
+    for (const kid of kids) {
+      const item = await dict.get(kid);
+      if (item) {
+        const { kids: kids2, text, ...rest } = item;
+        yield {
+          ...rest,
+          level,
+          quality: "c00",
+          text: text && await blockquotify("<p>" + text),
+          time: new Date(item.time * 1e3),
+          kids: crawlCommentTree(kids2 || [], dict, level + 1)
+        };
       }
-    });
-    scrapeComments(rewriter, target2, "");
-    consume(r2h(rewriter).transform(response).body).then(() => iter.return()).then(() => moreLink.resolve("")).catch((e) => iter.throw(e));
+    }
+  }
+  var truncateText = (text) => {
+    if (text) {
+      const words = text.split(" ");
+      const trunc = words.splice(0, 11).join(" ");
+      return words.length > 11 ? trunc + " ..." : trunc;
+    }
+    return "";
+  };
+  var stripHTML = (text) => text ? text.replace(/(<([^>]+)>)/gi, "") : "";
+  async function comments(api2, id, p) {
+    const post = await api2(`/v0/item/${id}`);
+    if (post.type === "comment") {
+      let curr = post;
+      while (curr.parent) {
+        curr = await api2(`/v0/item/${curr.parent}`);
+      }
+      post.story = curr.id;
+      post.storyTitle = truncateText(curr.title);
+    }
+    const queue = new PQueue({ concurrency: CONCURRENCY });
+    const kids = post.kids ?? [];
+    const dict = new Map(kids.map((id2) => [id2, resolvablePromise()]));
+    for (const kid of kids) {
+      queue.add(() => commentTask(api2, kid, queue, dict));
+    }
+    const text = post.text != null ? await blockquotify("<p>" + post.text) : null;
     return {
-      items: aMap2(iter, ({ detail: comment }) => {
-        return fixComment(comment);
-      }),
-      moreLink
+      ...post,
+      time: new Date(post.time * 1e3),
+      title: post.title || truncateText(stripHTML(text)),
+      text,
+      quality: "c00",
+      url: post.text != null ? `item?id=${post.id}` : post.url,
+      kids: crawlCommentTree(kids, dict)
     };
   }
-  async function user(id) {
-    const url = new SearchParamsURL("user", { id }, HN);
-    const response = await fetch(url.href);
-    if (!response.ok)
-      r2err(response);
-    let user3 = { id, about: "", submitted: [] };
-    const rewriter = h2r(new HTMLRewriter()).on("tr.athing td[timestamp]", {
-      element(el) {
-        user3.created = Number(el.getAttribute("timestamp"));
-      }
-    }).on('tr > td > table[border="0"] > tr:nth-child(3) > td:nth-child(2)', {
-      text({ text }) {
-        if (text?.trimStart().match(/^\d/))
-          user3.karma = parseInt(text, 10);
-      }
-    }).on('tr > td > table[border="0"] > tr:nth-child(4) > td:nth-child(2)', {
-      text({ text }) {
-        user3.about += text;
-      }
-    }).on('tr > td > table[border="0"] > tr:nth-child(4) > td:nth-child(2) *', {
-      element(el) {
-        user3.about += elToTagOpen(el);
-        el.onEndTag((endTag) => {
-          user3.about += `</${endTag.name}>`;
-        });
-      }
-    });
-    await consume(r2h(rewriter).transform(response).body);
-    if (user3.about?.trim())
-      user3.about = "<p>" + user3.about.trim();
-    return user3;
+  async function user(api2, id) {
+    const { about, ...user4 } = await api2(`/v0/user/${id}`);
+    return {
+      ...user4,
+      ...about ? { about: await blockquotify("<p>" + about) } : {}
+    };
+  }
+  async function* threads(api2, id, next) {
+    throw Error("Unsupported by HN REST API");
   }
 
-  // src/routes/news.ts
-  var JUNK_NEWS = [];
-  var SUB_SITES = ["medium.com", "substack.com", "mozilla.org", "mit.edu", "hardvard.edu", "google.com", "apple.com", "notion.site", "js.org"];
-  var GIT_SITES = ["twitter.com", "github.com", "gitlab.com", "vercel.app"];
-  var tryURL = (href) => {
-    try {
-      const url = new URL(href, self.location.origin);
-      const res = parseDomain(url.hostname);
-      if (res.type === "LISTED") {
-        const { domain, topLevelDomains: tld, subDomains } = res;
-        const allowedSubDomains = SUB_SITES.some((_) => url.hostname.endsWith(_)) && subDomains.length ? subDomains.slice(subDomains.length - 1).concat("").join(".") : "";
-        const allowedPathname = GIT_SITES.includes(url.hostname) ? url.pathname.split(/\/+/).slice(0, 2).join("/").toLowerCase() : "";
-        const sitebit = `${allowedSubDomains}${domain}.${tld.join(".")}${allowedPathname}`;
-        return Object.assign(url, { sitebit });
-      }
-      return null;
-    } catch {
-      return null;
+  // src/routes/api/rest-api.ts
+  var API = "https://hacker-news.firebaseio.com";
+  var api = async (path) => {
+    const url = new URL(path.endsWith(".json") ? path : `${path}.json`, API);
+    return fetch(url.href).then((x4) => x4.json());
+  };
+  function stories2(params, type = "news" /* TOP */) {
+    return stories(api, params, type);
+  }
+  function comments2(id, p) {
+    return comments(api, id, p);
+  }
+  function user2(id) {
+    return user(api, id);
+  }
+  function threads2(id, next) {
+    return threads(api, id, next);
+  }
+
+  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/index.js
+  init_env();
+
+  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/search-params-url.js
+  init_env();
+
+  // node_modules/.pnpm/@worker-tools+json-fetch@2.1.0-pre.4/node_modules/@worker-tools/json-fetch/esm/index.js
+  function isBodyInit(b) {
+    return b == null || typeof b === "string" || typeof Blob !== "undefined" && b instanceof Blob || typeof ArrayBuffer !== "undefined" && (b instanceof ArrayBuffer || ArrayBuffer.isView(b)) || typeof FormData !== "undefined" && b instanceof FormData || typeof URLSearchParams !== "undefined" && b instanceof URLSearchParams || typeof ReadableStream !== "undefined" && b instanceof ReadableStream;
+  }
+  var JSONRequest = class extends Request {
+    constructor(input, init2, replacer, space) {
+      const { headers: _headers, body: _body, ..._init } = init2 || {};
+      let isBI;
+      const body = (isBI = isBodyInit(_body)) ? _body : JSON.stringify(_body, replacer, space);
+      const headers = new Headers(_headers);
+      if (!headers.has("Content-Type") && !isBI)
+        headers.set("Content-Type", JSONRequest.contentType);
+      if (!headers.has("Accept"))
+        headers.set("Accept", JSONRequest.accept);
+      super(input instanceof URL ? input.href : input, { headers, body, ..._init });
     }
   };
-  var rankEl = (index) => html`
-  <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ""}</span>`;
-  var favicon = (url) => {
-    const img = url?.hostname && url.hostname !== self.location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`;
-    return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? "favicon"}" width="11" height="11"/>`;
-  };
-  var aThing = async ({ type, id, url: href, title, dead, deleted }, index, op) => {
-    try {
-      const url = tryURL(href);
-      const upVoted = false;
-      return html`
-      <tr class="athing" id="${id}">
-        <td align="right" valign="top" class="title">${rankEl(index)}</td>
-        <td valign="top" class="votelinks"><center>${type === "job" ? html`<img src="s.gif" height="1" width="14">` : upVoted ? "" : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`}</center></td>
-        <td class="title">${deleted ? "[flagged]" : html`<a href="${href}"
-            class="titlelink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? "" : url ? html`<span
-            class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
-                class="sitestr">${url.sitebit}</span></a>)</span>` : ""}</td>`}</tr>`;
-    } catch (err) {
-      throw html`<tr><td>Something went wrong</td><td>${err instanceof Error ? err.message : err}</td></tr>`;
+  Object.defineProperty(JSONRequest, "contentType", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "application/json;charset=UTF-8"
+  });
+  Object.defineProperty(JSONRequest, "accept", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "application/json, text/plain, */*"
+  });
+  var JSONResponse = class extends Response {
+    constructor(body, init2, replacer, space) {
+      const { headers: _headers, ..._init } = init2 || {};
+      let isBI;
+      const _body = (isBI = isBodyInit(body)) ? body : JSON.stringify(body, replacer, space);
+      const headers = new Headers(_headers);
+      if (!headers.has("Content-Type") && !isBI)
+        headers.set("Content-Type", JSONResponse.contentType);
+      super(_body, { headers, ..._init });
     }
   };
-  var subtext = (post, index, op, { showPast = false } = {}) => {
-    const { type, id, title, time, score, by, descendants, dead } = post;
-    const timeAgo = time && formatDistanceToNowStrict(time, { addSuffix: true });
-    return html`
-    <tr>
-      <td colspan="2"></td>
-      <td class="subtext">
-        ${!dead && type !== "job" ? html`<span class="score" id="score_${id}">${score} points</span> by` : ""}
-        ${type !== "job" ? html`<a href="user?id=${by}" class="hnuser">${by}</a>` : ""}
-        <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
-        <span id="unv_${id}"></span>
-        ${showPast ? html`| <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a>` : ""}
-        <!-- | <a href="hide?id=${id}&amp;auth=${"TODO"}&amp;goto=item%3Fid%3D${id}">hide</a> -->
-        <!-- | <a href="hide?id=${id}&amp;auth=${"TODO"}&amp;goto=${op}" onclick="return hidestory(event, this, ${id})">hide</a>  -->
-        ${!dead && type !== "job" ? html`| <a href="item?id=${id}">${descendants === 0 ? "discuss" : unsafeHTML(`${descendants}&nbsp;comments`)}</a></td>` : ""}
-    </tr>
-  `;
-  };
-  var rowEl = (post, i, type) => {
-    if (JUNK_NEWS.some((f) => tryURL(post.url)?.hostname?.includes(f)))
-      return "";
-    const index = ["jobs" /* JOB */, "from" /* FROM */].includes(type) ? NaN : i;
-    return html`
-    ${aThing(post, index, type)}
-    ${subtext(post, index, type)}
-    <tr class="spacer" style="height:5px"></tr>`;
-  };
-  var x3 = {
-    ["news" /* TOP */]: "",
-    ["jobs" /* JOB */]: "jobs",
-    ["ask" /* ASK */]: "Ask",
-    ["best" /* BEST */]: "Top Links",
-    ["newest" /* NEW */]: "New Links",
-    ["show" /* SHOW */]: "Show",
-    ["shownew" /* SHOW_NEW */]: "New Show",
-    ["submitted" /* USER */]: `$user's submissions`,
-    ["classic" /* CLASSIC */]: "",
-    ["from" /* FROM */]: "Submissions from $site"
-  };
-  var messageEl = (message, marginBottom = 12) => html`
-  <tr style="height:6px"></tr>
-  <tr><td colspan="2"></td><td>${message}</td></tr>
-  <tr style="height:${marginBottom}px"></tr>`;
-  var mkStories = (type) => ({ searchParams }) => {
-    const p = Number(searchParams.get("p") || "1");
-    if (p > Math.ceil(500 / 30))
-      return notFound2("Not supported by Worker News");
-    const next = Number(searchParams.get("next"));
-    const n = Number(searchParams.get("n"));
-    const id = "submitted" /* USER */ ? searchParams.get("id") : "";
-    const site = "from" /* FROM */ ? searchParams.get("site") : "";
-    const title = x3[type].replace("$user", searchParams.get("id")).replace("$site", searchParams.get("site"));
-    const storiesPage = stories({ p, n, next, id, site }, type);
-    return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get("id") })(html`
-    <tr>
-      <td>
-        <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
-          <tbody>
-            ${type === "show" /* SHOW */ ? messageEl(html`
-              Please read the <a href="showhn.html"><u>rules</u></a>. You can also
-              browse the <a href="shownew"><u>newest</u></a> Show HNs.`) : ""}
-            ${type === "jobs" /* JOB */ ? messageEl(html`
-              These are jobs at YC startups. See more at
-              <a href="https://www.ycombinator.com/jobs"><u>ycombinator.com/jobs</u></a>.`, 14) : ""}
-            ${async function* () {
-      try {
-        let i = next && n ? n - 1 : (p - 1) * 30;
-        const { items, moreLink } = await storiesPage;
-        for await (const post of items) {
-          yield rowEl(post, i++, type);
-        }
-        yield html`<tr class="morespace" style="height:10px"></tr>
-                  <tr>
-                    <td colspan="2"></td>
-                    <td class="title"><a href="${moreLink}" class="morelink" rel="next">More</a></td>
-                  </tr>`;
-      } catch (err) {
-        yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err}</td></tr>`;
-      }
-    }}
-          </tbody>
-        </table>
-      </td>
-    </tr>`));
-  };
-  var news = mkStories("news" /* TOP */);
-  var newest = mkStories("newest" /* NEW */);
-  var best = mkStories("best" /* BEST */);
-  var show = mkStories("show" /* SHOW */);
-  var showNew = mkStories("shownew" /* SHOW_NEW */);
-  var ask = mkStories("ask" /* ASK */);
-  var jobs = mkStories("jobs" /* JOB */);
-  var submitted = mkStories("submitted" /* USER */);
-  var classic = mkStories("classic" /* CLASSIC */);
-  var from = mkStories("from" /* FROM */);
-  var withBasics = basics();
-  router.get("/news", withBasics, (_req, ctx) => news(ctx));
-  router.get("/newest", withBasics, (_req, x4) => newest(x4));
-  router.get("/best", withBasics, (_req, x4) => best(x4));
-  router.get("/show", withBasics, (_req, x4) => show(x4));
-  router.get("/shownew", withBasics, (_req, x4) => showNew(x4));
-  router.get("/ask", withBasics, (_req, x4) => ask(x4));
-  router.get("/jobs", withBasics, (_req, x4) => jobs(x4));
-  router.get("/submitted", withBasics, (_req, x4) => submitted(x4));
-  router.get("/classic", withBasics, (_req, x4) => classic(x4));
-  router.get("/from", withBasics, (_req, x4) => from(x4));
+  Object.defineProperty(JSONResponse, "contentType", {
+    enumerable: true,
+    configurable: true,
+    writable: true,
+    value: "application/json;charset=UTF-8"
+  });
 
   // src/routes/item.ts
   init_env();
@@ -29852,13 +29655,16 @@ MTMuMC4x
       </table>
     </td>
   </tr>`;
-  function threads2({ searchParams }) {
+  async function threads3({ searchParams, type: contentType }) {
     const id = searchParams.get("id");
     if (!id)
       return notFound2("No such item.");
     const title = `${id}'s comments`;
     const next = Number(searchParams.get("next"));
-    const threadsPage = threads(id, next);
+    const threadsPage = threads2(id, next);
+    if (contentType === "application/json") {
+      return new JSONResponse(await jsonStringifyStream(threadsPage));
+    }
     return new HTMLResponse(pageLayout({ title, op: "threads", id })(async () => {
       return html`
       <tr>
@@ -29879,7 +29685,7 @@ MTMuMC4x
       `;
     }));
   }
-  router.get("/threads", basics(), (_req, x4) => threads2(x4));
+  router.get("/threads", mw, (_req, x4) => threads3(x4));
 
   // src/routes/item.ts
   var commentTr = (comm, { showToggle = true, showReply = true, showParent = false } = {}) => {
@@ -29976,15 +29782,35 @@ MTMuMC4x
       </td>
     </tr>`;
   };
+  async function buffer(iter) {
+    const chunks = [];
+    for await (const x4 of iter)
+      chunks.push(x4);
+    return chunks;
+  }
+  async function jsonStringifyStream(_obj) {
+    const obj = await _obj;
+    for (const [key2, value] of Object.entries(obj)) {
+      if (value != null && typeof value === "object" && Symbol.asyncIterator in value) {
+        obj[key2] = await buffer(value);
+      } else {
+        obj[key2] = await value;
+      }
+    }
+    return obj;
+  }
   var _a7;
-  function getItem(args) {
+  async function getItem(args) {
     const { searchParams } = args;
     const id = Number(searchParams.get("id"));
     if (Number.isNaN(id))
       return notFound2("No such item.");
     const p = Number(searchParams.get("p"));
-    const postResponse = comments(id, p);
+    const postResponse = comments2(id, p);
     const pageRenderer = pageLayout({ title: PLACEHOLDER, op: "item" });
+    if (args.type === "application/json") {
+      return new JSONResponse(await jsonStringifyStream(await postResponse));
+    }
     return new HTMLResponse(pageRenderer(async () => {
       try {
         const post = await postResponse;
@@ -30039,7 +29865,158 @@ MTMuMC4x
     }
     return new Response(res.body, res);
   });
-  router.get("/item", pipe(basics(), contentTypes(["text/html", "application/json"])), (_req, ctx) => getItem(ctx));
+  router.get("/item", mw, (_req, ctx) => getItem(ctx));
+
+  // src/routes/news.ts
+  var JUNK_NEWS = [];
+  var SUB_SITES = ["medium.com", "substack.com", "mozilla.org", "mit.edu", "hardvard.edu", "google.com", "apple.com", "notion.site", "js.org"];
+  var GIT_SITES = ["twitter.com", "github.com", "gitlab.com", "vercel.app"];
+  var tryURL = (href) => {
+    try {
+      const url = new URL(href, self.location.origin);
+      const res = parseDomain(url.hostname);
+      if (res.type === "LISTED") {
+        const { domain, topLevelDomains: tld, subDomains } = res;
+        const allowedSubDomains = SUB_SITES.some((_) => url.hostname.endsWith(_)) && subDomains.length ? subDomains.slice(subDomains.length - 1).concat("").join(".") : "";
+        const allowedPathname = GIT_SITES.includes(url.hostname) ? url.pathname.split(/\/+/).slice(0, 2).join("/").toLowerCase() : "";
+        const sitebit = `${allowedSubDomains}${domain}.${tld.join(".")}${allowedPathname}`;
+        return Object.assign(url, { sitebit });
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+  var rankEl = (index) => html`
+  <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ""}</span>`;
+  var favicon = (url) => {
+    const img = url?.hostname && url.hostname !== self.location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`;
+    return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? "favicon"}" width="11" height="11"/>`;
+  };
+  var aThing = async ({ type, id, url: href, title, dead, deleted }, index, op) => {
+    try {
+      const url = tryURL(href);
+      const upVoted = false;
+      return html`
+      <tr class="athing" id="${id}">
+        <td align="right" valign="top" class="title">${rankEl(index)}</td>
+        <td valign="top" class="votelinks"><center>${type === "job" ? html`<img src="s.gif" height="1" width="14">` : upVoted ? "" : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`}</center></td>
+        <td class="title">${deleted ? "[flagged]" : html`<a href="${href}"
+            class="titlelink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? "" : url ? html`<span
+            class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
+                class="sitestr">${url.sitebit}</span></a>)</span>` : ""}</td>`}</tr>`;
+    } catch (err) {
+      throw html`<tr><td>Something went wrong</td><td>${err instanceof Error ? err.message : err}</td></tr>`;
+    }
+  };
+  var subtext = (post, index, op, { showPast = false } = {}) => {
+    const { type, id, title, time, score, by, descendants, dead } = post;
+    const timeAgo = time && formatDistanceToNowStrict(time, { addSuffix: true });
+    return html`
+    <tr>
+      <td colspan="2"></td>
+      <td class="subtext">
+        ${!dead && type !== "job" ? html`<span class="score" id="score_${id}">${score} points</span> by` : ""}
+        ${type !== "job" ? html`<a href="user?id=${by}" class="hnuser">${showPast ? identicon(by, 9) : ""} ${by}</a>` : ""}
+        <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
+        <span id="unv_${id}"></span>
+        ${showPast ? html`| <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a>` : ""}
+        <!-- | <a href="hide?id=${id}&amp;auth=${"TODO"}&amp;goto=item%3Fid%3D${id}">hide</a> -->
+        <!-- | <a href="hide?id=${id}&amp;auth=${"TODO"}&amp;goto=${op}" onclick="return hidestory(event, this, ${id})">hide</a>  -->
+        ${!dead && type !== "job" ? html`| <a href="item?id=${id}">${descendants === 0 ? "discuss" : unsafeHTML(`${descendants}&nbsp;comments`)}</a></td>` : ""}
+    </tr>
+  `;
+  };
+  var rowEl = (post, i, type) => {
+    if (JUNK_NEWS.some((f) => tryURL(post.url)?.hostname?.includes(f)))
+      return "";
+    const index = ["jobs" /* JOB */, "from" /* FROM */].includes(type) ? NaN : i;
+    return html`
+    ${aThing(post, index, type)}
+    ${subtext(post, index, type)}
+    <tr class="spacer" style="height:5px"></tr>`;
+  };
+  var x3 = {
+    ["news" /* TOP */]: "",
+    ["jobs" /* JOB */]: "jobs",
+    ["ask" /* ASK */]: "Ask",
+    ["best" /* BEST */]: "Top Links",
+    ["newest" /* NEW */]: "New Links",
+    ["show" /* SHOW */]: "Show",
+    ["shownew" /* SHOW_NEW */]: "New Show",
+    ["submitted" /* USER */]: `$user's submissions`,
+    ["classic" /* CLASSIC */]: "",
+    ["from" /* FROM */]: "Submissions from $site"
+  };
+  var messageEl = (message, marginBottom = 12) => html`
+  <tr style="height:6px"></tr>
+  <tr><td colspan="2"></td><td>${message}</td></tr>
+  <tr style="height:${marginBottom}px"></tr>`;
+  var mkStories = (type) => async ({ searchParams, type: contentType }) => {
+    const p = Number(searchParams.get("p") || "1");
+    if (p > Math.ceil(500 / 30))
+      return notFound2("Not supported by Worker News");
+    const next = Number(searchParams.get("next"));
+    const n = Number(searchParams.get("n"));
+    const id = "submitted" /* USER */ ? searchParams.get("id") : "";
+    const site = "from" /* FROM */ ? searchParams.get("site") : "";
+    const title = x3[type].replace("$user", searchParams.get("id")).replace("$site", searchParams.get("site"));
+    const storiesPage = stories2({ p, n, next, id, site }, type);
+    if (contentType === "application/json") {
+      return new JSONResponse(await jsonStringifyStream(storiesPage));
+    }
+    return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get("id") })(html`
+    <tr>
+      <td>
+        <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
+          <tbody>
+            ${type === "show" /* SHOW */ ? messageEl(html`
+              Please read the <a href="showhn.html"><u>rules</u></a>. You can also
+              browse the <a href="shownew"><u>newest</u></a> Show HNs.`) : ""}
+            ${type === "jobs" /* JOB */ ? messageEl(html`
+              These are jobs at YC startups. See more at
+              <a href="https://www.ycombinator.com/jobs"><u>ycombinator.com/jobs</u></a>.`, 14) : ""}
+            ${async function* () {
+      try {
+        let i = next && n ? n - 1 : (p - 1) * 30;
+        const { items, moreLink } = await storiesPage;
+        for await (const post of items) {
+          yield rowEl(post, i++, type);
+        }
+        yield html`<tr class="morespace" style="height:10px"></tr>
+                  <tr>
+                    <td colspan="2"></td>
+                    <td class="title"><a href="${moreLink}" class="morelink" rel="next">More</a></td>
+                  </tr>`;
+      } catch (err) {
+        yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err}</td></tr>`;
+      }
+    }}
+          </tbody>
+        </table>
+      </td>
+    </tr>`));
+  };
+  var news = mkStories("news" /* TOP */);
+  var newest = mkStories("newest" /* NEW */);
+  var best = mkStories("best" /* BEST */);
+  var show = mkStories("show" /* SHOW */);
+  var showNew = mkStories("shownew" /* SHOW_NEW */);
+  var ask = mkStories("ask" /* ASK */);
+  var jobs = mkStories("jobs" /* JOB */);
+  var submitted = mkStories("submitted" /* USER */);
+  var classic = mkStories("classic" /* CLASSIC */);
+  var from = mkStories("from" /* FROM */);
+  router.get("/news", mw, (_req, ctx) => news(ctx));
+  router.get("/newest", mw, (_req, x4) => newest(x4));
+  router.get("/best", mw, (_req, x4) => best(x4));
+  router.get("/show", mw, (_req, x4) => show(x4));
+  router.get("/shownew", mw, (_req, x4) => showNew(x4));
+  router.get("/ask", mw, (_req, x4) => ask(x4));
+  router.get("/jobs", mw, (_req, x4) => jobs(x4));
+  router.get("/submitted", mw, (_req, x4) => submitted(x4));
+  router.get("/classic", mw, (_req, x4) => classic(x4));
+  router.get("/from", mw, (_req, x4) => from(x4));
 
   // src/routes/user.ts
   init_env();
@@ -30053,12 +30030,15 @@ MTMuMC4x
     month: "numeric",
     day: "numeric"
   });
-  var user2 = ({ searchParams }) => {
+  var user3 = async ({ searchParams, type }) => {
     const un = searchParams.get("id");
     if (!un)
       return notFound2("No such user.");
-    const userPromise = user(un);
+    const userPromise = user2(un);
     const title = `Profile: ${un}`;
+    if (type === "application/json") {
+      return new JSONResponse(await jsonStringifyStream(userPromise));
+    }
     return new HTMLResponse(pageLayout({ op: "user", title })(html`
     <tr>
       <td>
@@ -30086,7 +30066,7 @@ MTMuMC4x
       </td>
     </tr>`));
   };
-  router.get("/user", basics(), (_req, x4) => user2(x4));
+  router.get("/user", mw, (_req, x4) => user3(x4));
 
   // src/routes/index.ts
   router.get("/yc500.gif", (req) => fetch("https://news.ycombinator.com/yc500.gif", req));
@@ -30095,7 +30075,7 @@ MTMuMC4x
   router.get("/showhn.html", (req) => fetch("https://news.ycombinator.com/showhn.html", req));
   router.get("/security.html", (req) => fetch("https://news.ycombinator.com/security.html", req));
   router.get("/yc.css", (req) => fetch("https://news.ycombinator.com/yc.css", req));
-  router.get("/", basics(), (req, x4) => news(x4));
+  router.get("/", mw, (req, x4) => news(x4));
   router.get("*", caching({
     cacheControl: "public",
     maxAge: 60 * 60 * 24 * 30 * 12

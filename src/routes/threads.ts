@@ -1,13 +1,14 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
-import { basics } from "@worker-tools/middleware";
+import { basics, combine, contentTypes } from "@worker-tools/middleware";
 
-import { router, RouteArgs } from "../router";
+import { router, RouteArgs, mw } from "../router";
 
 import { threads as apiThreads } from "./api";
 
 import { pageLayout } from './components';
-import { commentEl } from "./item";
+import { commentEl, jsonStringifyStream } from "./item";
+import { JSONResponse } from "@worker-tools/json-fetch";
 
 export const moreLinkEl = (moreLink: string) => html`
   <tr class="morespace" style="height:10px"></tr>
@@ -23,7 +24,7 @@ export const moreLinkEl = (moreLink: string) => html`
     </td>
   </tr>`;
 
-function threads({ searchParams }: RouteArgs)  {
+async function threads({ searchParams, type: contentType }: RouteArgs)  {
   const id = searchParams.get('id');
   if (!id) return notFound('No such item.');
   const title = `${id}'s comments`;
@@ -31,6 +32,10 @@ function threads({ searchParams }: RouteArgs)  {
   const next = Number(searchParams.get('next'));
 
   const threadsPage = apiThreads(id, next);
+
+  if (contentType === 'application/json') {
+    return new JSONResponse(await jsonStringifyStream(threadsPage))
+  }
 
   return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {
     return html`
@@ -53,4 +58,4 @@ function threads({ searchParams }: RouteArgs)  {
   }));
 }
 
-router.get('/threads', basics(), (_req, x) => threads(x))
+router.get('/threads', mw, (_req, x) => threads(x))

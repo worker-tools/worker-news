@@ -1,13 +1,15 @@
 import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
-import { basics } from "@worker-tools/middleware";
+import { basics, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
 
-import { router, RouteArgs } from "../router";
-import { pageLayout } from './components';
+import { router, RouteArgs, mw } from "../router";
+import { identicon, pageLayout } from './components';
 
 import { stories, APost, Stories } from './api'
+import { JSONResponse } from "@worker-tools/json-fetch";
+import { jsonStringifyStream } from "./item";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -90,8 +92,8 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
         ${!dead && type !== 'job' 
           ? html`<span class="score" id="score_${id}">${score} points</span> by`
           : ''}
-        ${type !== 'job' 
-          ? html`<a href="user?id=${by}" class="hnuser">${by}</a>` 
+        ${type !== 'job'
+          ? html`<a href="user?id=${by}" class="hnuser">${showPast ? identicon(by, 9): ''} ${by}</a>` 
           : ''}
         <span class="age" title="${time?.toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
         <span id="unv_${id}"></span>
@@ -135,7 +137,7 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
   <tr><td colspan="2"></td><td>${message}</td></tr>
   <tr style="height:${marginBottom}px"></tr>`;
 
-const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
+const mkStories = (type: Stories) => async ({ searchParams, type: contentType }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
@@ -148,6 +150,10 @@ const mkStories = (type: Stories) => ({ searchParams }: RouteArgs) => {
     .replace('$site', searchParams.get('site')!)
 
   const storiesPage = stories({ p, n, next, id, site }, type);
+
+  if (contentType === 'application/json') {
+    return new JSONResponse(await jsonStringifyStream(storiesPage))
+  }
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
     <tr>
@@ -195,14 +201,13 @@ export const submitted = mkStories(Stories.USER)
 export const classic = mkStories(Stories.CLASSIC)
 export const from = mkStories(Stories.FROM)
 
-const withBasics = basics()
-router.get('/news', withBasics, (_req, ctx) => news(ctx))
-router.get('/newest', withBasics, (_req, x) => newest(x));
-router.get('/best', withBasics, (_req, x) => best(x));
-router.get('/show', withBasics, (_req, x) => show(x))
-router.get('/shownew', withBasics, (_req, x) => showNew(x))
-router.get('/ask', withBasics, (_req, x) => ask(x))
-router.get('/jobs', withBasics, (_req, x) => jobs(x))
-router.get('/submitted', withBasics, (_req, x) => submitted(x))
-router.get('/classic', withBasics, (_req, x) => classic(x))
-router.get('/from', withBasics, (_req, x) => from(x))
+router.get('/news', mw, (_req, ctx) => news(ctx))
+router.get('/newest', mw, (_req, x) => newest(x));
+router.get('/best', mw, (_req, x) => best(x));
+router.get('/show', mw, (_req, x) => show(x))
+router.get('/shownew', mw, (_req, x) => showNew(x))
+router.get('/ask', mw, (_req, x) => ask(x))
+router.get('/jobs', mw, (_req, x) => jobs(x))
+router.get('/submitted', mw, (_req, x) => submitted(x))
+router.get('/classic', mw, (_req, x) => classic(x))
+router.get('/from', mw, (_req, x) => from(x))

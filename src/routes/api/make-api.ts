@@ -22,11 +22,18 @@ const x = {
   [Stories.FROM]: '',
 };
 
-export async function* stories(api: APIFn, { p }: StoriesParams, type = Stories.TOP) {
+export function stories(api: APIFn, { p }: StoriesParams, type = Stories.TOP) {
   const page = p || 1;
   const href = x[type];
   if (!href) throw Error('Unsupported by HN REST API')
 
+  return {
+    items: storiesGenerator(api, href, page),
+    moreLink: page !== 1 ? `${type}?p=${page}` : type,
+  }
+}
+
+export async function* storiesGenerator(api: APIFn, href: string, page: number) {
   const ps = (await api<number[]>(href))
     .slice(PAGE * (page - 1), PAGE * page)
     .map(id => api<RESTPost>(`/v0/item/${id}`));
@@ -39,9 +46,6 @@ export async function* stories(api: APIFn, { p }: StoriesParams, type = Stories.
       url: text != null ? `item?id=${p.id}` : url,
     };
   }
-
-  // FIXME
-  yield page !== 1 ? `${type}?p=${page}` : type;
 }
 
 type RESTPost = Omit<APost, 'kids'> & { kids: number[], time: number }
