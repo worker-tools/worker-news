@@ -8651,10 +8651,10 @@
   // src/routes/index.ts
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/index.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/index.js
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/context.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/context.js
   init_env();
 
   // node_modules/.pnpm/ts-functional-pipe@3.1.2/node_modules/ts-functional-pipe/dist/ts-functional-pipe.es5.js
@@ -8725,7 +8725,7 @@
   var _a;
   _ResolvablePromise_promise = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_resolve = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_reject = /* @__PURE__ */ new WeakMap(), _ResolvablePromise_settled = /* @__PURE__ */ new WeakMap(), _a = Symbol.toStringTag;
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/utils/append-only-list.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/utils/append-only-list.js
   init_env();
   var _arr = /* @__PURE__ */ new WeakMap();
   var AppendOnlyList = class {
@@ -8761,7 +8761,7 @@
     }
   };
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/context.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/context.js
   var EffectsList = class extends AppendOnlyList {
   };
   function executeEffects(effects, response) {
@@ -8772,7 +8772,7 @@
     }, response)) !== null && _a7 !== void 0 ? _a7 : response;
   }
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/basics.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/basics.js
   init_env();
   var basics = () => async (ax) => {
     var _a7, _b3, _c, _d, _e, _f;
@@ -8789,7 +8789,7 @@
     return Object.assign(x4, { headers, method, url, pathname, searchParams, userAgent, ip, params, query: query2 });
   };
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/content-negotiation.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/content-negotiation.js
   init_env();
 
   // node_modules/.pnpm/@worker-tools+response-creators@1.2.0-pre.5/node_modules/@worker-tools/response-creators/esm/index.js
@@ -8885,7 +8885,7 @@
   var notExtended = mkResponse(510, "Not Extended");
   var networkAuthenticationRequired = mkResponse(511, "Network Authentication Required");
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/content-negotiation.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/content-negotiation.js
   var import_negotiated = __toESM(require_lib(), 1);
   var weightSortFn = (a, b) => a.weight >= b.weight ? a : b;
   var ACCEPT = "Accept";
@@ -8900,7 +8900,8 @@
         throw notAcceptable();
       ctx.effects.push((response) => {
         var _a7;
-        response.headers.set(CONTENT_TYPE, type);
+        if (!response.headers.has(CONTENT_TYPE))
+          response.headers.set(CONTENT_TYPE, type);
         if (((_a7 = types === null || types === void 0 ? void 0 : types.length) !== null && _a7 !== void 0 ? _a7 : 0) > 1)
           response.headers.append(VARY, ACCEPT);
         return response;
@@ -8909,10 +8910,10 @@
     };
   }
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/body-parser.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/body-parser.js
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/cookies.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/cookies.js
   init_env();
 
   // node_modules/.pnpm/@worker-tools+request-cookie-store@0.5.0-pre.9/node_modules/@worker-tools/request-cookie-store/esm/index.js
@@ -9071,7 +9072,7 @@ MTMuMC4x
   var _EncryptedCookieStore_decrypt;
   _EncryptedCookieStore_store = /* @__PURE__ */ new WeakMap(), _EncryptedCookieStore_keyring = /* @__PURE__ */ new WeakMap(), _EncryptedCookieStore_key = /* @__PURE__ */ new WeakMap(), _EncryptedCookieStore_decrypt = /* @__PURE__ */ new WeakMap();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/utils/middleware-cookie-store.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/utils/middleware-cookie-store.js
   init_env();
 
   // node_modules/.pnpm/@worker-tools+extendable-promise@0.2.0-pre.8/node_modules/@worker-tools/extendable-promise/esm/index.js
@@ -9114,18 +9115,18 @@ MTMuMC4x
     }
   }, _a2 = Symbol.toStringTag;
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/utils/middleware-cookie-store.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/utils/middleware-cookie-store.js
   var _MiddlewareCookieStore_promise;
   var _MiddlewareCookieStore_store;
   _MiddlewareCookieStore_promise = /* @__PURE__ */ new WeakMap(), _MiddlewareCookieStore_store = /* @__PURE__ */ new WeakMap();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/utils/headers-set-cookie-fix.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/utils/headers-set-cookie-fix.js
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/utils/unsettle.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/utils/unsettle.js
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/utils/aggregate-error.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/utils/aggregate-error.js
   init_env();
   var __classPrivateFieldSet4 = function(receiver, state, value, kind, f) {
     if (kind === "m")
@@ -9160,10 +9161,10 @@ MTMuMC4x
   _AggregateErrorPolyfill_errors2 = /* @__PURE__ */ new WeakMap();
   var AggregateError2 = "AggregateError" in self ? self.AggregateError : AggregateErrorPolyfill2;
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/cors.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/cors.js
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/session.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/session.js
   init_env();
 
   // node_modules/.pnpm/uuid-class@0.13.0-alpha.0/node_modules/uuid-class/esm/index.js
@@ -11024,7 +11025,7 @@ MTMuMC4x
   // node_modules/.pnpm/msgpackr@1.5.6/node_modules/msgpackr/iterators.js
   init_env();
 
-  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.15/node_modules/@worker-tools/middleware/esm/caching.js
+  // node_modules/.pnpm/@worker-tools+middleware@0.1.0-pre.16/node_modules/@worker-tools/middleware/esm/caching.js
   init_env();
   var caching = (opt = {}) => async (ax) => {
     const x4 = await ax;
@@ -12995,7 +12996,7 @@ MTMuMC4x
     </td>
   </tr>`;
   var _a5, _b2;
-  var pageLayout = ({ title, op, id }) => (content) => html(_b2 || (_b2 = __template(['\n  <!DOCTYPE html>\n  <html lang="en" op="', '">\n  <head>\n    <meta charset="UTF-8">\n    <meta name="referrer" content="origin">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <link rel="stylesheet" type="text/css" href="news.css">\n    <link rel="shortcut icon" href="favicon.ico">\n    <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">\n    <title>', `</title>
+  var pageLayout = ({ title, op, id }) => (content) => html(_b2 || (_b2 = __template(['\n  <!DOCTYPE html>\n  <html lang="en" op="', '">\n  <head>\n    <meta charset="UTF-8">\n    <meta name="referrer" content="origin">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <link rel="stylesheet" type="text/css" href="news.css?v=2">\n    <link rel="shortcut icon" href="favicon.ico">\n    <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">\n    <title>', `</title>
     <script type="module">(async () => {
       const regis = await navigator.serviceWorker.register('/sw.js')
       regis.addEventListener('updatefound', () => { console.log('update found')})
@@ -17407,74 +17408,6 @@ MTMuMC4x
   // node_modules/.pnpm/github.com+qwtel+blockies@e4dfe44e09b7b24f0647392b73409354680114f6/node_modules/@download/blockies/src/blockies.mjs
   init_env();
   var randseed = new Array(4);
-  function seedrand(seed) {
-    randseed.fill(0);
-    for (let i = 0; i < seed.length; i++) {
-      randseed[i % 4] = (randseed[i % 4] << 5) - randseed[i % 4] + seed.charCodeAt(i);
-    }
-  }
-  function rand() {
-    const t = randseed[0] ^ randseed[0] << 11;
-    randseed[0] = randseed[1];
-    randseed[1] = randseed[2];
-    randseed[2] = randseed[3];
-    randseed[3] = randseed[3] ^ randseed[3] >> 19 ^ t ^ t >> 8;
-    return (randseed[3] >>> 0) / (1 << 31 >>> 0);
-  }
-  function createColor() {
-    const h = Math.floor(rand() * 360);
-    const s = rand() * 60 + 40 + "%";
-    const l = (rand() + rand() + rand() + rand()) * 25 + "%";
-    return "hsl(" + h + "," + s + "," + l + ")";
-  }
-  function createImageData(size) {
-    const width = size;
-    const height = size;
-    const dataWidth = Math.ceil(width / 2);
-    const mirrorWidth = width - dataWidth;
-    const data = [];
-    for (let y = 0; y < height; y++) {
-      let row = [];
-      for (let x4 = 0; x4 < dataWidth; x4++) {
-        row[x4] = Math.floor(rand() * 2.3);
-      }
-      const r = row.slice(0, mirrorWidth);
-      r.reverse();
-      row = row.concat(r);
-      for (let i = 0; i < row.length; i++) {
-        data.push(row[i]);
-      }
-    }
-    return data;
-  }
-  function buildOpts(opts) {
-    const newOpts = {};
-    newOpts.seed = opts.seed || Math.floor(Math.random() * Math.pow(10, 16)).toString(16);
-    seedrand(newOpts.seed);
-    newOpts.size = opts.size || 8;
-    newOpts.scale = opts.scale || 4;
-    newOpts.color = opts.color || createColor();
-    newOpts.bgcolor = opts.bgcolor || createColor();
-    newOpts.spotcolor = opts.spotcolor || createColor();
-    return newOpts;
-  }
-  function renderIconSVG(opts) {
-    opts = buildOpts(opts);
-    const imageData = createImageData(opts.size);
-    const width = Math.sqrt(imageData.length);
-    const size = opts.size * opts.scale;
-    let svg = '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + size + " " + size + '">';
-    svg += '<rect x="0" y="0" width="' + size + '" height="' + size + '" fill="' + opts.bgcolor + '"/>';
-    for (let i = 0; i < imageData.length; i++) {
-      if (imageData[i]) {
-        const row = Math.floor(i / width);
-        const col = i % width;
-        const fill = imageData[i] == 1 ? opts.color : opts.spotcolor;
-        svg += '<rect x="' + col * opts.scale + '" y="' + row * opts.scale + '" width="' + opts.scale + '" height="' + opts.scale + '" fill="' + fill + '"/>';
-      }
-    }
-    return svg + "</svg>";
-  }
 
   // src/routes/threads.ts
   init_env();
@@ -17573,9 +17506,13 @@ MTMuMC4x
     </td>
   </tr>`;
   };
+  var timeout = (n) => new Promise((res) => setTimeout(res, n));
   async function* commentTree(kids, parent) {
+    let i = 0;
     for await (const item of kids) {
       yield commentEl(item, { showReply: !parent.dead });
+      if (i++ % 10 === 0)
+        await timeout(100);
       if (item.kids)
         yield* commentTree(item.kids, parent);
     }
@@ -17682,18 +17619,25 @@ MTMuMC4x
     }));
   }
   router.get("/identicon/dang.svg", (req) => fetch("https://news.ycombinator.com/y18.gif", req));
-  router.get("/identicon/:by.svg", pipe(basics(), contentTypes(["image/svg+xml", "*/*"]), caching({
-    cacheControl: "public",
-    maxAge: 31536e3
-  })), async (req, { params, type, waitUntil, handled }) => {
+  router.get("/identicon/:by.svg", pipe(basics(), contentTypes(["image/svg+xml", "*/*"])), async (req, { params, type, waitUntil, handled }) => {
     const cache = await self.caches?.open("identicon");
     const res = await cache?.match(req);
     if (!res) {
-      const svg = renderIconSVG({ seed: params.by ?? "", size: 6, scale: 2 });
-      const res2 = new Response(svg, { headers: { "content-type": type, "content-length": "" + svg.length } });
+      let res2;
+      if (true) {
+        res2 = await fetch(req).then((r) => new Response(r.body, r));
+      } else {
+        const svg = renderIconSVG({ seed: params.by ?? "", size: 6, scale: 2 });
+        res2 = new Response(svg, {
+          headers: {
+            "content-type": "image/svg+xml",
+            "content-length": "" + svg.length,
+            "cache-control": "public, max-age=31536000"
+          }
+        });
+      }
       waitUntil((async () => {
         await handled;
-        res2.headers.set("cache-control", "public, max-age=31536000");
         return cache?.put(req, res2);
       })());
       return res2.clone();
@@ -17931,9 +17875,10 @@ MTMuMC4x
       "/grayarrow2x.gif",
       "/hn.js",
       "/new.png",
-      "/news.css",
+      "/news.css?v=2",
       "/s.gif",
-      "/y18.png"
+      "/y18.png",
+      "/y18.gif"
     ]);
     console.log("skipWaiting");
   });

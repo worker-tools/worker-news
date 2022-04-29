@@ -43,7 +43,7 @@
     "@worker-tools/html-rewriter": "^0.1.0-pre.12",
     "@worker-tools/json-fetch": "2.1.0-pre.4",
     "@worker-tools/location-polyfill": "^0.4.0",
-    "@worker-tools/middleware": "^0.1.0-pre.15",
+    "@worker-tools/middleware": "^0.1.0-pre.16",
     "@worker-tools/parsed-html-rewriter": "^0.1.11",
     "@worker-tools/request-cookie-store": "^0.5.0-pre.9",
     "@worker-tools/resolvable-promise": "^0.2.0-pre.4",

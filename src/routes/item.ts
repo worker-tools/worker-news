@@ -77,9 +77,13 @@ export const commentEl = (comment: AComment, commOpts: CommOpts = {}) => {
   </tr>`;
 }
 
+const timeout = (n?: number) => new Promise(res => setTimeout(res, n))
+
 export async function* commentTree(kids: AsyncIterable<AComment>, parent: { dead: boolean }): AsyncGenerator<HTMLContent> {
+  let i = 0;
   for await (const item of kids) {
     yield commentEl(item, { showReply: !parent.dead });
+    if (i++ % 10 === 0) await timeout(100)
     if (item.kids) yield* commentTree(item.kids, parent);
   }
 }
@@ -219,26 +223,37 @@ async function getItem({ searchParams, type: contentType, url }: RouteArgs)  {
   }));
 }
 
-router.get('/identicon/dang.svg', req => fetch('https://news.ycombinator.com/y18.gif', req))
+router.get('/identicon/dang.svg', req => fetch('https://news.ycombinator.com/y18.gif', req)) // meehhhhhhhh
 router.get('/identicon/:by.svg', 
   combine(
     basics(), 
     contentTypes(['image/svg+xml', '*/*']), 
-    caching({ 
-      cacheControl: 'public', 
-      maxAge: 31536000,
-    })
+    // caching({ 
+    //   cacheControl: 'public', 
+    //   maxAge: 31536000,
+    // })
   ), 
   async (req, { params, type, waitUntil, handled }) => {
     const cache = await self.caches?.open('identicon');
     const res = await cache?.match(req);
+
     if (!res) {
-      const svg = renderIconSVG({ seed: params.by ?? '', size: 6, scale: 2 }) 
-      const res = new Response(svg, { headers: { 'content-type': type, 'content-length': ''+svg.length } });
+      let res: Response;
+      if (SW) {
+        res = await fetch(req).then(r => new Response(r.body, r))
+      } else {
+        const svg = renderIconSVG({ seed: params.by ?? '', size: 6, scale: 2 }) 
+        res = new Response(svg, { 
+          headers: { 
+            'content-type': 'image/svg+xml', 
+            'content-length': ''+svg.length ,
+            'cache-control': 'public, max-age=31536000',
+          }, 
+        });
+      }
       waitUntil((async () => { 
         await handled; 
         // FIXME: make it possible to get response (or just headers!?) after middleware applied!?
-        res.headers.set('cache-control', 'public, max-age=31536000')
         return cache?.put(req, res) 
       })());
       // Returning a clone of the response, because this response gets used first (thanks to `await handled`)
@@ -247,6 +262,7 @@ router.get('/identicon/:by.svg',
 
     // FIXME: how to deal with immutable responses + middleware from cache??
     return new Response(res.body, res)
+    // return res;
   },
 )
 

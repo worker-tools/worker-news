@@ -270,3 +270,5 @@ and (max-width : 750px) {
 #footer a[href$="workers.cloudflare.com"]:before { content:'〈》'; margin-left: -5px; position: inline-block;}
 
 .identicon { position: relative; top: 1px }
+
+.athing { content-visibility: auto }

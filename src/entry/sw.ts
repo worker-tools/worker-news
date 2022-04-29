@@ -16,10 +16,10 @@ self.addEventListener('install', async () => {
     '/grayarrow2x.gif',
     '/hn.js',
     '/new.png',
-    '/news.css',
+    '/news.css?v=2',
     '/s.gif',
-    // '/sw.js',
     '/y18.png',
+    '/y18.gif',
   ])
   console.log('skipWaiting');
 });
