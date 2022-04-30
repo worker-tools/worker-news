@@ -10,7 +10,7 @@
     "build-cf": "esbuild src/entry/cf.ts --bundle --target=es2022 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=false --define:SW=false",
     "watch-cf": "esbuild src/entry/cf.ts --bundle --target=es2022 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=true --define:SW=false --sourcemap --watch",
     "build-deno": "esbuild src/entry/deno.ts --bundle --format=esm --target=es2022 --outfile=dist/deno.js --define:global=self --tsconfig=tsconfig.deno.json --define:DEBUG=false --define:SW=false --define:self.WORKER_LOCATION=\\\"https://worker-news.deno.dev\\\"",
-    "watch-deno": "esbuild src/entry/deno.ts --bundle --format=esm --target=es2022 --outfile=dist/deno.js --define:global=self --tsconfig=tsconfig.deno.json --define:DEBUG=true --define:SW=false --define:self.WORKER_LOCATION=\\\"https://worker-news.deno.dev\\\" --sourcemap --watch",
+    "watch-deno": "esbuild src/entry/deno.ts --bundle --format=esm --target=es2022 --outfile=dist/deno.js --define:global=self --tsconfig=tsconfig.deno.json --define:DEBUG=true --define:SW=false --define:self.WORKER_LOCATION=\\\"http://localhost:8000\\\" --sourcemap --watch",
     "build-sw": "esbuild src/entry/sw.ts --bundle --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=false --define:SW=true ",
     "watch-sw": "esbuild src/entry/sw.ts --bundle --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=true --define:SW=true --sourcemap --watch",
     "serve": "miniflare --watch",

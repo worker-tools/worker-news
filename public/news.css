@@ -85,7 +85,7 @@ td    { font-family:var(--font); font-size:10pt; color:var(--text); }
 input    { font-family:monospace; font-size:10pt; }
 textarea { font-family:monospace; font-size:10pt; resize:both; }
 blockquote { border-left: 4px solid var(--input-border); margin: 0; color: var(--text); margin-left: 1px; padding-left: 9px; }
-hr { border: none; border-top: 1px solid var(--page-background); border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
+hr { border: none; border-bottom: 1px solid var(--input-border); margin: 11pt 0 }
 
 a:link    { color:var(--text-strong); text-decoration:none; }
 a:visited { color:var(--text); text-decoration:none; }

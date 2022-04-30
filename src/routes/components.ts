@@ -122,9 +122,9 @@ export const pageLayout = ({ title, op, id }: {
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {
-      // const regis = await navigator.serviceWorker.register('/sw.js')
+      const regis = await navigator.serviceWorker.register('/sw.js')
       // regis.addEventListener('updatefound', () => { console.log('update found')})
-      for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+      // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
     })()</script>
   </head>
   <body>

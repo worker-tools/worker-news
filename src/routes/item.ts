@@ -1,4 +1,4 @@
-import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
+import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "@worker-tools/html";
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
 import { JSONResponse } from '@worker-tools/json-fetch';
@@ -83,7 +83,7 @@ export async function* commentTree(kids: AsyncIterable<AComment>, parent: { dead
   let i = 0;
   for await (const item of kids) {
     yield commentEl(item, { showReply: !parent.dead });
-    if (i++ % 10 === 0) await timeout(100)
+    if (i++ % 10 === 0) await timeout()
     if (item.kids) yield* commentTree(item.kids, parent);
   }
 }
@@ -206,12 +206,7 @@ async function getItem({ searchParams, type: contentType, url }: RouteArgs)  {
             <table border="0" class="comment-tree">
               <tbody>
                 ${kids && commentTree(kids, post)}
-                ${async () => {
-                  const moreLink = await post.moreLink;
-                  return moreLink
-                    ? moreLinkEl(moreLink)
-                    : html`<br/><br/>`;
-                }}
+                ${Promise.resolve(post.moreLink).then(ml => ml ? moreLinkEl(ml) : html`<br/><br/>`)}
               </tbody>
             </table>
           </td>
@@ -227,33 +222,29 @@ router.get('/identicon/dang.svg', req => fetch('https://news.ycombinator.com/y18
 router.get('/identicon/:by.svg', 
   combine(
     basics(), 
-    contentTypes(['image/svg+xml', '*/*']), 
+    contentTypes(['image/svg+xml', '*/*']),  // FF does not include image/svg+xml in image request accept header...
     // caching({ 
     //   cacheControl: 'public', 
     //   maxAge: 31536000,
     // })
   ), 
-  async (req, { params, type, waitUntil, handled }) => {
+  async (req, { params: { by: seed = '' }, waitUntil, handled }) => {
     const cache = await self.caches?.open('identicon');
     const res = await cache?.match(req);
 
     if (!res) {
-      let res: Response;
-      if (SW) {
-        res = await fetch(req).then(r => new Response(r.body, r))
-      } else {
-        const svg = renderIconSVG({ seed: params.by ?? '', size: 6, scale: 2 }) 
-        res = new Response(svg, { 
-          headers: { 
-            'content-type': 'image/svg+xml', 
-            'content-length': ''+svg.length ,
-            'cache-control': 'public, max-age=31536000',
-          }, 
-        });
-      }
+      const svg = new TextEncoder().encode(renderIconSVG({ seed, size: 6, scale: 2 }))
+      const res = new Response(svg, { 
+        headers: { 
+          'content-type': 'image/svg+xml', 
+          'content-length': ''+svg.byteLength ,
+          // FIXME: Make it possible to get response (or just headers!?) after middleware applied!?
+          //        Avoid setting cache control manually
+          'cache-control': 'public, max-age=31536000',
+        }, 
+      });
       waitUntil((async () => { 
         await handled; 
-        // FIXME: make it possible to get response (or just headers!?) after middleware applied!?
         return cache?.put(req, res) 
       })());
       // Returning a clone of the response, because this response gets used first (thanks to `await handled`)
