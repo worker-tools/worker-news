@@ -27,7 +27,7 @@ export async function handler(req: Request, event: { request: Request, waitUntil
       page = await getAssetFromKV(event, options)
     } else if ('Deno' in globalThis) {
       const url = new URL(event.request.url);
-      const assetURL = new URL(`../public${url.pathname}`, import.meta.url).href;
+      const assetURL = new URL(`./public${url.pathname}`, import.meta.url).href;
       page = await fetch(assetURL)
     } else { // Service Worker
       page = (await self.caches.match(event.request)) ?? await fetch(event.request, { mode: 'cors' })
