@@ -19,6 +19,7 @@ jobs:
         with:
           version: 6
           run_install: true
+      - run: npm run build
       - uses: denoland/deployctl@v1
         with:
           project: worker-news
