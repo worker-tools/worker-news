@@ -19,9 +19,10 @@ jobs:
         with:
           version: 6
           run_install: true
-      - run: npm run build
+      - run: cp -r public dist
       - uses: denoland/deployctl@v1
         with:
           project: worker-news
-          entrypoint: dist/deno.js
+          entrypoint: deno.js
+          root: dist
       
