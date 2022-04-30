@@ -2,6 +2,7 @@ import { DOMParser } from 'linkedom';
 import type { TreeWalker } from 'linkedom/types/interface/tree-walker';
 import type { Node } from 'linkedom/types/interface/node';
 import { unescape } from 'html-escaper';
+import { location } from '../../location'
 
 import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 import { Text } from 'linkedom/types/interface/text';
@@ -16,7 +17,7 @@ export function* treeWalkerToIter(walker: TreeWalker): IterableIterator<Node> {
 // Primitive support for 
 // Problem: item?id=26520957, item?id=30283264
 export async function blockquotify(text: string) {
-  const { protocol, host } = self.location;
+  const { protocol, host } = location;
 
   // const resp1 = new Response(text);
   // // const resp2 = resp1.clone();

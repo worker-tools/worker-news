@@ -3,6 +3,7 @@ import { basics, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
+import { location } from '../location';
 
 import { router, RouteArgs, mw } from "../router";
 import { identicon, pageLayout } from './components';
@@ -18,7 +19,7 @@ const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
 
 const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
   try { 
-    const url = new URL(href, self.location.origin); 
+    const url = new URL(href, location.origin); 
     const res = parseDomain(url.hostname)!
     if (res.type === 'LISTED') {
       const { domain, topLevelDomains: tld, subDomains } = res;
@@ -53,7 +54,7 @@ const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
 export const favicon = (url?: { hostname?: string } | null) => {
-  const img = url?.hostname && url.hostname !== self.location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`
+  const img = url?.hostname && url.hostname !== location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`
   return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? 'favicon'}" width="11" height="11"/>`
 }
 
@@ -73,7 +74,7 @@ export const aThing = async ({ type, id, url: href, title, dead, deleted }: APos
         <td class="title">${deleted 
           ? '[flagged]' 
           : html`<a href="${href}"
-            class="titlelink">${favicon(url)} ${title}</a>${url?.host === self.location.host ? '' : url ? html`<span
+            class="titlelink">${favicon(url)} ${title}</a>${url?.host === location.host ? '' : url ? html`<span
             class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
                 class="sitestr">${url.sitebit}</span></a>)</span>` : ''}</td>`
         }</tr>`;

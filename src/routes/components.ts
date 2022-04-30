@@ -1,6 +1,7 @@
 import { html, HTMLContent } from "@worker-tools/html";
 import { Stories } from "./api/interface";
 import { user as apiUser } from './api';
+import { location } from '../location';
 
 const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
@@ -138,7 +139,7 @@ export const pageLayout = ({ title, op, id }: {
       </table>
     </center>
     <script type="text/javascript" src="hn.js"></script>
-    ${self.location.hostname === 'news.workers.tools' 
+    ${location.hostname === 'news.workers.tools' 
       ? html`<script defer data-domain="news.workers.tools" src="https://plausible.io/js/plausible.js"></script>` 
       : ''}
   </body>

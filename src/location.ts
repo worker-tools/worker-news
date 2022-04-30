@@ -13,24 +13,5 @@ class WorkerLocationPolyfill2 implements WorkerLocation {
   toString(): string { return this.href }
 }
 
-function defineProperty(url: string, writable = false) {
-  Object.defineProperty(self, 'location', {
-    configurable: false,
-    enumerable: true,
-    writable,
-    value: new WorkerLocationPolyfill2(url),
-  });
-}
-
-function polyfillLocation(event: FetchEvent): void {
-  defineProperty(event.request.url, true);
-}
-
-if (!('location' in self)) {
-  const envLoc = ((<any>self).WORKER_LOCATION) ?? ((<any>self).process?.env?.WORKER_LOCATION)
-  if (envLoc) {
-    defineProperty(envLoc);
-  } else {
-    console.warn('Could not polyfill location')
-  } 
-}
+const envLoc = ((<any>self).WORKER_LOCATION) ?? ((<any>self).process?.env?.WORKER_LOCATION)
+export const location = self.location || new WorkerLocationPolyfill2(envLoc)
