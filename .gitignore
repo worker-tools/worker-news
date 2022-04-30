@@ -13,3 +13,4 @@ cert.pem
 *.sqlite
 /sw.js*
 /tmp
+/public/sw.js*

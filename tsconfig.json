@@ -7,7 +7,7 @@
     },
     "outDir": "./dist",
     "module": "ESNext",
-    "target": "ES2021",
+    "target": "ES2022",
     "lib": [
       "ES2021",
       "WebWorker",
@@ -32,8 +32,6 @@
     "typings/*.d.ts",
     "src/*.ts",
     "src/**/*.ts", 
-    "src/routes/.login.ts",
-    "src/routes/.crawl.ts",
   ],
   "exclude": [
     "node_modules/",

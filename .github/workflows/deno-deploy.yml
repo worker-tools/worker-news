@@ -1,0 +1,22 @@
+name: Deno Deploy
+
+on:
+  push:
+    branches: 
+      - deno
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6
+          run_install: true
+      - uses: denoland/deployctl@v1
+        with:
+          project: worker-news
+          entrypoint: dist/deno.js
+      

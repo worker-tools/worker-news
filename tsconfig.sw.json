@@ -21,6 +21,7 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "strict": true,
+    "strictFunctionTypes": true,
     "allowJs": true,
     "checkJs": true,
     "types": [
@@ -28,9 +29,9 @@
     ],
   },
   "include": [
-    "./typings/*.d.ts",
-    "./src/*.ts",
-    "./src/**/*.ts",
+    "typings/*.d.ts",
+    "src/*.ts",
+    "src/**/*.ts",
   ],
   "exclude": [
     "node_modules/",
