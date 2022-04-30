@@ -15,8 +15,8 @@ jobs:
         with:
           version: 6
           run_install: true
-      - uses: denoland/deployctl@v1
-        with:
-          project: worker-news
-          entrypoint: dist/deno.js
+      # - uses: denoland/deployctl@v1
+      #   with:
+      #     project: worker-news
+      #     entrypoint: dist/deno.js
       
