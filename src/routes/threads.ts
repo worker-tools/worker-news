@@ -24,14 +24,14 @@ export const moreLinkEl = (moreLink: string) => html`
     </td>
   </tr>`;
 
-async function threads({ searchParams, type: contentType, url }: RouteArgs)  {
+async function threads({ searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = searchParams.get('id');
   if (!id) return notFound('No such item.');
   const title = `${id}'s comments`;
 
   const next = Number(searchParams.get('next'));
 
-  const threadsPage = apiThreads(id, next, { url });
+  const threadsPage = apiThreads(id, next, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
     return new JSONResponse(await jsonStringifyStream(threadsPage))

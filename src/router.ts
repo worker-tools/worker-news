@@ -10,6 +10,8 @@ export interface RouteArgs {
   method: Method;
   params: { [key: string]: string | undefined };
   type: string;
+  handled: Promise<void>;
+  waitUntil: (f?: any) => void
 }
 
 export const mw = combine(basics(), contentTypes(['text/html', 'application/json']))

@@ -164,12 +164,12 @@ export async function jsonStringifyStream(_obj: Awaitable<Record<PropertyKey, an
 }
 
 // Dead items: 26841031
-async function getItem({ searchParams, type: contentType, url }: RouteArgs)  {
+async function getItem({ searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Number(searchParams.get('p'));
 
-  const postResponse = apiComments(id, p, { url });
+  const postResponse = apiComments(id, p, { url, handled, waitUntil });
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
   if (contentType === 'application/json') {
@@ -203,10 +203,12 @@ async function getItem({ searchParams, type: contentType, url }: RouteArgs)  {
                 }${!post.dead ? replyTr(post) : ''}
               </tbody>
             </table>
+            <br/>
+            <br/>
             <table border="0" class="comment-tree">
               <tbody>
                 ${kids && commentTree(kids, post)}
-                ${Promise.resolve(post.moreLink).then(ml => ml ? moreLinkEl(ml) : html`<br/><br/>`)}
+                ${Promise.resolve(post.moreLink).then(ml => ml ? moreLinkEl(ml) : '')}
               </tbody>
             </table>
           </td>

@@ -16,26 +16,60 @@ const x = {
   [Stories.FROM]: '/from'
 };
 
-export async function stories(params: StoriesParams, type = Stories.TOP, args: { url: URL }): Promise<StoriesData> {
-  const res = await fetch(new JSONRequest(args.url));
-  const data = await res.json() as any;
+type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
+
+export async function stories(params: StoriesParams, type = Stories.TOP, args: MinArgs): Promise<StoriesData> {
+  const req = new JSONRequest(args.url);
+  const res = await fetch(req);
+  const data = await res.clone().json() as any;
+
+  args.waitUntil((async () => {
+    await args.handled
+    const cache = await caches.open('stories')
+    await cache.put(req, res)
+  })())
+
   return data as StoriesData;
 }
 
-export async function comments(id: number, p: number | undefined, args: { url: URL }): Promise<APost> {
-  const res = await fetch(new JSONRequest(args.url)) 
-  const data = await res.json() as any
+export async function comments(id: number, p: number | undefined, args: MinArgs): Promise<APost> {
+  const req = new JSONRequest(args.url);
+  const res = await fetch(req) 
+  const data = await res.clone().json() as any
+
+  args.waitUntil((async () => {
+    await args.handled
+    const cache = await caches.open('comments')
+    await cache.put(req, res)
+  })())
+
   return data as APost
 }
 
-export async function user(id: string, args: { url: URL }): Promise<AUser> {
-  const res = await fetch(new JSONRequest(args.url)) 
-  const data = await res.json() as any
+export async function user(id: string, args: MinArgs): Promise<AUser> {
+  const req = new JSONRequest(args.url);
+  const res = await fetch(req) 
+  const data = await res.clone().json() as any
+
+  args.waitUntil((async () => {
+    await args.handled
+    const cache = await caches.open('user')
+    await cache.put(req, res)
+  })());
+
   return data;
 }
 
-export async function threads(id: string, next: number | undefined, args: { url: URL }): Promise<ThreadsData> {
-  const res = await fetch(new JSONRequest(args.url)) 
-  const data = await res.json() as any
+export async function threads(id: string, next: number | undefined, args: MinArgs): Promise<ThreadsData> {
+  const req = new JSONRequest(args.url);
+  const res = await fetch(req) 
+  const data = await res.clone().json() as any
+
+  args.waitUntil((async () => {
+    await args.handled;
+    const cache = await caches.open('threads')
+    await cache.put(req, res)
+  })());
+
   return data;
 }

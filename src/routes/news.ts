@@ -138,7 +138,7 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
   <tr><td colspan="2"></td><td>${message}</td></tr>
   <tr style="height:${marginBottom}px"></tr>`;
 
-const mkStories = (type: Stories) => async ({ searchParams, type: contentType, url }: RouteArgs) => {
+const mkStories = (type: Stories) => async ({ searchParams, type: contentType, url, handled, waitUntil }: RouteArgs) => {
   const p = Number(searchParams.get('p') || '1');
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
@@ -150,7 +150,7 @@ const mkStories = (type: Stories) => async ({ searchParams, type: contentType, u
     .replace('$user', searchParams.get('id')!)
     .replace('$site', searchParams.get('site')!)
 
-  const storiesPage = stories({ p, n, next, id, site }, type, { url });
+  const storiesPage = stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
     return new JSONResponse(await jsonStringifyStream(storiesPage))

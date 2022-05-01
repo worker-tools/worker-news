@@ -22,11 +22,11 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-const user = async ({ searchParams, type, url }: RouteArgs) => {
+const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) => {
   const un = searchParams.get('id');
   if (!un) return notFound('No such user.');
 
-  const userPromise = apiUser(un, { url })
+  const userPromise = apiUser(un, { url, handled, waitUntil })
   const title = `Profile: ${un}`;
 
   if (type === 'application/json') {
