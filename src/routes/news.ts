@@ -168,6 +168,7 @@ const mkStories = (type: Stories) => async ({ request, searchParams, type: conte
   }
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
+    <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">

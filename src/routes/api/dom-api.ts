@@ -207,7 +207,7 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem > tr:nth-child(4) > td:nth-child(2)', { 
       text({ text }) { post.text += text }
     })
-    .on('.fatitem form', {
+    .on('.fatitem form, .comment-tree .reply a[href]', {
       element() { post.dead = false }
     })
     // HACK: there's no good way to distinguish link and story submissions.

@@ -38,6 +38,7 @@ const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) 
   }
 
   return new HTMLResponse(pageLayout({ op: 'user', title })(html`
+    <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>
         <table border="0"><tbody>

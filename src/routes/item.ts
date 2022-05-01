@@ -114,7 +114,7 @@ async function* pollOptList(parts: ForOfAwaitable<APollOpt>): AsyncIterable<HTML
     </tr>`;
 }
 
-const PLACEHOLDER = 'Loading...';
+const PLACEHOLDER = 'Loading…';
 
 const replyTr = ({ id, type }: APost) => {
   return html`<tr style="height:10px"></tr>
@@ -174,6 +174,7 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
       const post = await postResponse;
       const { title, text, kids, parts } = post;
       return html`
+        <tr id="pagespace" title="${title}" style="height:10px"></tr>
         ${title 
           ? html`<script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` 
           : ''}
@@ -194,7 +195,7 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
                         ? pollOptList(parts)
                         : '',
                     ]
-                }${!post.dead ? replyTr(post) : ''}
+                }${!post.dead && !searchParams.has('p') ? replyTr(post) : ''}
               </tbody>
             </table>
             <br/>
