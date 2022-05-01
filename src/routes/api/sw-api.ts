@@ -1,5 +1,5 @@
 import { JSONRequest, ParamsURL } from "@worker-tools/json-fetch";
-import { RouteArgs } from "src/router";
+import { ResolvablePromise } from "@worker-tools/resolvable-promise";
 import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface";
 
 // DRY:!!
@@ -18,58 +18,68 @@ const x = {
 
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
 
+const MIN_WAIT = 250;
+const NEVER = new Promise<never>(() => {});
+const timeout = (n?: number) => new Promise(r => setTimeout(r, n))
+
+// FIXME: What a mess. But need to call waitUntil immediately, or event gets garbage collected...
+const networkFirst = (cacheKey: string) => async <T>({ url, handled, waitUntil }: MinArgs): Promise<T> => {
+  const forceFetch = url.searchParams.get('force') === 'fetch'
+  const forceCache = url.searchParams.get('force') === 'cache'
+  url.searchParams.delete('force')
+
+  const done = new ResolvablePromise<void>()
+  waitUntil(done)
+  try {
+    const req = new JSONRequest(url);
+    const race = { over: false }
+    const onLine = forceFetch || (navigator.onLine && !forceCache)
+    const res = await Promise.race([
+      onLine 
+        ? fetch(req) 
+        : NEVER,
+      forceFetch 
+        ? NEVER 
+        : timeout(onLine ? MIN_WAIT : 0).then(() => !race.over ? caches.match(req) : void 0)
+    ])
+    race.over = true;
+    if (!res) throw Error('You are offline');
+    const data = await res.clone().json() as any;
+
+    const fromCache = res.headers.has('x-from-sw-cache');
+    if (!fromCache) {
+      (async () => {
+        await handled
+        const cache = await caches.open(cacheKey)
+        const res_ = new Response(res.body, res);
+        res_.headers.set('x-from-sw-cache', 'true')
+        await cache.put(req, res_)
+      })().finally(() => done.resolve())
+    } else {
+      data.fromCache = true;
+      data.fromCacheDate = new Date(res.headers.get('date')!)
+      done.resolve()
+    }
+
+    return data as T;
+  } catch (err) { 
+    done.resolve();
+    throw err
+  }
+}
+
 export async function stories(params: StoriesParams, type = Stories.TOP, args: MinArgs): Promise<StoriesData> {
-  const req = new JSONRequest(args.url);
-  const res = await fetch(req);
-  const data = await res.clone().json() as any;
-
-  args.waitUntil((async () => {
-    await args.handled
-    const cache = await caches.open('stories')
-    await cache.put(req, res)
-  })())
-
-  return data as StoriesData;
+  return networkFirst('stories')(args);
 }
 
 export async function comments(id: number, p: number | undefined, args: MinArgs): Promise<APost> {
-  const req = new JSONRequest(args.url);
-  const res = await fetch(req) 
-  const data = await res.clone().json() as any
-
-  args.waitUntil((async () => {
-    await args.handled
-    const cache = await caches.open('comments')
-    await cache.put(req, res)
-  })())
-
-  return data as APost
+  return networkFirst('comments')(args);
 }
 
 export async function user(id: string, args: MinArgs): Promise<AUser> {
-  const req = new JSONRequest(args.url);
-  const res = await fetch(req) 
-  const data = await res.clone().json() as any
-
-  args.waitUntil((async () => {
-    await args.handled
-    const cache = await caches.open('user')
-    await cache.put(req, res)
-  })());
-
-  return data;
+  return networkFirst('user')(args);
 }
 
 export async function threads(id: string, next: number | undefined, args: MinArgs): Promise<ThreadsData> {
-  const req = new JSONRequest(args.url);
-  const res = await fetch(req) 
-  const data = await res.clone().json() as any
-
-  args.waitUntil((async () => {
-    await args.handled;
-    const cache = await caches.open('threads')
-    await cache.put(req, res)
-  })());
-
-  return data;
+  return networkFirst('threads')(args);
 }

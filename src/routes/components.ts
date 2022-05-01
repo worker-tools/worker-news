@@ -1,4 +1,6 @@
 import { html, HTMLContent } from "@worker-tools/html";
+import { formatDistanceToNowStrict } from 'date-fns';
+
 import { Stories } from "./api/interface";
 import { user as apiUser } from './api';
 import { location } from '../location';
@@ -20,9 +22,21 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
 //   [Stories.FROM]: '/from'
 // };
 
+export const favicon = (url?: { hostname?: string } | null) => {
+  const img = url?.hostname && url.hostname !== location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`
+  return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? 'favicon'}" width="11" height="11"/>`
+}
+
 export const identicon = (by: string, size = 11) => {
   const img = new URL(`/identicon/${by}.svg`, location.origin).href
-  return html`<img class="identicon" src="${img}" alt="${by}" width="${size}" height="${size}"/>`
+  return html`<img class="identicon" src="${img}" alt="Identicon" width="${size}" height="${size}" loading="lazy"/>`
+}
+
+export const cachedWarning = (fromCacheDate?: Date | null) => {
+  if (fromCacheDate) {
+    const timeAgo = formatDistanceToNowStrict(fromCacheDate, { addSuffix: true })
+    return html`<tr style="height:6px"></tr><tr><td colspan="2"></td><td>Reading offline page. Last updated ${timeAgo}</td></tr><tr style="height:14px"></tr>`
+  }
 }
 
 export const headerEl = ({ op, id }: { 
@@ -34,7 +48,7 @@ export const headerEl = ({ op, id }: {
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
         <tbody>
           <tr>
-            <td style="width:18px;padding-right:4px"><a href="https://workers.tools"><picture><source 
+            <td style="width:18px;padding-right:4px"><a href="https://workers.tools"><picture style="display:block;height:20px"><source 
                   srcset="darky18.png" media="(prefers-color-scheme: dark)"><img
                   src="y18.png" width="18" height="18"
                   style="border:1px transparent solid;"></picture></a></td>

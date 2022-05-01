@@ -15,10 +15,14 @@ export type StoriesParams = { p?: number, n?: number, next?: number, id?: string
 export type StoriesData = { 
   items: AsyncIterable<APost>, 
   moreLink: PromiseLike<string> 
+  fromCache?: boolean,
+  fromCacheDate?: Date,
 }
 export type ThreadsData = { 
   items: AsyncIterable<AComment>, 
   moreLink: Promise<string> 
+  fromCache?: boolean,
+  fromCacheDate?: Date,
 }
 
 export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
@@ -40,6 +44,10 @@ export interface AUser {
   id: string,
   karma: number,
   submitted: number[],
+
+  // FIXME: Don't include app-level data in schema..
+  fromCache?: boolean,
+  fromCacheDate?: Date,
 }
 
 export interface AComment extends AThing {
@@ -60,11 +68,6 @@ export interface APollOpt extends AThing {
   text: string,
 }
 
-// export interface Poll {
-//   item: string | undefined,
-//   points: number,
-// }
-
 export type Type = 'job' | 'story' | 'comment' | 'poll' | 'pollopt';
 export interface APost extends AThing {
   title: string,
@@ -78,4 +81,8 @@ export interface APost extends AThing {
   story?: number,
   storyTitle?: string,
   moreLink?: Promise<string>,
+
+  // FIXME: Don't include app-level data in schema..
+  fromCache?: boolean,
+  fromCacheDate?: Date,
 }

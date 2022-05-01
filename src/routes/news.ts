@@ -6,11 +6,13 @@ import { fromUrl, parseDomain } from 'parse-domain';
 import { location } from '../location';
 
 import { router, RouteArgs, mw } from "../router";
-import { identicon, pageLayout } from './components';
+import { cachedWarning, favicon, identicon, pageLayout } from './components';
 
 import { stories, APost, Stories } from './api'
-import { JSONResponse } from "@worker-tools/json-fetch";
+import { JSONRequest, JSONResponse } from "@worker-tools/json-fetch";
+import { StreamResponse } from "@worker-tools/stream-response";
 import { jsonStringifyStream } from "./item";
+import { promiseToAsyncIterable } from "./api/iter";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -38,25 +40,8 @@ const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
   } catch { return null }
 }
 
-// const stripWWW = (url?: URL | null) => {
-//   if (!url) return '';
-//   if (url.hostname.substr(0, 4) === 'www.') {
-//     url.hostname = url.hostname.substr(4);
-//   }
-//   if (['github.com', 'gitlab.com'].includes(url.hostname)) {
-//     const p = url.pathname.substr(1).replace(/\/+/g, '/').split('/');
-//     return url.hostname + '/' + p[0];
-//   }
-//   return url.hostname;
-// }
-
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
-
-export const favicon = (url?: { hostname?: string } | null) => {
-  const img = url?.hostname && url.hostname !== location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`
-  return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? 'favicon'}" width="11" height="11"/>`
-}
 
 export const aThing = async ({ type, id, url: href, title, dead, deleted }: APost, index?: number, op?: Stories) => {
   try {
@@ -83,9 +68,10 @@ export const aThing = async ({ type, id, url: href, title, dead, deleted }: APos
   }
 }
 
-export const subtext = (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
+export const subtext = async (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
   const { type, id, title, time, score, by, descendants, dead } = post;
   const timeAgo = time && formatDistanceToNowStrict(new Date(time), { addSuffix: true })
+  const cache = await caches?.open('comments')
   return html`
     <tr>
       <td colspan="2"></td>
@@ -106,8 +92,11 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
         ${!dead && type !== 'job' 
           ? html`| <a href="item?id=${id}">${descendants === 0 
             ? 'discuss' 
-            : unsafeHTML(`${descendants}&nbsp;comments`)}</a></td>`
+            : unsafeHTML(`${descendants}&nbsp;comments`)}</a>`
           : ''}
+        ${cache.match(new JSONRequest(`item?id=${id}`))
+          .then(x => x && html`| <a href="item?id=${id}&force=cache">Offline ✓</a>`)}
+      </td>
     </tr>
   `;
 }
@@ -153,7 +142,8 @@ const mkStories = (type: Stories) => async ({ searchParams, type: contentType, u
   const storiesPage = stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    return new JSONResponse(await jsonStringifyStream(storiesPage))
+    // FIXME: ...
+    return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(storiesPage)), new JSONResponse(null))
   }
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
@@ -172,7 +162,8 @@ const mkStories = (type: Stories) => async ({ searchParams, type: contentType, u
                 let i = (next && n)
                   ? (n - 1) 
                   : (p - 1) * 30;
-                const { items, moreLink } = await storiesPage;
+                const { items, moreLink, fromCacheDate } = await storiesPage;
+                yield cachedWarning(fromCacheDate)
                 for await (const post of items) {
                   yield rowEl(post, i++, type);
                 }
@@ -183,6 +174,7 @@ const mkStories = (type: Stories) => async ({ searchParams, type: contentType, u
                   </tr>`;
               } catch (err) {
                 yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err as string}</td></tr>`;
+              } finally {
               }
             }}
           </tbody>

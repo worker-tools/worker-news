@@ -23,6 +23,7 @@ specifiers:
   '@worker-tools/response-creators': ^1.0.8
   '@worker-tools/router': 0.2.0-pre.6
   '@worker-tools/signed-cookie-store': ^0.3.0-pre.7
+  '@worker-tools/stream-response': ^0.1.0-pre.0
   '@worker-tools/stripe-webhook': ^1.1.4
   base64-encoding: ^0.14.3
   cookie-store-interface: ^0.1.1
@@ -71,6 +72,7 @@ dependencies:
   '@worker-tools/response-creators': 1.0.8
   '@worker-tools/router': 0.2.0-pre.6
   '@worker-tools/signed-cookie-store': 0.3.0-pre.7
+  '@worker-tools/stream-response': 0.1.0-pre.0
   '@worker-tools/stripe-webhook': 1.1.4
   base64-encoding: 0.14.3
   cookie-store-interface: 0.1.1

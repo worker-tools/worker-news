@@ -1,6 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "@worker-tools/html";
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
+import { StreamResponse } from '@worker-tools/stream-response';
 import { JSONResponse } from '@worker-tools/json-fetch';
 import { renderIconSVG } from '@download/blockies';
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -9,10 +10,11 @@ import { mw, RouteArgs, router } from "../router";
 
 import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api";
 
-import { pageLayout, identicon } from './components';
+import { pageLayout, identicon, cachedWarning } from './components';
 import { aThing, subtext } from './news';
 import { moreLinkEl } from "./threads";
 import { Awaitable } from "src/vendor/common-types";
+import { promiseToAsyncIterable } from "./api/iter";
 
 export interface CommOpts {
   showToggle?: boolean,
@@ -160,7 +162,7 @@ export async function jsonStringifyStream(_obj: Awaitable<Record<PropertyKey, an
       obj[key] = await value
     }
   }
-  return obj;
+  return JSON.stringify(obj, null, DEBUG ? 2 : 0);
 }
 
 // Dead items: 26841031
@@ -173,13 +175,14 @@ async function getItem({ searchParams, type: contentType, url, handled, waitUnti
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
   if (contentType === 'application/json') {
-    return new JSONResponse(await jsonStringifyStream(await postResponse))
+    // FIXME: ...
+    return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(postResponse)), new JSONResponse(null))
   }
 
   return new HTMLResponse(pageRenderer(async () => {
     try {
       const post = await postResponse;
-      const { title, text, kids, parts } = post;
+      const { title, text, kids, parts, fromCacheDate } = post;
       return html`
         ${title 
           ? html`<script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` 
@@ -188,6 +191,7 @@ async function getItem({ searchParams, type: contentType, url, handled, waitUnti
           <td>
             <table class="fatitem" border="0">
               <tbody>
+                ${cachedWarning(fromCacheDate)}
                 ${post.type === 'comment' 
                   ? [commentTr(post as AComment, { showParent: true, showToggle: false })]
                   : [
@@ -216,6 +220,7 @@ async function getItem({ searchParams, type: contentType, url, handled, waitUnti
     } catch (err) {
       return html`<tr id="pagespace" title="Error" style="height:10px"></tr>
         <tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`
+    } finally {
     }
   }));
 }

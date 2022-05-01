@@ -15,3 +15,8 @@ export async function slurp<T>(xs: AsyncIterable<T>): Promise<T[]> {
   for await (const x of xs) ret.push(x);
   return ret;
 }
+
+export async function* promiseToAsyncIterable(promise: Promise<string>): AsyncIterableIterator<string> {
+  yield ' '; // LOOOOL: need to send first byte, otherwise FF and Safari won't recognize settle fetch promise
+  yield await promise;
+}

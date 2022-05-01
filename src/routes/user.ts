@@ -7,8 +7,11 @@ import { basics, combine, contentTypes } from "@worker-tools/middleware";
 import { router, RouteArgs, mw } from "../router";
 import { user as apiUser } from "./api";
 import { pageLayout, identicon } from './components';
+import { StreamResponse } from "@worker-tools/stream-response";
 import { JSONResponse } from "@worker-tools/json-fetch";
 import { jsonStringifyStream } from "./item";
+import { asyncIterableToStream } from "whatwg-stream-to-async-iter";
+import { promiseToAsyncIterable } from "./api/iter";
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -30,7 +33,8 @@ const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) 
   const title = `Profile: ${un}`;
 
   if (type === 'application/json') {
-    return new JSONResponse(await jsonStringifyStream(userPromise))
+    // FIXME: ...
+    return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(userPromise)), new JSONResponse(null))
   }
 
   return new HTMLResponse(pageLayout({ op: 'user', title })(html`

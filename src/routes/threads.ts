@@ -8,7 +8,10 @@ import { threads as apiThreads } from "./api";
 
 import { pageLayout } from './components';
 import { commentEl, jsonStringifyStream } from "./item";
+import { StreamResponse } from '@worker-tools/stream-response';
 import { JSONResponse } from "@worker-tools/json-fetch";
+import { asyncIterableToStream } from "whatwg-stream-to-async-iter";
+import { promiseToAsyncIterable } from "./api/iter";
 
 export const moreLinkEl = (moreLink: string) => html`
   <tr class="morespace" style="height:10px"></tr>
@@ -34,7 +37,8 @@ async function threads({ searchParams, type: contentType, url, handled, waitUnti
   const threadsPage = apiThreads(id, next, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    return new JSONResponse(await jsonStringifyStream(threadsPage))
+    // FIXME: ...
+    return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(threadsPage)), new JSONResponse(null))
   }
 
   return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {

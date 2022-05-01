@@ -25,6 +25,15 @@ router.get('*', caching({
   maxAge: 60 * 60 * 24 * 30 * 12 
 }), assets.handler)
 
-router.external('https://icons.duckduckgo.com/*', req => fetch(req))
+router.external('https://icons.duckduckgo.com/*', async (req, { waitUntil, handled }) => {
+  const cache = await caches.open('favicon')
+  const res = await caches.match(req)
+  if (!res) {
+    const res2 = await fetch(req)
+    waitUntil(cache.put(req, res2.clone()))
+    return res2;
+  }
+  return res;
+})
 
 export { router }
