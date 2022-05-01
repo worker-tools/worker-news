@@ -96,7 +96,7 @@ export const footerEl = () => html`
       </table><br/>
       <center>Made by <a href="/user?id=qwtel">qwtel</a> with <a
           href="https://workers.tools">Worker&nbsp;Tools</a> and <a
-          href="https://workers.cloudflare.com">Cloudflare&nbsp;Workers</a>.</center><br/>
+          href="https://deno.com">Deno&nbsp;Deploy</a>.</center><br/>
       <center><span class="yclinks">YC: 
             <a href="newsguidelines.html">Guidelines</a>
           | <a href="newsfaq.html">FAQ</a>

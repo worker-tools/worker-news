@@ -96,7 +96,7 @@ export const subtext = async (post: APost, index?: number, op?: Stories, { showP
             : unsafeHTML(`${descendants}&nbsp;comments`)}</a>`
           : ''}
         ${SW && caches?.open('comments').then(cache => cache.match(new JSONRequest(`item?id=${id}`)))
-          .then(x => x && html`| <a href="item?id=${id}&force=cache">Offline ✓</a>`)}
+          .then(x => x && html`| <a href="item?id=${id}&force=cache">Offline&nbsp;✓</a>`)}
       </td>
     </tr>
   `;

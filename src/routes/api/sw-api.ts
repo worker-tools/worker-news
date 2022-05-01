@@ -2,20 +2,6 @@ import { JSONRequest, ParamsURL } from "@worker-tools/json-fetch";
 import { ResolvablePromise } from "@worker-tools/resolvable-promise";
 import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface";
 
-// DRY:!!
-const x = {
-  [Stories.TOP]: '/news',
-  [Stories.NEW]: '/newest',
-  [Stories.BEST]: '/best',
-  [Stories.SHOW]: '/show',
-  [Stories.SHOW_NEW]: '/shownew',
-  [Stories.ASK]: '/ask',
-  [Stories.JOB]: '/jobs',
-  [Stories.USER]: '/submitted',
-  [Stories.CLASSIC]: '/classic',
-  [Stories.FROM]: '/from'
-};
-
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
 
 const MIN_WAIT = 250;
