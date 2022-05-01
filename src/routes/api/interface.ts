@@ -1,3 +1,6 @@
+import { Awaitable } from "@worker-tools/router";
+import { ForOfAwaitable } from "whatwg-stream-to-async-iter";
+
 export enum Stories {
   TOP = 'news',
   NEW = 'newest',
@@ -9,18 +12,19 @@ export enum Stories {
   USER = 'submitted',
   CLASSIC = 'classic',
   FROM = 'from',
+  OFFLINE = 'offline',
 }
 
 export type StoriesParams = { p?: number, n?: number, next?: number, id?: string, site?: string };
 export type StoriesData = { 
-  items: AsyncIterable<APost>, 
-  moreLink: PromiseLike<string> 
+  items: ForOfAwaitable<APost>, 
+  moreLink: Awaitable<string> 
   fromCache?: boolean,
   fromCacheDate?: Date,
 }
 export type ThreadsData = { 
-  items: AsyncIterable<AComment>, 
-  moreLink: Promise<string> 
+  items: ForOfAwaitable<AComment>, 
+  moreLink: Awaitable<string> 
   fromCache?: boolean,
   fromCacheDate?: Date,
 }
@@ -32,8 +36,8 @@ export interface AThing {
   id: number,
   by: string,
   time?: number | string | Date,
-  kids?: AsyncIterable<AComment>,
-  parts?: AsyncIterable<APollOpt>,
+  kids?: ForOfAwaitable<AComment>,
+  parts?: ForOfAwaitable<APollOpt>,
   dead?: boolean,
   deleted?: boolean,
 }
@@ -80,7 +84,7 @@ export interface APost extends AThing {
   parent?: number,
   story?: number,
   storyTitle?: string,
-  moreLink?: Promise<string>,
+  moreLink?: Awaitable<string>,
 
   // FIXME: Don't include app-level data in schema..
   fromCache?: boolean,

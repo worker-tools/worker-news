@@ -27,7 +27,8 @@ const x = {
   [Stories.JOB]: '/jobs',
   [Stories.USER]: '/submitted',
   [Stories.CLASSIC]: '/classic',
-  [Stories.FROM]: '/from'
+  [Stories.FROM]: '/from',
+  [Stories.OFFLINE]: 'never',
 };
 
 const extractId = (href: string | null) => Number(/item\?id=(\d+)/.exec(href ?? '')?.[1]);

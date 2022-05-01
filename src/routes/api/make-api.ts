@@ -20,6 +20,7 @@ const x = {
   [Stories.USER]: '',
   [Stories.CLASSIC]: '',
   [Stories.FROM]: '',
+  [Stories.OFFLINE]: '',
 };
 
 export function stories(api: APIFn, { p }: StoriesParams, type = Stories.TOP) {

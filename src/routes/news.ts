@@ -1,18 +1,19 @@
 import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { basics, combine, contentTypes } from "@worker-tools/middleware";
-import { notFound } from "@worker-tools/response-creators";
+import { notFound, ok } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
 import { location } from '../location';
 
 import { router, RouteArgs, mw } from "../router";
-import { cachedWarning, favicon, identicon, pageLayout } from './components';
+import { cachedWarning, del, favicon, identicon, pageLayout } from './components';
 
-import { stories, APost, Stories } from './api'
+import { stories, APost, Stories, StoriesParams, StoriesData } from './api'
 import { JSONRequest, JSONResponse } from "@worker-tools/json-fetch";
 import { StreamResponse } from "@worker-tools/stream-response";
 import { jsonStringifyStream } from "./item";
 import { promiseToAsyncIterable } from "./api/iter";
+import { Awaitable } from "@worker-tools/router";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -58,10 +59,11 @@ export const aThing = async ({ type, id, url: href, title, dead, deleted }: APos
         }</center></td>
         <td class="title">${deleted 
           ? '[flagged]' 
-          : html`<a href="${href}"
-            class="titlelink">${favicon(url)} ${title}</a>${url?.host === location.host ? '' : url ? html`<span
-            class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span
-                class="sitestr">${url.sitebit}</span></a>)</span>` : ''}</td>`
+          : html`<a href="${href}" class="titlelink">${favicon(url)} ${title}</a>${url?.host === location.host 
+              ? '' 
+              : url 
+                ? html`<span class="sitebit comhead"> (<a href="from?site=${url.sitebit}"><span class="sitestr">${url.sitebit}</span></a>)</span>` 
+                : ''}</td>`
         }</tr>`;
   } catch (err) {
     throw html`<tr><td>Something went wrong</td><td>${err instanceof Error ? err.message : err as string}</td></tr>`
@@ -71,7 +73,6 @@ export const aThing = async ({ type, id, url: href, title, dead, deleted }: APos
 export const subtext = async (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
   const { type, id, title, time, score, by, descendants, dead } = post;
   const timeAgo = time && formatDistanceToNowStrict(new Date(time), { addSuffix: true })
-  const cache = await caches?.open('comments')
   return html`
     <tr>
       <td colspan="2"></td>
@@ -94,7 +95,7 @@ export const subtext = async (post: APost, index?: number, op?: Stories, { showP
             ? 'discuss' 
             : unsafeHTML(`${descendants}&nbsp;comments`)}</a>`
           : ''}
-        ${cache.match(new JSONRequest(`item?id=${id}`))
+        ${SW && caches?.open('comments').then(cache => cache.match(new JSONRequest(`item?id=${id}`)))
           .then(x => x && html`| <a href="item?id=${id}&force=cache">Offline ✓</a>`)}
       </td>
     </tr>
@@ -119,7 +120,8 @@ const x = {
   [Stories.SHOW_NEW]: 'New Show',
   [Stories.USER]: `$user's submissions`,
   [Stories.CLASSIC]: '',
-  [Stories.FROM]: 'Submissions from $site'
+  [Stories.FROM]: 'Submissions from $site',
+  [Stories.OFFLINE]: ''
 }
 
 const messageEl = (message: HTMLContent, marginBottom = 12) => html`
@@ -127,8 +129,25 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
   <tr><td colspan="2"></td><td>${message}</td></tr>
   <tr style="height:${marginBottom}px"></tr>`;
 
-const mkStories = (type: Stories) => async ({ searchParams, type: contentType, url, handled, waitUntil }: RouteArgs) => {
-  const p = Number(searchParams.get('p') || '1');
+const toTime = (r: Response) => new Date(r.headers.get('date')!).getTime()
+
+async function offlineStories({ p }: { p: number }): Promise<StoriesData> {
+  const cache = await caches.open('comments')
+  const keys = await cache.keys()
+  // FIXME: should probably manage an index in indexeddb
+  const responses = await Promise.all(keys.map(async key => (await cache.match(key))!))
+  const items = await Promise.all(responses
+    .sort((a, b) => toTime(b) - toTime(a))
+    .slice(PAGE * (p - 1), PAGE * p)
+    .map(res => res.json() as Promise<APost>)
+  );
+  const moreLink = PAGE * p < responses.length ? `offline?p=${p + 1}` : ''
+  return { items, moreLink }
+}
+
+const PAGE = 30
+const mkStories = (type: Stories) => async ({ request, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs) => {
+  const p = Math.max(1, Number(searchParams.get('p') || '1'));
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
   const n = Number(searchParams.get('n'))
@@ -139,7 +158,9 @@ const mkStories = (type: Stories) => async ({ searchParams, type: contentType, u
     .replace('$user', searchParams.get('id')!)
     .replace('$site', searchParams.get('site')!)
 
-  const storiesPage = stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
+  const storiesPage = type === Stories.OFFLINE
+    ? offlineStories({ p })
+    : stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
     // FIXME: ...
@@ -157,21 +178,25 @@ const mkStories = (type: Stories) => async ({ searchParams, type: contentType, u
             ${type === Stories.JOB ? messageEl(html`
               These are jobs at YC startups. See more at
               <a href="https://www.ycombinator.com/jobs"><u>ycombinator.com/jobs</u></a>.`, 14) : ''}
+            ${type === Stories.OFFLINE ? messageEl(html`
+              These are stories cached for offline reading.`) : ''}
             ${async function* () {
               try {
                 let i = (next && n)
                   ? (n - 1) 
                   : (p - 1) * 30;
-                const { items, moreLink, fromCacheDate } = await storiesPage;
-                yield cachedWarning(fromCacheDate)
+                const { items, moreLink } = await storiesPage;
+                yield cachedWarning(await storiesPage, request)
                 for await (const post of items) {
                   yield rowEl(post, i++, type);
                 }
-                yield html`<tr class="morespace" style="height:10px"></tr>
-                  <tr>
-                    <td colspan="2"></td>
-                    <td class="title"><a href="${moreLink}" class="morelink" rel="next">More</a></td>
-                  </tr>`;
+                if (await moreLink) {
+                  yield html`<tr class="morespace" style="height:10px"></tr>
+                    <tr>
+                      <td colspan="2"></td>
+                      <td class="title"><a href="${moreLink}" class="morelink" rel="next">More</a></td>
+                    </tr>`;
+                }
               } catch (err) {
                 yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err as string}</td></tr>`;
               } finally {
@@ -193,6 +218,7 @@ export const jobs = mkStories(Stories.JOB)
 export const submitted = mkStories(Stories.USER)
 export const classic = mkStories(Stories.CLASSIC)
 export const from = mkStories(Stories.FROM)
+export const offline = mkStories(Stories.OFFLINE)
 
 router.get('/news', mw, (_req, ctx) => news(ctx))
 router.get('/newest', mw, (_req, x) => newest(x));
@@ -204,3 +230,7 @@ router.get('/jobs', mw, (_req, x) => jobs(x))
 router.get('/submitted', mw, (_req, x) => submitted(x))
 router.get('/classic', mw, (_req, x) => classic(x))
 router.get('/from', mw, (_req, x) => from(x))
+
+if (SW) {
+  router.get('/offline', mw, (_req, x) => offline(x))
+}

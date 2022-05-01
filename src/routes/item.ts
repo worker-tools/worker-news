@@ -5,6 +5,7 @@ import { StreamResponse } from '@worker-tools/stream-response';
 import { JSONResponse } from '@worker-tools/json-fetch';
 import { renderIconSVG } from '@download/blockies';
 import { formatDistanceToNowStrict } from 'date-fns';
+import { ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
 
 import { mw, RouteArgs, router } from "../router";
 
@@ -81,11 +82,11 @@ export const commentEl = (comment: AComment, commOpts: CommOpts = {}) => {
 
 const timeout = (n?: number) => new Promise(res => setTimeout(res, n))
 
-export async function* commentTree(kids: AsyncIterable<AComment>, parent: { dead: boolean }): AsyncGenerator<HTMLContent> {
+export async function* commentTree(kids: ForOfAwaitable<AComment>, parent: { dead: boolean }): AsyncGenerator<HTMLContent> {
   let i = 0;
   for await (const item of kids) {
     yield commentEl(item, { showReply: !parent.dead });
-    if (i++ % 10 === 0) await timeout()
+    if (i++ % 10 === 0) await timeout() // FIXME: streaming json parser should fix this!?
     if (item.kids) yield* commentTree(item.kids, parent);
   }
 }
@@ -100,7 +101,7 @@ export const pollOptEl = (opt: APollOpt) => {
     <tr style="height:7px"></tr>`;
 }
 
-async function* pollOptList(parts: AsyncIterable<APollOpt>): AsyncIterable<HTMLContent> {
+async function* pollOptList(parts: ForOfAwaitable<APollOpt>): AsyncIterable<HTMLContent> {
   yield html`<tr style="height:10px"></tr>
     <tr>
       <td colspan="2"></td>
@@ -112,20 +113,7 @@ async function* pollOptList(parts: AsyncIterable<APollOpt>): AsyncIterable<HTMLC
     </tr>`;
 }
 
-// const itemSubtext = ({ id, title, score, by, timeAgo, descendants, dead }: APost) => html`<tr>
-//   <td colspan="2"></td>
-//   <td class="subtext">
-//     <span class="score" id="score_${id}">${score} points</span> by <a href="user?id=${by}"
-//       class="hnuser">${by}</a> <span class="age"><a href="item?id=${id}">${timeAgo}</a></span>
-//     <span id="unv_${id}"></span> 
-//     <!-- | <a href="hide?id=${id}&amp;auth=${'TODO'}&amp;goto=item%3Fid%3D${id}">hide</a> -->
-//     | <a href="https://hn.algolia.com/?query=${encodeURIComponent(title)}&amp;type=story&amp;dateRange=all&amp;sort=byDate&amp;storyText=false&amp;prefix&amp;page=0" class="hnpast">past</a> 
-//     <!-- | <a href="fave?id=${id}&amp;auth=${'TODO'}">favorite</a>  -->
-//     | <a href="item?id=${id}">${descendants}&nbsp;comments</a>
-//   </td>
-// </tr>`;
-
-const PLACEHOLDER = 'Worker News';
+const PLACEHOLDER = 'Loading...';
 
 const replyTr = ({ id, type }: APost) => {
   return html`<tr style="height:10px"></tr>
@@ -166,7 +154,7 @@ export async function jsonStringifyStream(_obj: Awaitable<Record<PropertyKey, an
 }
 
 // Dead items: 26841031
-async function getItem({ searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
+async function getItem({ request, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Number(searchParams.get('p'));
@@ -182,7 +170,7 @@ async function getItem({ searchParams, type: contentType, url, handled, waitUnti
   return new HTMLResponse(pageRenderer(async () => {
     try {
       const post = await postResponse;
-      const { title, text, kids, parts, fromCacheDate } = post;
+      const { title, text, kids, parts } = post;
       return html`
         ${title 
           ? html`<script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` 
@@ -191,7 +179,7 @@ async function getItem({ searchParams, type: contentType, url, handled, waitUnti
           <td>
             <table class="fatitem" border="0">
               <tbody>
-                ${cachedWarning(fromCacheDate)}
+                ${cachedWarning(post, request)}
                 ${post.type === 'comment' 
                   ? [commentTr(post as AComment, { showParent: true, showToggle: false })]
                   : [

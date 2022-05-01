@@ -9,19 +9,6 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`
   : content
 
-// const x = {
-//   [Stories.TOP]: '/news',
-//   [Stories.NEW]: '/newest',
-//   [Stories.BEST]: '/best',
-//   [Stories.SHOW]: '/show',
-//   [Stories.SHOW_NEW]: '/shownew',
-//   [Stories.ASK]: '/ask',
-//   [Stories.JOB]: '/jobs',
-//   [Stories.USER]: '$id\'s submissions',
-//   [Stories.CLASSIC]: '/classic',
-//   [Stories.FROM]: '/from'
-// };
-
 export const favicon = (url?: { hostname?: string } | null) => {
   const img = url?.hostname && url.hostname !== location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`
   return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? 'favicon'}" width="11" height="11"/>`
@@ -32,12 +19,17 @@ export const identicon = (by: string, size = 11) => {
   return html`<img class="identicon" src="${img}" alt="Identicon" width="${size}" height="${size}" loading="lazy"/>`
 }
 
-export const cachedWarning = (fromCacheDate?: Date | null) => {
+export const cachedWarning = ({ fromCacheDate }: { fromCacheDate?: Date | null }, request: Request) => {
   if (fromCacheDate) {
+    const forceUrl = new URL(request.url)
+    forceUrl.searchParams.set('force', 'fetch')
     const timeAgo = formatDistanceToNowStrict(fromCacheDate, { addSuffix: true })
-    return html`<tr style="height:6px"></tr><tr><td colspan="2"></td><td>Reading offline page. Last updated ${timeAgo}</td></tr><tr style="height:14px"></tr>`
+    return html`<tr style="height:6px"></tr><tr><td colspan="2"></td><td>Reading offline page. Last updated ${
+      timeAgo}. <a href="${forceUrl.href}">Force Refresh</a>.</td></tr><tr style="height:14px"></tr>`
   }
 }
+
+export const del = (content: HTMLContent) => navigator.onLine ? content : html`<del>${content}</del>`
 
 export const headerEl = ({ op, id }: { 
   op: Stories | 'item' | 'user' | 'threads', 
@@ -62,6 +54,7 @@ export const headerEl = ({ op, id }: {
                 | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
                 | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)}
                 | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
+                ${SW && topSel(op === Stories.OFFLINE, html`| <a href="offline">offline</a>`)}
                 | <a onclick="popitup(this,event,850,380)" href="https://news.ycombinator.com/submit">submit</a>
                 ${op === Stories.SHOW_NEW
                     ? html`| <font color="#ffffff">${op}</font>` 
@@ -136,9 +129,11 @@ export const pageLayout = ({ title, op, id }: {
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {
-      const regis = await navigator.serviceWorker.register('/sw.js')
-      // regis.addEventListener('updatefound', () => { console.log('update found')})
-      // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+      if ('serviceWorker' in navigator) {
+        const regis = await navigator.serviceWorker.register('/sw.js')
+        regis.addEventListener('updatefound', () => { console.log('update found')})
+        // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+      }
     })()</script>
   </head>
   <body>
