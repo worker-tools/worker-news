@@ -2,8 +2,9 @@ import { html, HTMLContent } from "@worker-tools/html";
 import { formatDistanceToNowStrict } from 'date-fns';
 
 import { Stories } from "./api/interface";
-import { user as apiUser } from './api';
 import { location } from '../location';
+
+export const isSafari = (ua?: string | null) => !!ua && /Safari\/\d+/.test(ua) && !/(Chrome|Chromium)\/\d+/.test(ua)
 
 const topSel = (wrap: boolean, content: HTMLContent) => wrap
   ? html`<span class="topsel">${content}</span>`

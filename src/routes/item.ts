@@ -11,7 +11,7 @@ import { mw, RouteArgs, router } from "../router";
 
 import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api";
 
-import { pageLayout, identicon, cachedWarning } from './components';
+import { pageLayout, identicon, cachedWarning, isSafari } from './components';
 import { aThing, subtext } from './news';
 import { moreLinkEl } from "./threads";
 import { Awaitable } from "src/vendor/common-types";
@@ -86,7 +86,8 @@ export async function* commentTree(kids: ForOfAwaitable<AComment>, parent: { dea
   let i = 0;
   for await (const item of kids) {
     yield commentEl(item, { showReply: !parent.dead });
-    if (i++ % 10 === 0) await timeout() // FIXME: streaming json parser should fix this!?
+    // FIXME: streaming json parser should fix this!?
+    if (SW) if (i++ % 10 === 0) await timeout() 
     if (item.kids) yield* commentTree(item.kids, parent);
   }
 }
@@ -167,7 +168,8 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
     return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(postResponse)), new JSONResponse(null))
   }
 
-  return new HTMLResponse(pageRenderer(async () => {
+  const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
+  return new Ctor(pageRenderer(async () => {
     try {
       const post = await postResponse;
       const { title, text, kids, parts } = post;
