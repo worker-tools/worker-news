@@ -12,11 +12,15 @@ import './threads';
 // import './login';
 
 router.get('/yc500.gif', req => fetch('https://news.ycombinator.com/yc500.gif', req))
-router.get('/newsfaq.html', req => fetch('https://news.ycombinator.com/newsfaq.html', req))
-router.get('/newsguidelines.html', req => fetch('https://news.ycombinator.com/newsguidelines.html', req))
-router.get('/showhn.html', req => fetch('https://news.ycombinator.com/showhn.html', req))
-router.get('/security.html', req => fetch('https://news.ycombinator.com/security.html', req))
 router.get('/yc.css', req => fetch('https://news.ycombinator.com/yc.css', req))
+
+if (!SW) {
+  // TODO: redirect instead?
+  router.get('/newsfaq.html', req => fetch('https://news.ycombinator.com/newsfaq.html', req))
+  router.get('/newsguidelines.html', req => fetch('https://news.ycombinator.com/newsguidelines.html', req))
+  router.get('/showhn.html', req => fetch('https://news.ycombinator.com/showhn.html', req))
+  router.get('/security.html', req => fetch('https://news.ycombinator.com/security.html', req))
+}
 
 router.get('/', mw, (req, x) => news(x))
 
