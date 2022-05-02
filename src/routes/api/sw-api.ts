@@ -27,7 +27,9 @@ const networkFirst = (cacheKey: string) => async <T>({ url, handled, waitUntil }
         : NEVER,
       forceFetch 
         ? NEVER 
-        : timeout(useFetch ? MIN_WAIT : 0).then(() => !race.over ? caches.match(req) : void 0)
+        : timeout(useFetch ? MIN_WAIT : 0)
+          .then(() => !race.over ? caches.match(req) : void 0)
+          .then(re => !race.over && !forceCache && !re ? fetch(req) : re)
     ])
     race.over = true;
     if (!res) throw Error('You are offline');
