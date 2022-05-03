@@ -3,7 +3,7 @@ import { basics, caching, combine, contentTypes } from "@worker-tools/middleware
 import { notFound, ok } from "@worker-tools/response-creators";
 import { StreamResponse } from '@worker-tools/stream-response';
 import { JSONResponse } from '@worker-tools/json-fetch';
-import { renderIconSVG } from '@download/blockies';
+import { renderIconSVG } from "@download/blockies";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
 
@@ -174,7 +174,7 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
       const post = await postResponse;
       const { title, text, kids, parts } = post;
       return html`
-        <tr id="pagespace" title="${title}" style="height:10px"></tr>
+        <tr id="pagespace" title="${encodeURIComponent(title)}" style="height:10px"></tr>
         ${title 
           ? html`<script>document.title = document.title.replace('${PLACEHOLDER}', decodeURIComponent(document.getElementById('pagespace').title))</script>` 
           : ''}
@@ -216,7 +216,6 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
   }));
 }
 
-router.get('/identicon/dang.svg', req => fetch('https://news.ycombinator.com/y18.gif', req)) // meehhhhhhhh
 router.get('/identicon/:by.svg', 
   combine(
     basics(), 

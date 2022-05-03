@@ -11,13 +11,13 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
   : content
 
 export const favicon = (url?: { hostname?: string } | null) => {
-  const img = url?.hostname && url.hostname !== location.hostname ? `https://icons.duckduckgo.com/ip3/${url.hostname}.ico` : `darky18.png`
-  return html`<img class="favicon" src="${img}" alt="${url?.hostname ?? 'favicon'}" width="11" height="11"/>`
+  const img = url?.hostname && url.hostname !== location.hostname ? `favicon/${url.hostname}.ico` : `darky18.png`
+  return html`<img class="favicon" src="${img}" alt="Favicon" width="11" height="11" loading="lazy" />`
 }
 
 export const identicon = (by: string, size = 11) => {
-  const img = new URL(`/identicon/${by}.svg`, location.origin).href
-  return html`<img class="identicon" src="${img}" alt="Identicon" width="${size}" height="${size}" loading="lazy"/>`
+  const img = by === 'dang' ? 'y18.gif' : `identicon/${by}.svg`;
+  return html`<img class="identicon" src="${img}" alt="Identicon" width="${size}" height="${size}" loading="lazy" />`
 }
 
 export const cachedWarning = ({ fromCacheDate }: { fromCacheDate?: Date | null }, request: Request) => {

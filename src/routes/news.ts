@@ -13,7 +13,6 @@ import { JSONRequest, JSONResponse } from "@worker-tools/json-fetch";
 import { StreamResponse } from "@worker-tools/stream-response";
 import { jsonStringifyStream } from "./item";
 import { promiseToAsyncIterable } from "./api/iter";
-import { Awaitable } from "@worker-tools/router";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -208,6 +207,24 @@ const mkStories = (type: Stories) => async ({ request, searchParams, type: conte
       </td>
     </tr>`));
 };
+
+router.get('/favicon/:hostname.ico', basics(), async (req, { params, waitUntil, handled }) => {
+  const cache = await self.caches?.open('favicon')
+  const res = await cache?.match(req)
+  if (!res) {
+    let res2 = await fetch(SW ? req.url : `https://icons.duckduckgo.com/ip3/${params.hostname}.ico`, req)
+    if (res2.status === 404) {
+      res2 = new Response(res2.body, { ...res2, status: 200 })
+    }
+    waitUntil((async () => {
+      await handled;
+      if (res2.ok) await cache?.put(req, res2)
+    })());
+
+    return res2.clone();
+  }
+  return res;
+})
 
 export const news = mkStories(Stories.TOP)
 export const newest = mkStories(Stories.NEW)

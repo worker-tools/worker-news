@@ -1,5 +1,5 @@
-// import { Temporal } from '@js-temporal/polyfill';
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
+import { renderIconSVG } from "@download/blockies";
 import { ok } from "@worker-tools/response-creators";
 
 import { router, mw } from "../router";
@@ -28,16 +28,5 @@ router.get('*', caching({
   cacheControl: 'public', 
   maxAge: 60 * 60 * 24 * 30 * 12 
 }), assets.handler)
-
-router.external('https://icons.duckduckgo.com/*', async (req, { waitUntil, handled }) => {
-  const cache = await caches.open('favicon')
-  const res = await caches.match(req)
-  if (!res) {
-    const res2 = await fetch(req)
-    waitUntil(cache.put(req, res2.clone()))
-    return res2;
-  }
-  return res;
-})
 
 export { router }
