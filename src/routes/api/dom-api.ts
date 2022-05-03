@@ -36,9 +36,6 @@ const elToTagOpen = (el: Element) => `<${el.tagName}${[...el.attributes].map(x =
 const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? '') + '.000+00:00')
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
 
-// Trigger WASM initialization
-new HTMLRewriter()
-
 export async function stories(params: StoriesParams, type = Stories.TOP) {
   const pathname = x[type];
   const url = new ParamsURL(pathname, params, HN);
