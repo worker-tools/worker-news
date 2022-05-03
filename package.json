@@ -62,6 +62,7 @@
     "date-fns": "^2.28.0",
     "device-detector-js": "^3.0.3",
     "event-target-to-async-iter": "^0.2.1",
+    "firebase": "^9.7.0",
     "html-escaper": "^3.0.3",
     "html-rewriter-wasm": "^0.4.1",
     "kv-storage-interface": "^0.2.0",

@@ -1,11 +1,11 @@
-import { APost, AComment, Stories, StoriesParams, AUser } from './interface';
+import { APost, AComment, Stories, StoriesParams, AUser, ThreadsData, StoriesData } from './interface';
 import { default as PQueue } from '@qwtel/p-queue-browser';
-import { resolvablePromise, ResolvablePromise } from '@worker-tools/resolvable-promise';
+import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { blockquotify } from './util';
 
 type APIFn = <T>(path: string) => Promise<T>;
 
-const CONCURRENCY = 128;
+const CONCURRENCY = 64;
 
 const PAGE = 30;
 
@@ -23,14 +23,14 @@ const x = {
   [Stories.OFFLINE]: '',
 };
 
-export function stories(api: APIFn, { p }: StoriesParams, type = Stories.TOP) {
-  const page = p || 1;
+export function stories(api: APIFn, { p }: StoriesParams, type = Stories.TOP): StoriesData {
+  const page = Math.max(1, p || 1);
   const href = x[type];
   if (!href) throw Error('Unsupported by HN REST API')
 
   return {
     items: storiesGenerator(api, href, page),
-    moreLink: page !== 1 ? `${type}?p=${page}` : type,
+    moreLink: `${type}?p=${page + 1}`
   }
 }
 
@@ -50,16 +50,33 @@ export async function* storiesGenerator(api: APIFn, href: string, page: number) 
 }
 
 type RESTPost = Omit<APost, 'kids'> & { kids: number[], time: number }
-type RESTComment = Omit<AComment, 'kids'> & { kids: number[], time: number }
+type RESTComment = Omit<AComment, 'kids'> & { kids: number[], time: number, priority: number }
 type RESTUser = AUser;
 
-async function commentTask(api: APIFn, id: number, queue: PQueue, dict: Map<number, ResolvablePromise<RESTComment>>) {
-  const x = await api<RESTComment>(`/v0/item/${id}`);
-  dict.get(x.id)?.resolve(x);
-  const kids = x.kids ?? [];
-  for (const kid of kids) {
-    dict.set(kid, resolvablePromise());
-    queue.add(() => commentTask(api, kid, queue, dict));
+async function commentTask(
+  api: APIFn, 
+  id: number,
+  queue: PQueue, 
+  results: Map<number, ResolvablePromise<RESTComment>>,
+  topPriority: number, 
+  topFraction = 1,
+  level = 1,
+) {
+  const data = await api<RESTComment>(`/v0/item/${id}`);
+  const kids = data.kids ?? [];
+  const fraction = topFraction / kids.length;
+  results.get(data.id)?.resolve({ ...data, priority: topPriority });
+  for (const [i, kidId] of kids.entries()) {
+    results.set(kidId, new ResolvablePromise());
+    // HACK: Calculating a priority so that replies to top comments get moved to the front of the queue.
+    //       Further, top relies to top relies get higher priority than then the second rely to the top reply, etc.
+    //       If you're familiar with HN-style comment trees, this should make sense. Otherwise probably not.
+    //       It works by partitioning the real number line and increasingly "zooming in".
+    //       I have no proof that this does the correct thing (it probably doesn't), but it's close enough...
+    //       Significantly speeds up loading time of "above fold" content.
+    const subPriority = (kids.length - i - 1) * fraction;
+    const priority = topPriority + subPriority;
+    queue.add(() => commentTask(api, kidId, queue, results, priority, fraction, level + 1), { priority });
   }
 }
 
@@ -67,7 +84,8 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
   for (const kid of kids) {
     const item = await dict.get(kid);
     if (item) {
-      const { kids, text, ...rest } = item;
+      const { kids, text, priority, ...rest } = item;
+      // console.log(' '.repeat(level), priority)
       yield {
         ...rest,
         level,
@@ -106,11 +124,11 @@ export async function comments(api: APIFn, id: number, p?: number): Promise<APos
 
   const queue = new PQueue({ concurrency: CONCURRENCY });
   const kids = post.kids ?? [];
-  const dict = new Map(kids.map(id => [id, resolvablePromise<RESTComment>()]));
-  for (const kid of kids) {
-    queue.add(() => commentTask(api, kid, queue, dict));
+  const results = new Map(kids.map(id => [id, new ResolvablePromise<RESTComment>()]));
+  for (const [i, kid] of kids.entries()) {
+    const priority = kids.length - i;
+    queue.add(() => commentTask(api, kid, queue, results, priority), { priority: kids.length - i });
   }
-  // queue.addAll(kids.map(id => () => commentTask(id, queue, dict)));
 
   const text = post.text != null ? await blockquotify('<p>' + post.text) : null;
   return {
@@ -119,8 +137,8 @@ export async function comments(api: APIFn, id: number, p?: number): Promise<APos
     title: post.title || truncateText(stripHTML(text)),
     text,
     quality: 'c00', // REST API doesn't support quality..
-    url: post.text != null ? `item?id=${post.id}` : post.url,
-    kids: crawlCommentTree(kids, dict),
+    url: post.text != null ? `item?id=${post.id}` : post.url, // FIXME
+    kids: crawlCommentTree(kids, results),
   };
 }
 
@@ -132,6 +150,6 @@ export async function user(api: APIFn, id: string): Promise<AUser> {
   };
 }
 
-export async function* threads(api: APIFn, id: string, next?: number): AsyncGenerator<AComment> {
+export async function threads(api: APIFn, id: string, next?: number): Promise<ThreadsData> {
   throw Error('Unsupported by HN REST API')
 }
