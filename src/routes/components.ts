@@ -94,7 +94,7 @@ export const footerEl = () => html`
           </tr>
         </tbody>
       </table><br/>
-      <center>Made by <a href="/user?id=qwtel">qwtel</a> with <a
+      <center>Made by <a href="/user?id=qwtel">${identicon('qwtel', 12)} qwtel</a> with <a
           href="https://workers.tools">Worker&nbsp;Tools</a> and <a
           href="https://deno.com">Deno&nbsp;Deploy</a>.</center><br/>
       <center><span class="yclinks">YC: 
@@ -125,7 +125,7 @@ export const pageLayout = ({ title, op, id }: {
     <meta charset="UTF-8">
     <meta name="referrer" content="origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="news.css?v=5">
+    <link rel="stylesheet" type="text/css" href="news.css?v=6">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
