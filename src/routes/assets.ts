@@ -30,7 +30,7 @@ export async function handler(req: Request, event: { request: Request, waitUntil
       const assetURL = new URL(`./public${url.pathname}`, import.meta.url).href;
       page = await fetch(assetURL)
     } else { // Service Worker
-      page = (await self.caches.match(event.request)) ?? await fetch(event.request, { mode: 'cors' })
+      page = (await self.caches.match(event.request)) ?? await fetch(event.request)
     }
 
     // allow headers to be altered
