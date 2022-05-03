@@ -19,17 +19,17 @@ const networkFirst = (cacheKey: string) => async <T>({ url, handled, waitUntil }
 
   try {
     const req = new JSONRequest(url);
-    const race = { over: false }
+    const race = { over: false, rejected: false }
     const useFetch = forceFetch || (navigator.onLine && !forceCache)
     const res = await Promise.race([
       useFetch 
-        ? fetch(req).catch(err => { forceFetch ? Promise.reject(err) : NEVER })
+        ? fetch(req).catch(err => (race.rejected = true, forceFetch ? Promise.reject(err) : NEVER))
         : NEVER,
       forceFetch 
         ? NEVER 
         : timeout(useFetch ? MIN_WAIT : 0)
-          .then(() => !race.over ? caches.match(req) : void 0)
-          .then(re => !race.over && !forceCache && !re ? fetch(req).catch(() => {}) : re)
+          .then(() => !race.over ? caches.match(req) : undefined)
+          .then(res => !res && !race.over && !race.rejected && !forceCache ? NEVER : res)
     ])
     race.over = true;
     if (!res) throw Error('You are offline');
