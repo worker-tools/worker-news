@@ -125,7 +125,7 @@ export const pageLayout = ({ title, op, id }: {
     <meta charset="UTF-8">
     <meta name="referrer" content="origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="news.css?v=7">
+    <link rel="stylesheet" type="text/css" href="news.css?v=8">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>

@@ -50,7 +50,7 @@ const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) 
                 <tr class="athing"><td valign="top">user:</td><td timestamp="${uo.created}"><a href="user?id=${un}" class="hnuser">${identicon(un, 13)} ${un}</a></td></tr>
                 <tr><td valign="top">created:</td><td><a href="front?day=${year}-${month}-${day}&amp;birth=${un}">${dtf.format(dt)}</a></td></tr>
                 <tr><td valign="top">karma:</td><td>${uo.karma}</td></tr>
-                <tr><td valign="top" class="about">about:</td><td style="overflow:hidden;">${unsafeHTML(uo.about ?? '')}</td></tr>
+                <tr><td valign="top">about:</td><td class="about">${unsafeHTML(uo.about ?? '')}</td></tr>
                 <tr><td></td><td><a href="submitted?id=${un}"><u>submissions</u></a></td></tr>
                 <tr><td></td><td><a href="threads?id=${un}"><u>comments</u></a></td></tr>
                 <!-- <tr><td></td><td><a href="favorites?id=${un}"><u>favorites</u></a></td></tr> -->
