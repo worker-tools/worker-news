@@ -90,7 +90,7 @@ hr { border: none; border-bottom: 1px solid var(--input-border); margin: 11pt 0 
 a:link    { color:var(--text-strong); text-decoration:none; }
 a:visited { color:var(--text); text-decoration:none; }
 
-#hnmain  { background-color: var(--background);}
+#hnmain  { background-color: var(--background); width:85% }
 #header  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
 #border  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
 
