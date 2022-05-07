@@ -6,7 +6,7 @@ import { StreamResponse } from '@worker-tools/stream-response';
 import { renderIconSVG } from "@download/blockies";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
-import { jsonStringifyGenerator, jsonStringifyStream } from "../vendor/json-stringify-stream";
+import { jsonStringifyGenerator } from '@worker-tools/json-stream'
 
 import { mw, RouteArgs, router } from "../router";
 
@@ -146,8 +146,8 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
     return new StreamResponse(fastTTFB(jsonStringifyGenerator(postPromise)), new JSONResponse())
   }
 
-  const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
-  return new Ctor(pageRenderer(async () => {
+  // const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
+  return new HTMLResponse(pageRenderer(async () => {
     try {
       const post = await postPromise;
       const { title, text, kids, parts } = post;

@@ -6,6 +6,10 @@ specifiers:
   '@download/blockies': github:qwtel/blockies
   '@miniflare/html-rewriter': ^2.4.0
   '@qwtel/p-queue-browser': ^6.6.2
+  '@stardazed/streams': ^3.1.0
+  '@stardazed/streams-compression': ^1.0.0
+  '@stardazed/streams-fetch-adapter': ^3.0.0
+  '@stardazed/streams-text-encoding': ^1.0.2
   '@types/html-escaper': ^3.0.0
   '@types/node': ^17.0.31
   '@worker-tools/cloudflare-kv-storage': ^0.8.0
@@ -58,6 +62,10 @@ dependencies:
   '@download/blockies': github.com/qwtel/blockies/e4dfe44e09b7b24f0647392b73409354680114f6
   '@miniflare/html-rewriter': 2.4.0
   '@qwtel/p-queue-browser': 6.6.2
+  '@stardazed/streams': 3.1.0
+  '@stardazed/streams-compression': 1.0.0
+  '@stardazed/streams-fetch-adapter': 3.0.0
+  '@stardazed/streams-text-encoding': 1.0.2
   '@types/html-escaper': 3.0.0
   '@worker-tools/cloudflare-kv-storage': 0.8.0
   '@worker-tools/deno-fetch-event-adapter': 1.0.5
@@ -278,6 +286,18 @@ packages:
     resolution: {integrity: sha512-SQCiwxdIVJ5xxUBYptN+fc+tJpSDbxQuJ0+3u2SmHjIzr6JIRZ28AVFtFnGy6x6j3UBlaLx73w9rC6UAFxnd1g==}
     dependencies:
       '@stardazed/zlib': 1.0.1
+    dev: false
+
+  /@stardazed/streams-fetch-adapter/3.0.0:
+    resolution: {integrity: sha512-LBaQDJNqJK50OoojVXKVVsu0/14ATGFsiTMvYCihvisnRSoApZpDKYAfBIrwU8+G6Wi5s6EGl5M0U1yZ4IdGww==}
+    dev: false
+
+  /@stardazed/streams-text-encoding/1.0.2:
+    resolution: {integrity: sha512-f2Z15BId3t44a/u21yYSGXFAkCyKocmAyduoAy7swnZ4xIfbaZlOWsgly/jDNNOuj6hYQN72UaBRe3Z/tOHfqg==}
+    dev: false
+
+  /@stardazed/streams/3.1.0:
+    resolution: {integrity: sha512-+fNbzyPb65oknwBgMjJrfs7dPXIJTDgnrFQcLI9+tpYTvHgrxwlqMm8geV4NA640qp+udIenWQDLU+hsB06Vcw==}
     dev: false
 
   /@stardazed/zlib/1.0.1:

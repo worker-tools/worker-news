@@ -6,7 +6,7 @@ import { liftPromises, PromisedValues } from "../../vendor/awaited-values";
 
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
 
-const MIN_WAIT = 250;
+const MIN_WAIT = 350;
 const NEVER = new Promise<never>(() => {});
 const timeout = (n?: number) => new Promise(r => setTimeout(r, n))
 

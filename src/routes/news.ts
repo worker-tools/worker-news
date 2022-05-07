@@ -3,7 +3,7 @@ import { basics, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
-import { jsonStringifyGenerator, jsonStringifyStream } from "../vendor/json-stringify-stream";
+import { jsonStringifyGenerator } from '@worker-tools/json-stream'
 import { JSONRequest, JSONResponse } from "@worker-tools/json-fetch";
 import { StreamResponse } from "@worker-tools/stream-response";
 import { location } from '../location';

@@ -1,4 +1,5 @@
 import 'urlpattern-polyfill'
+import './streams-polyfill'
 // import './html-rewriter-polyfill'
 
 import { router } from '../routes/index';
