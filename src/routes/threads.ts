@@ -1,17 +1,17 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 import { basics, combine, contentTypes } from "@worker-tools/middleware";
+import { JSONResponse } from "@worker-tools/json-fetch";
+import { StreamResponse } from "@worker-tools/stream-response";
+import { jsonStringifyGenerator, jsonStringifyStream } from "../vendor/json-stringify-stream";
 
 import { router, RouteArgs, mw } from "../router";
 
 import { threads as apiThreads } from "./api";
 
 import { pageLayout } from './components';
-import { commentEl, jsonStringifyStream } from "./item";
-import { StreamResponse } from '@worker-tools/stream-response';
-import { JSONResponse } from "@worker-tools/json-fetch";
-import { asyncIterableToStream } from "whatwg-stream-to-async-iter";
-import { promiseToAsyncIterable } from "./api/iter";
+import { commentEl } from "./item";
+import { fastTTFB } from "./news";
 
 export const moreLinkEl = (moreLink: string) => html`
   <tr class="morespace" style="height:10px"></tr>
@@ -37,8 +37,7 @@ async function threads({ searchParams, type: contentType, url, handled, waitUnti
   const threadsPage = apiThreads(id, next, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    // FIXME: ...
-    return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(threadsPage)), new JSONResponse(null))
+    return new StreamResponse(fastTTFB(jsonStringifyGenerator(threadsPage)), new JSONResponse())
   }
 
   return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {

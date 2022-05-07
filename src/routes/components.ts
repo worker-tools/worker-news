@@ -125,14 +125,19 @@ export const pageLayout = ({ title, op, id }: {
     <meta charset="UTF-8">
     <meta name="referrer" content="origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="news.css?v=6">
+    <link rel="stylesheet" type="text/css" href="news.css?v=7">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {
       if ('serviceWorker' in navigator) {
-        const regis = await navigator.serviceWorker.register('/sw.js')
-        regis.addEventListener('updatefound', () => { console.log('update found')})
+        try {
+          const regis = await navigator.serviceWorker.register('/sw.js')
+          regis.addEventListener('updatefound', () => { console.log('update found')})
+          regis.addEventListener('error', err => console.error(err))
+        } catch (err) {
+          console.error(err)
+        }
         // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
       }
     })()</script>

@@ -3,21 +3,25 @@ import { basics, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
+import { jsonStringifyGenerator, jsonStringifyStream } from "../vendor/json-stringify-stream";
+import { JSONRequest, JSONResponse } from "@worker-tools/json-fetch";
+import { StreamResponse } from "@worker-tools/stream-response";
 import { location } from '../location';
 
 import { router, RouteArgs, mw } from "../router";
 import { cachedWarning, del, favicon, identicon, pageLayout } from './components';
 
 import { stories, APost, Stories, StoriesParams, StoriesData } from './api'
-import { JSONRequest, JSONResponse } from "@worker-tools/json-fetch";
-import { StreamResponse } from "@worker-tools/stream-response";
-import { jsonStringifyStream } from "./item";
-import { promiseToAsyncIterable } from "./api/iter";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
 
 // const at = <T>(xs: T[], i: number) => i >= 0 ? xs[i] : xs[xs.length + i]
+
+export async function* fastTTFB(iter: AsyncIterable<string>) {
+  yield ' '
+  yield* iter;
+}
 
 const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
   try { 
@@ -162,8 +166,7 @@ const mkStories = (type: Stories) => async ({ request, searchParams, type: conte
     : stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    // FIXME: ...
-    return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(storiesPage)), new JSONResponse(null))
+    return new StreamResponse(fastTTFB(jsonStringifyGenerator(storiesPage)), new JSONResponse())
   }
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`

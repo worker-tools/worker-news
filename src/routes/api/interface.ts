@@ -25,7 +25,6 @@ export type StoriesData = {
 export type ThreadsData = { 
   items: ForOfAwaitable<AComment>, 
   moreLink: Awaitable<string> 
-  fromCache?: boolean,
   fromCacheDate?: Date,
 }
 
@@ -50,7 +49,6 @@ export interface AUser {
   submitted: number[],
 
   // FIXME: Don't include app-level data in schema..
-  fromCache?: boolean,
   fromCacheDate?: Date,
 }
 
@@ -87,6 +85,5 @@ export interface APost extends AThing {
   moreLink?: Awaitable<string>,
 
   // FIXME: Don't include app-level data in schema..
-  fromCache?: boolean,
   fromCacheDate?: Date,
 }

@@ -273,3 +273,4 @@ and (max-width : 750px) {
 .identicon { position: relative; top: 1px }
 
 .athing { content-visibility: auto }
+.athing .about p:first-child { margin-top: 0 }

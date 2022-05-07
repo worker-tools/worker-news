@@ -1,21 +1,20 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "@worker-tools/html";
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
-import { StreamResponse } from '@worker-tools/stream-response';
 import { JSONResponse } from '@worker-tools/json-fetch';
+import { StreamResponse } from '@worker-tools/stream-response';
 import { renderIconSVG } from "@download/blockies";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
+import { jsonStringifyGenerator, jsonStringifyStream } from "../vendor/json-stringify-stream";
 
 import { mw, RouteArgs, router } from "../router";
 
 import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api";
 
 import { pageLayout, identicon, cachedWarning, isSafari } from './components';
-import { aThing, subtext } from './news';
+import { aThing, fastTTFB, subtext } from './news';
 import { moreLinkEl } from "./threads";
-import { Awaitable } from "src/vendor/common-types";
-import { promiseToAsyncIterable } from "./api/iter";
 
 export interface CommOpts {
   showToggle?: boolean,
@@ -134,44 +133,23 @@ const replyTr = ({ id, type }: APost) => {
     </tr>`;
 }
 
-// FIXME
-async function buffer<T>(iter: AsyncIterable<T>): Promise<T[]> {
-  const chunks: T[] = []
-  for await (const x of iter) chunks.push(x)
-  return chunks;
-}
-
-// FIXME
-export async function jsonStringifyStream(_obj: Awaitable<Record<PropertyKey, any>>) {
-  const obj = await _obj
-  for (const [key, value] of Object.entries(obj)) {
-    if (value != null && typeof value === 'object' && Symbol.asyncIterator in value) {
-      obj[key] = await buffer(value)
-    } else {
-      obj[key] = await value
-    }
-  }
-  return JSON.stringify(obj, null, DEBUG ? 2 : 0);
-}
-
 // Dead items: 26841031
 async function getItem({ request, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Number(searchParams.get('p'));
 
-  const postResponse = apiComments(id, p, { url, handled, waitUntil });
+  const postPromise = apiComments(id, p, { url, handled, waitUntil });
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
   if (contentType === 'application/json') {
-    // FIXME: ...
-    return new StreamResponse(promiseToAsyncIterable(jsonStringifyStream(postResponse)), new JSONResponse(null))
+    return new StreamResponse(fastTTFB(jsonStringifyGenerator(postPromise)), new JSONResponse())
   }
 
   const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
   return new Ctor(pageRenderer(async () => {
     try {
-      const post = await postResponse;
+      const post = await postPromise;
       const { title, text, kids, parts } = post;
       return html`
         <tr id="pagespace" title="${encodeURIComponent(title)}" style="height:10px"></tr>
