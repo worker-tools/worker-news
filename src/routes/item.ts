@@ -146,8 +146,8 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
     return new StreamResponse(fastTTFB(jsonStringifyGenerator(postPromise)), new JSONResponse())
   }
 
-  // const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
-  return new HTMLResponse(pageRenderer(async () => {
+  const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
+  return new Ctor(pageRenderer(async () => {
     try {
       const post = await postPromise;
       const { title, text, kids, parts } = post;
