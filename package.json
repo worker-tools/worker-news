@@ -60,6 +60,7 @@
     "base64-encoding": "^0.14.3",
     "cookie-store-interface": "^0.1.1",
     "date-fns": "^2.28.0",
+    "device-detector-js": "^3.0.3",
     "event-target-to-async-iter": "^0.2.1",
     "html-escaper": "^3.0.3",
     "html-rewriter-wasm": "^0.4.1",

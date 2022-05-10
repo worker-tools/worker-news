@@ -1,6 +1,7 @@
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { renderIconSVG } from "@download/blockies";
 import { ok } from "@worker-tools/response-creators";
+import { manifestHandler } from './manifest-handler';
 
 import { router, mw } from "../router";
 
@@ -20,6 +21,8 @@ if (!SW) {
   router.get('/newsguidelines.html', req => fetch('https://news.ycombinator.com/newsguidelines.html', req))
   router.get('/showhn.html', req => fetch('https://news.ycombinator.com/showhn.html', req))
   router.get('/security.html', req => fetch('https://news.ycombinator.com/security.html', req))
+
+  router.get('/app.webmanifest', manifestHandler)
 }
 
 router.get('/', mw, (req, x) => news(x))

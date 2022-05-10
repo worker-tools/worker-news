@@ -149,7 +149,7 @@ async function offlineStories({ p }: { p: number }): Promise<StoriesData> {
 }
 
 const PAGE = 30
-const mkStories = (type: Stories) => async ({ request, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs) => {
+const mkStories = (type: Stories) => async ({ request, headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs) => {
   const p = Math.max(1, Number(searchParams.get('p') || '1'));
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
@@ -171,7 +171,7 @@ const mkStories = (type: Stories) => async ({ request, searchParams, type: conte
     })
   }
 
-  return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`
+  return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')!, headers })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>

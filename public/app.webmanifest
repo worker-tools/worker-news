@@ -1,0 +1,27 @@
+{
+  "name": "Worker News",
+  "short_name": "Worker News",
+  "start_url": ".",
+  "display": "minimal-ui",
+  "description": "A drop-in replacement for Hacker News",
+  "icons": [
+    {
+      "__os": "Mac",
+      "src": "icon_1024_mac.png",
+      "type": "image/png",
+      "sizes": "1024x1024"
+    },
+    {
+      "__os": "Windows",
+      "src": "icon_1024_win.webp",
+      "type": "image/webp",
+      "sizes": "1024x1024"
+    },
+    {
+      "src": "icon_1024_maskable.jpg",
+      "type": "image/jpg",
+      "sizes": "1024x1024",
+      "purpose": "maskable"
+    }
+  ]
+}

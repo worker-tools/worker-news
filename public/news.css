@@ -76,7 +76,7 @@
 
 html  { background-color: var(--page-background);}
 
-body  { font-family:var(--font); font-size:10pt; color:var(--text); overflow-y:scroll; }
+body  { font-family:var(--font); font-size:10pt; color:var(--text); scrollbar-gutter:stable; }
 td    { font-family:var(--font); font-size:10pt; color:var(--text); }
 
 .admin td   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
@@ -275,3 +275,17 @@ and (max-width : 750px) {
 .athing { content-visibility: auto }
 .about { overflow:hidden; }
 .about > p:first-child { margin-top: 0 }
+
+@media only screen and (display-mode: minimal-ui), only screen and (display-mode: standalone) {
+  body { padding: 0; margin: 0; }
+  #hnmain { width:100% }
+  #header { 
+    position: sticky; top: 0; z-index: 2; 
+    height: env(titlebar-area-height, 30px); 
+    padding-left: calc(env(titlebar-area-x, 0px) + 5px);
+    padding-right: calc(100vw - env(titlebar-area-width, 100vw) - env(titlebar-area-x, 0px) + 5px);
+    app-region: drag;
+  }
+  #header .pagetop, #header a { app-region: no-drag; }
+  #header .pagetop a { cursor:pointer; }
+}

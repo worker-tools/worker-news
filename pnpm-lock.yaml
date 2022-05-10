@@ -34,6 +34,7 @@ specifiers:
   base64-encoding: ^0.14.3
   cookie-store-interface: ^0.1.1
   date-fns: ^2.28.0
+  device-detector-js: ^3.0.3
   esbuild: ^0.14.38
   event-target-to-async-iter: ^0.2.1
   html-escaper: ^3.0.3
@@ -89,6 +90,7 @@ dependencies:
   base64-encoding: 0.14.3
   cookie-store-interface: 0.1.1
   date-fns: 2.28.0
+  device-detector-js: 3.0.3
   event-target-to-async-iter: 0.2.1
   html-escaper: 3.0.3
   html-rewriter-wasm: 0.4.1
@@ -549,6 +551,11 @@ packages:
   /date-fns/2.28.0:
     resolution: {integrity: sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==}
     engines: {node: '>=0.11'}
+    dev: false
+
+  /device-detector-js/3.0.3:
+    resolution: {integrity: sha512-jM89LJAvP6uOd84at8OlD9dWP8KeYCCHUde0RT0HQo/stdoRH4b54Xl/fntx2nEXCmqiFhmo+/cJetS2VGUHPw==}
+    engines: {node: '>= 8.11.4'}
     dev: false
 
   /dicer/0.3.0:

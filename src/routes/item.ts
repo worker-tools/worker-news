@@ -158,13 +158,13 @@ export class ExponentialJoinStream extends TransformStream<string, string> {
 
 
 // Dead items: 26841031
-async function getItem({ request, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
+async function getItem({ request, headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Number(searchParams.get('p'));
 
   const postPromise = apiComments(id, p, { url, handled, waitUntil });
-  const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
+  const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item', headers })
 
   if (contentType === 'application/json') {
     return new StreamResponse(fastTTFB(jsonStringifyGenerator(postPromise)), { 

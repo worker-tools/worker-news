@@ -21,7 +21,7 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) => {
+const user = async ({ headers, searchParams, type, url, handled, waitUntil }: RouteArgs) => {
   const un = searchParams.get('id');
   if (!un) return notFound('No such user.');
 
@@ -34,7 +34,7 @@ const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) 
     })
   }
 
-  return new HTMLResponse(pageLayout({ op: 'user', title })(html`
+  return new HTMLResponse(pageLayout({ op: 'user', title, headers })(html`
     <tr id="pagespace" title="${title}" style="height:10px"></tr>
     <tr>
       <td>

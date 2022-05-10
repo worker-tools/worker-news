@@ -26,7 +26,7 @@ export const moreLinkEl = (moreLink: string) => html`
     </td>
   </tr>`;
 
-async function threads({ searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
+async function threads({ headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = searchParams.get('id');
   if (!id) return notFound('No such item.');
   const title = `${id}'s comments`;
@@ -41,7 +41,7 @@ async function threads({ searchParams, type: contentType, url, handled, waitUnti
     })
   }
 
-  return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {
+  return new HTMLResponse(pageLayout({ title, op: 'threads', id, headers })(async () => {
     return html`
       <tr id="pagespace" title="${title}" style="height:10px"></tr>
       <tr>

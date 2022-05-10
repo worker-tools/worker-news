@@ -41,6 +41,10 @@ export const headerEl = ({ op, id }: {
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
         <tbody>
           <tr>
+            ${false ? html`<td style="width:80px;padding-right:10px"><span class="pagetop btns">
+              <button onclick="window.history.back();this.disabled=true">←</button>
+              <button onclick="window.history.forward();this.disabled=true">→</button>
+            </span></td>` : null}
             <td style="width:18px;padding-right:4px"><a href="https://workers.tools"><picture style="display:block;height:20px"><source 
                   srcset="darky18.png" media="(prefers-color-scheme: dark)"><img
                   src="y18.png" width="18" height="18"
@@ -114,19 +118,21 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const pageLayout = ({ title, op, id }: { 
+export const pageLayout = ({ title, op, id, headers }: { 
   title?: string, 
   op: Stories | 'item' | 'user' | 'threads', 
-  id?: string 
+  id?: string,
+  headers?: Headers,
 }) => (content: HTMLContent) => html`
   <!DOCTYPE html>
   <html lang="en" op="${op}">
   <head>
     <meta charset="UTF-8">
     <meta name="referrer" content="origin">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="news.css?v=8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="news.css?v=20">
     <link rel="shortcut icon" href="favicon.ico">
+    <link rel="manifest" href="app.webmanifest">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {

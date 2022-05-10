@@ -40,6 +40,7 @@ export async function handler(req: Request, event: { request: Request, waitUntil
     if (req.url.endsWith('.wasm')) response.headers.set('content-type', 'application/wasm')
     if (req.url.endsWith('.css')) response.headers.set('content-type', 'text/css')
     if (req.url.endsWith('.html')) response.headers.set('content-type', 'text/html')
+    if (req.url.endsWith('.webmanifest')) response.headers.set('content-type', 'application/manifest+json')
 
     // response.headers.set('X-XSS-Protection', '1; mode=block')
     // response.headers.set('X-Content-Type-Options', 'nosniff')
