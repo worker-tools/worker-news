@@ -1,11 +1,6 @@
 import { html, HTMLResponse, unsafeHTML } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
-// import { basics, combine, contentTypes } from "@worker-tools/middleware";
-// import { notFound } from "@worker-tools/response-creators";
-// import { formatDistanceToNowStrict } from 'date-fns';
-import { JSONResponse } from "@worker-tools/json-fetch";
-import { StreamResponse } from "@worker-tools/stream-response";
-import { jsonStringifyGenerator } from '@worker-tools/json-stream'
+import { JSONStreamResponse, jsonStringifyGenerator } from "@worker-tools/json-stream";
 
 import { router, RouteArgs, mw } from "../router";
 
@@ -33,7 +28,7 @@ const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) 
   const title = `Profile: ${un}`;
 
   if (type === 'application/json') {
-    return new StreamResponse(fastTTFB(jsonStringifyGenerator(userPromise)), new JSONResponse())
+    return new JSONStreamResponse(userPromise)
   }
 
   return new HTMLResponse(pageLayout({ op: 'user', title })(html`

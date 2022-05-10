@@ -1,9 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
 import { notFound } from "@worker-tools/response-creators";
 import { basics, combine, contentTypes } from "@worker-tools/middleware";
-import { JSONResponse } from "@worker-tools/json-fetch";
-import { StreamResponse } from "@worker-tools/stream-response";
-import { jsonStringifyGenerator } from '@worker-tools/json-stream'
+import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream'
 
 import { router, RouteArgs, mw } from "../router";
 
@@ -37,7 +35,7 @@ async function threads({ searchParams, type: contentType, url, handled, waitUnti
   const threadsPage = apiThreads(id, next, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    return new StreamResponse(fastTTFB(jsonStringifyGenerator(threadsPage)), new JSONResponse())
+    return new JSONStreamResponse(threadsPage)
   }
 
   return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {

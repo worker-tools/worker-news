@@ -3,9 +3,8 @@ import { basics, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { fromUrl, parseDomain } from 'parse-domain';
-import { jsonStringifyGenerator } from '@worker-tools/json-stream'
-import { JSONRequest, JSONResponse } from "@worker-tools/json-fetch";
-import { StreamResponse } from "@worker-tools/stream-response";
+import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream'
+import { JSONRequest } from "@worker-tools/json-fetch";
 import { location } from '../location';
 
 import { router, RouteArgs, mw } from "../router";
@@ -166,7 +165,7 @@ const mkStories = (type: Stories) => async ({ request, searchParams, type: conte
     : stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    return new StreamResponse(fastTTFB(jsonStringifyGenerator(storiesPage)), new JSONResponse())
+    return new JSONStreamResponse(storiesPage)
   }
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`

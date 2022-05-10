@@ -17,10 +17,10 @@ specifiers:
   '@worker-tools/deno-kv-storage': ^0.4.4
   '@worker-tools/encrypted-cookie-store': ^0.2.1
   '@worker-tools/extendable-promise': 0.2.0-pre.8
-  '@worker-tools/html': ^2.0.0-pre.8
+  '@worker-tools/html': ^2.0.0-pre.10
   '@worker-tools/html-rewriter': ^0.1.0-pre.12
   '@worker-tools/json-fetch': 2.1.0-pre.5
-  '@worker-tools/json-stream': 0.1.0-pre.3
+  '@worker-tools/json-stream': 0.1.0-pre.5
   '@worker-tools/location-polyfill': ^0.4.0
   '@worker-tools/middleware': ^0.1.0-pre.16
   '@worker-tools/parsed-html-rewriter': ^0.1.11
@@ -29,7 +29,7 @@ specifiers:
   '@worker-tools/response-creators': ^1.0.8
   '@worker-tools/router': 0.2.0-pre.6
   '@worker-tools/signed-cookie-store': ^0.3.0-pre.7
-  '@worker-tools/stream-response': ^0.1.0-pre.0
+  '@worker-tools/stream-response': ^0.1.0-pre.3
   '@worker-tools/stripe-webhook': ^1.1.4
   base64-encoding: ^0.14.3
   cookie-store-interface: ^0.1.1
@@ -40,7 +40,7 @@ specifiers:
   html-rewriter-wasm: ^0.4.1
   kv-storage-interface: ^0.2.0
   kv-storage-polyfill: ^2.0.0
-  linkedom: ^0.14.8
+  linkedom: ^0.14.9
   miniflare: ^2.4.0
   msgpackr: ^1.5.7
   negotiated: ^1.0.2
@@ -55,7 +55,7 @@ specifiers:
   typeson-registry: ^1.0.0-alpha.39
   urlpattern-polyfill: ^4.0.3
   uuid-class: ^0.12.3
-  whatwg-stream-to-async-iter: 0.5.0
+  whatwg-stream-to-async-iter: 0.6.1
 
 dependencies:
   '@cloudflare/kv-asset-handler': 0.2.0
@@ -72,10 +72,10 @@ dependencies:
   '@worker-tools/deno-kv-storage': 0.4.4
   '@worker-tools/encrypted-cookie-store': 0.2.1
   '@worker-tools/extendable-promise': 0.2.0-pre.8
-  '@worker-tools/html': 2.0.0-pre.8
+  '@worker-tools/html': 2.0.0-pre.10
   '@worker-tools/html-rewriter': 0.1.0-pre.12
   '@worker-tools/json-fetch': 2.1.0-pre.5
-  '@worker-tools/json-stream': 0.1.0-pre.3
+  '@worker-tools/json-stream': 0.1.0-pre.5
   '@worker-tools/location-polyfill': 0.4.0
   '@worker-tools/middleware': 0.1.0-pre.16
   '@worker-tools/parsed-html-rewriter': 0.1.11
@@ -84,7 +84,7 @@ dependencies:
   '@worker-tools/response-creators': 1.0.8
   '@worker-tools/router': 0.2.0-pre.6
   '@worker-tools/signed-cookie-store': 0.3.0-pre.7
-  '@worker-tools/stream-response': 0.1.0-pre.0
+  '@worker-tools/stream-response': 0.1.0-pre.3
   '@worker-tools/stripe-webhook': 1.1.4
   base64-encoding: 0.14.3
   cookie-store-interface: 0.1.1
@@ -94,7 +94,7 @@ dependencies:
   html-rewriter-wasm: 0.4.1
   kv-storage-interface: 0.2.0
   kv-storage-polyfill: 2.0.0
-  linkedom: 0.14.8
+  linkedom: 0.14.9
   msgpackr: 1.5.7
   negotiated: 1.0.2
   parse-domain: 7.0.0
@@ -107,7 +107,7 @@ dependencies:
   typeson-registry: 1.0.0-alpha.39
   urlpattern-polyfill: 4.0.3
   uuid-class: 0.12.3
-  whatwg-stream-to-async-iter: 0.5.0
+  whatwg-stream-to-async-iter: 0.6.1
 
 devDependencies:
   '@cloudflare/workers-types': 3.9.0
@@ -373,23 +373,23 @@ packages:
       '@worker-tools/resolvable-promise': 0.2.0-pre.4
     dev: false
 
-  /@worker-tools/html/2.0.0-pre.8:
-    resolution: {integrity: sha512-7nobGcMy8ZbmGWIqPg7UHBAgh6lcgx3oplxe1LvrNYa5myLOTOLK93weaYxhQyigh4lS1xQPeVu1M2zDCIpFQw==}
+  /@worker-tools/html/2.0.0-pre.10:
+    resolution: {integrity: sha512-lqXrD4gD32A8LOpwLOQKcSopWg8PZk0wGpUxOOtI00hFJhijlIrnRnW/0f4d6E2jTpqA2unD6dXJErVPk11ySQ==}
     dependencies:
-      '@worker-tools/stream-response': 0.1.0-pre.0
+      '@worker-tools/stream-response': 0.1.0-pre.3
     dev: false
 
   /@worker-tools/json-fetch/2.1.0-pre.5:
     resolution: {integrity: sha512-gP+7Cjv+O1uDbCsTecr3UdAG5GaUbGX5VwaUryp3QBQpZ+ulsjoqmVdptPL74Iv74//Em+XBv27CjRcmTxiynQ==}
     dev: false
 
-  /@worker-tools/json-stream/0.1.0-pre.3:
-    resolution: {integrity: sha512-XtwQRdZQBkT4RtKnk/fF4dVfmhAmAFpdMtusoexEczw60h6Ab+COX1qmcOriU1HC0J108d5Lj0gAY74OitBEwQ==}
+  /@worker-tools/json-stream/0.1.0-pre.5:
+    resolution: {integrity: sha512-EyOyWTM0JI9bulYCiFciW9LLAC0RHGkyoBgcVjuvDvTcF39sV3wX4gGxKeiC6fqYeAEvLtBloPNHTHJxukUzhw==}
     dependencies:
-      '@worker-tools/extendable-promise': 0.2.0-pre.8
       '@worker-tools/resolvable-promise': 0.2.0-pre.4
+      '@worker-tools/stream-response': 0.1.0-pre.3
       typed-array-utils: 0.2.2
-      whatwg-stream-to-async-iter: 0.5.0
+      whatwg-stream-to-async-iter: 0.6.1
     dev: false
 
   /@worker-tools/location-polyfill/0.4.0:
@@ -459,10 +459,11 @@ packages:
       typed-array-utils: 0.2.2
     dev: false
 
-  /@worker-tools/stream-response/0.1.0-pre.0:
-    resolution: {integrity: sha512-U1C99/3qdu713Rs4qEhqFZnHvkhLQlNReyVi/MKzwv95THtJDBL9MgcIkcPFhgYVLWJ6hGqPxIcZGqYtlshwLw==}
+  /@worker-tools/stream-response/0.1.0-pre.3:
+    resolution: {integrity: sha512-lD40mbvdq8LqQUaVKmrPsgTe8SAl+AOlaxncXWLqUqLxP9jS67Arb/GRI9x4fch1n3G4UJUW1IrqGs8A6oyEBQ==}
     dependencies:
-      whatwg-stream-to-async-iter: 0.5.0
+      typed-array-utils: 0.2.2
+      whatwg-stream-to-async-iter: 0.6.1
     dev: false
 
   /@worker-tools/stripe-webhook/1.1.4:
@@ -925,8 +926,8 @@ packages:
       uhyphen: 0.1.0
     dev: false
 
-  /linkedom/0.14.8:
-    resolution: {integrity: sha512-uYdw1/0jB+FdS760KEcyuIkFhLl6e9V1o/1Yne0lV2+8ZF+mPr2NWGs6rzUeLDe2KOsJc/EsQCL9tCCBVhUdSw==}
+  /linkedom/0.14.9:
+    resolution: {integrity: sha512-ZV4H69VFzOwKp7akxsMtrzcnlP7mlFBvKy1RBsyIccuGX7ewkFlt/1FFfTHSg/BvREXNFFuyZlWoSf48FYAMzA==}
     dependencies:
       css-select: 5.1.0
       cssom: 0.5.0
@@ -1255,8 +1256,8 @@ packages:
       tslib: 2.4.0
     dev: false
 
-  /whatwg-stream-to-async-iter/0.5.0:
-    resolution: {integrity: sha512-WE30JxHlYI5Pft7XVdU/RcLz1NfjGPN0WbE6Dk1nafGb0tYKwJKdfaQwgpSf3IIv6OCItYDrZ2M9MzoDBvIAFw==}
+  /whatwg-stream-to-async-iter/0.6.1:
+    resolution: {integrity: sha512-cKE4lNr86ZC/W222NHZnmcQsgSSWlV3dptsYglGtq6co0n8Bylb2xfMlmdrfInrFEi2CuLIoFXnaX5ZWKBhKsw==}
     dependencies:
       tslib: 2.4.0
     dev: false

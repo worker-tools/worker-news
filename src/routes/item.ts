@@ -1,8 +1,7 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "@worker-tools/html";
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
-import { JSONResponse } from '@worker-tools/json-fetch';
-import { StreamResponse } from '@worker-tools/stream-response';
+import { JSONStreamResponse } from '@worker-tools/json-stream';
 import { renderIconSVG } from "@download/blockies";
 import { formatDistanceToNowStrict } from 'date-fns';
 import { ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
@@ -143,11 +142,11 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
   if (contentType === 'application/json') {
-    return new StreamResponse(fastTTFB(jsonStringifyGenerator(postPromise)), new JSONResponse())
+    return new JSONStreamResponse(postPromise)
   }
 
-  const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
-  return new Ctor(pageRenderer(async () => {
+  // const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
+  return new HTMLResponse(pageRenderer(async () => {
     try {
       const post = await postPromise;
       const { title, text, kids, parts } = post;
