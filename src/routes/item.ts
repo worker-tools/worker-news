@@ -1,11 +1,10 @@
 import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "@worker-tools/html";
 import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { notFound, ok } from "@worker-tools/response-creators";
-import { JSONStreamResponse } from '@worker-tools/json-stream';
+import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream';
 import { renderIconSVG } from "@download/blockies";
 import { formatDistanceToNowStrict } from 'date-fns';
-import { ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
-import { jsonStringifyGenerator } from '@worker-tools/json-stream'
+import { asyncIterableToStream, ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
 
 import { mw, RouteArgs, router } from "../router";
 
@@ -14,6 +13,7 @@ import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./a
 import { pageLayout, identicon, cachedWarning, isSafari } from './components';
 import { aThing, fastTTFB, subtext } from './news';
 import { moreLinkEl } from "./threads";
+import { StreamResponse } from "@worker-tools/stream-response";
 
 export interface CommOpts {
   showToggle?: boolean,
@@ -81,11 +81,8 @@ export const commentEl = (comment: AComment, commOpts: CommOpts = {}) => {
 const timeout = (n?: number) => new Promise(res => setTimeout(res, n))
 
 export async function* commentTree(kids: ForOfAwaitable<AComment>, parent: { dead: boolean }): AsyncGenerator<HTMLContent> {
-  let i = 0;
   for await (const item of kids) {
     yield commentEl(item, { showReply: !parent.dead });
-    // FIXME: streaming json parser should fix this!?
-    if (SW) if (i++ % 10 === 0) await timeout() 
     if (item.kids) yield* commentTree(item.kids, parent);
   }
 }
@@ -132,6 +129,34 @@ const replyTr = ({ id, type }: APost) => {
     </tr>`;
 }
 
+export class ExponentialJoinStream extends TransformStream<string, string> {
+  constructor(joiner = ',') {
+    let n = 0;
+    let i = 0;
+    let buffer: string[] = [];
+    super({
+      start() {
+        n = 4;
+        i = 0;
+        buffer = new Array(2**n);
+      },
+      transform(chunk, controller) {
+        buffer[i++] = chunk;
+        if (i === 2**n) {
+          i = 0;
+          controller.enqueue(buffer.join(joiner))
+          buffer = new Array(2**++n);
+        }
+      },
+      flush(controller) {
+        controller.enqueue(buffer.join(joiner))
+        buffer = [];
+      },
+    })
+  }
+}
+
+
 // Dead items: 26841031
 async function getItem({ request, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
@@ -142,11 +167,13 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item' })
 
   if (contentType === 'application/json') {
-    return new JSONStreamResponse(postPromise)
+    return new StreamResponse(fastTTFB(jsonStringifyGenerator(postPromise)), { 
+      headers: [['content-type', JSONStreamResponse.contentType]] 
+    })
   }
 
   // const Ctor = isSafari(navigator.userAgent) ? BufferedHTMLResponse : HTMLResponse
-  return new HTMLResponse(pageRenderer(async () => {
+  const content = pageRenderer(async () => {
     try {
       const post = await postPromise;
       const { title, text, kids, parts } = post;
@@ -190,7 +217,12 @@ async function getItem({ request, searchParams, type: contentType, url, handled,
         <tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`
     } finally {
     }
-  }));
+  });
+  let stream = asyncIterableToStream(content)
+  // In safari, sending many small chunks to the chokes up the browser for some reason, 
+  // so we limit the amount of chunks sent via exponential grouping.
+  if (isSafari(navigator.userAgent)) stream = stream.pipeThrough(new ExponentialJoinStream(''))
+  return new StreamResponse(stream, { headers: [['content-type', HTMLResponse.contentType]]})
 }
 
 router.get('/identicon/:by.svg', 

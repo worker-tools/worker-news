@@ -20,14 +20,14 @@ specifiers:
   '@worker-tools/html': ^2.0.0-pre.10
   '@worker-tools/html-rewriter': ^0.1.0-pre.12
   '@worker-tools/json-fetch': 2.1.0-pre.5
-  '@worker-tools/json-stream': 0.1.0-pre.5
-  '@worker-tools/location-polyfill': ^0.4.0
-  '@worker-tools/middleware': ^0.1.0-pre.16
+  '@worker-tools/json-stream': 0.1.0-pre.8
+  '@worker-tools/location-polyfill': ^0.4.1
+  '@worker-tools/middleware': ^0.1.0-pre.17
   '@worker-tools/parsed-html-rewriter': ^0.1.11
   '@worker-tools/request-cookie-store': ^0.5.0-pre.9
   '@worker-tools/resolvable-promise': ^0.2.0-pre.4
   '@worker-tools/response-creators': ^1.0.8
-  '@worker-tools/router': 0.2.0-pre.6
+  '@worker-tools/router': 0.2.0-pre.7
   '@worker-tools/signed-cookie-store': ^0.3.0-pre.7
   '@worker-tools/stream-response': ^0.1.0-pre.3
   '@worker-tools/stripe-webhook': ^1.1.4
@@ -55,7 +55,7 @@ specifiers:
   typeson-registry: ^1.0.0-alpha.39
   urlpattern-polyfill: ^4.0.3
   uuid-class: ^0.12.3
-  whatwg-stream-to-async-iter: 0.6.1
+  whatwg-stream-to-async-iter: 0.6.2
 
 dependencies:
   '@cloudflare/kv-asset-handler': 0.2.0
@@ -75,14 +75,14 @@ dependencies:
   '@worker-tools/html': 2.0.0-pre.10
   '@worker-tools/html-rewriter': 0.1.0-pre.12
   '@worker-tools/json-fetch': 2.1.0-pre.5
-  '@worker-tools/json-stream': 0.1.0-pre.5
-  '@worker-tools/location-polyfill': 0.4.0
-  '@worker-tools/middleware': 0.1.0-pre.16
+  '@worker-tools/json-stream': 0.1.0-pre.8
+  '@worker-tools/location-polyfill': 0.4.1
+  '@worker-tools/middleware': 0.1.0-pre.17
   '@worker-tools/parsed-html-rewriter': 0.1.11
   '@worker-tools/request-cookie-store': 0.5.0-pre.9
   '@worker-tools/resolvable-promise': 0.2.0-pre.4
   '@worker-tools/response-creators': 1.0.8
-  '@worker-tools/router': 0.2.0-pre.6
+  '@worker-tools/router': 0.2.0-pre.7
   '@worker-tools/signed-cookie-store': 0.3.0-pre.7
   '@worker-tools/stream-response': 0.1.0-pre.3
   '@worker-tools/stripe-webhook': 1.1.4
@@ -107,7 +107,7 @@ dependencies:
   typeson-registry: 1.0.0-alpha.39
   urlpattern-polyfill: 4.0.3
   uuid-class: 0.12.3
-  whatwg-stream-to-async-iter: 0.6.1
+  whatwg-stream-to-async-iter: 0.6.2
 
 devDependencies:
   '@cloudflare/workers-types': 3.9.0
@@ -383,23 +383,24 @@ packages:
     resolution: {integrity: sha512-gP+7Cjv+O1uDbCsTecr3UdAG5GaUbGX5VwaUryp3QBQpZ+ulsjoqmVdptPL74Iv74//Em+XBv27CjRcmTxiynQ==}
     dev: false
 
-  /@worker-tools/json-stream/0.1.0-pre.5:
-    resolution: {integrity: sha512-EyOyWTM0JI9bulYCiFciW9LLAC0RHGkyoBgcVjuvDvTcF39sV3wX4gGxKeiC6fqYeAEvLtBloPNHTHJxukUzhw==}
+  /@worker-tools/json-stream/0.1.0-pre.8:
+    resolution: {integrity: sha512-Dzd2Qp0OLRFp1J9hpuG5V9y2Je8pVD6GJJOyOUUwT+WfOyplJOLMM3J0CPEBwURhPubGfzGJfQdu2RzC3os8oQ==}
     dependencies:
       '@worker-tools/resolvable-promise': 0.2.0-pre.4
       '@worker-tools/stream-response': 0.1.0-pre.3
+      ts-functional-pipe: 3.1.2
       typed-array-utils: 0.2.2
-      whatwg-stream-to-async-iter: 0.6.1
+      whatwg-stream-to-async-iter: 0.6.2
     dev: false
 
-  /@worker-tools/location-polyfill/0.4.0:
-    resolution: {integrity: sha512-nS4ujxISXY5o9mdevM8WHK+zK67Srb5xfLeCikeiW1zlXSiZqIhx+9kMtcvHitNPmQhciWsjQ5FV97hBGc0EOA==}
+  /@worker-tools/location-polyfill/0.4.1:
+    resolution: {integrity: sha512-TynpAEJ4KYIc48aWubmCCxzwdUM8uK7SBUy7/lCB34UyFcH1u6p8Rb7dzcFvZEluJcduE2TBWZGsqypVdNs58A==}
     dependencies:
       '@cloudflare/workers-types': 2.2.2
     dev: false
 
-  /@worker-tools/middleware/0.1.0-pre.16:
-    resolution: {integrity: sha512-xAuKsRjzIMwBuY2X1sSNfvT/2vwXgNSyWE8vlicOYfHZs8psALTofGgkLXucB8L02MHan6HzpNJNat0dWShaog==}
+  /@worker-tools/middleware/0.1.0-pre.17:
+    resolution: {integrity: sha512-ncJlrEJAdQj7lyQ8C/Eo2a8y0/gu3w9s0gB9d3HxbhPysIGEzz/v8ezcunm9QrpBsR/C4ZQwrUwTGkMZl+PNmA==}
     dependencies:
       '@worker-tools/encrypted-cookie-store': 0.3.0-pre.5
       '@worker-tools/extendable-promise': 0.2.0-pre.8
@@ -412,7 +413,6 @@ packages:
       msgpackr: 1.5.7
       negotiated: 1.0.2
       ts-functional-pipe: 3.1.2
-      urlpattern-polyfill: 4.0.3
       uuid-class: 0.13.0-alpha.0
     dev: false
 
@@ -443,12 +443,12 @@ packages:
     resolution: {integrity: sha512-T5Q4CoW4JGv/kVrbuwTN0C0kgfwFj7j/8LPrScUGnk+2BIXdm9Be2YGtNpMgQRqs263yYHij2YRgFKK8bOdBaQ==}
     dev: false
 
-  /@worker-tools/router/0.2.0-pre.6:
-    resolution: {integrity: sha512-VfDGzi1cEI8Xu4p9EbussIAziz7rhyELCdIeAwS2qkqU/Z2UNe088/OLvD5ipnvGsFTJJxzg+unXK6x9MPVbog==}
+  /@worker-tools/router/0.2.0-pre.7:
+    resolution: {integrity: sha512-A5Tik+qjEJ9WFitTGZm6E5Yhu0Nws1VmBAFpjdR4GZ+URhzckpf5vNg1RVeEgnTVNvksoiIiUEa9qiQbvcT3Xw==}
     dependencies:
-      '@worker-tools/middleware': 0.1.0-pre.16
+      '@worker-tools/middleware': 0.1.0-pre.17
+      '@worker-tools/resolvable-promise': 0.2.0-pre.4
       '@worker-tools/response-creators': 1.2.0-pre.5
-      urlpattern-polyfill: 4.0.3
     dev: false
 
   /@worker-tools/signed-cookie-store/0.3.0-pre.7:
@@ -463,7 +463,7 @@ packages:
     resolution: {integrity: sha512-lD40mbvdq8LqQUaVKmrPsgTe8SAl+AOlaxncXWLqUqLxP9jS67Arb/GRI9x4fch1n3G4UJUW1IrqGs8A6oyEBQ==}
     dependencies:
       typed-array-utils: 0.2.2
-      whatwg-stream-to-async-iter: 0.6.1
+      whatwg-stream-to-async-iter: 0.6.2
     dev: false
 
   /@worker-tools/stripe-webhook/1.1.4:
@@ -1256,8 +1256,8 @@ packages:
       tslib: 2.4.0
     dev: false
 
-  /whatwg-stream-to-async-iter/0.6.1:
-    resolution: {integrity: sha512-cKE4lNr86ZC/W222NHZnmcQsgSSWlV3dptsYglGtq6co0n8Bylb2xfMlmdrfInrFEi2CuLIoFXnaX5ZWKBhKsw==}
+  /whatwg-stream-to-async-iter/0.6.2:
+    resolution: {integrity: sha512-ocSOY/Qe/Y5rLC3Xnz6gi8+A9niy+dUQSjnox/nRryKkV/NahxyspB/joyhYLBbQp1JAFrTBOVd/RUo0NrZ96g==}
     dependencies:
       tslib: 2.4.0
     dev: false

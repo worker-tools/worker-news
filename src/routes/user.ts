@@ -7,6 +7,7 @@ import { router, RouteArgs, mw } from "../router";
 import { user as apiUser } from "./api";
 import { pageLayout, identicon } from './components';
 import { fastTTFB } from "./news";
+import { StreamResponse } from "@worker-tools/stream-response";
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -28,7 +29,9 @@ const user = async ({ searchParams, type, url, handled, waitUntil }: RouteArgs) 
   const title = `Profile: ${un}`;
 
   if (type === 'application/json') {
-    return new JSONStreamResponse(userPromise)
+    return new StreamResponse(fastTTFB(jsonStringifyGenerator(userPromise)), { 
+      headers: [['content-type', JSONStreamResponse.contentType]] 
+    })
   }
 
   return new HTMLResponse(pageLayout({ op: 'user', title })(html`

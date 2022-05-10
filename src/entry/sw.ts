@@ -6,7 +6,7 @@ import { router } from '../routes/index';
 self.addEventListener('fetch', <any>router);
 
 self.addEventListener('install', async () => {
-  (<any>self).skipWaiting();
+  console.log('install')
   const cache = await caches.open('public')
   await cache.addAll([
     '/darkbluearrow.png',
@@ -22,10 +22,15 @@ self.addEventListener('install', async () => {
     '/y18.png',
     '/y18.gif',
   ])
-  console.log('skipWaiting');
+  console.log('installed')
+  // TODO: debug only?
+  // console.log('skipWaiting');
+  // (<any>self).skipWaiting();
 });
 
 self.addEventListener('activate', (event: any) => {
-  event.waitUntil((<any>self).clients.claim());
-  console.log('claim');
+  console.log('activated')
+  // TODO: debug only?
+  // event.waitUntil((<any>self).clients.claim());
+  // console.log('claim');
 });

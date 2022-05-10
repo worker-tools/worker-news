@@ -10,8 +10,12 @@ type ExpandRecursively<T> = T extends Record<PropertyKey, unknown>
 //  * @deprecated Change name
  */
 // FIXME: better way to retain readonly and optional modifiers!???
-export type PromisedValues<Type, Exclude extends keyof Type = never> = ExpandRecursively<{
-  [Property in keyof Type]: Property extends Exclude ? Type[Property] : Awaitable<Type[Property]>
+export type PromisedValuesIn<Type, In extends keyof Type = never> = ExpandRecursively<{
+  [Property in keyof Type]: Property extends In ? Awaitable<Type[Property]> : Type[Property]
+}>
+
+export type PromisedValuesEx<Type, Ex extends keyof Type = never> = ExpandRecursively<{
+  [Property in keyof Type]: Property extends Ex ? Type[Property] : Awaitable<Type[Property]>
 }>
 
 /**
@@ -19,20 +23,36 @@ export type PromisedValues<Type, Exclude extends keyof Type = never> = ExpandRec
 //  * @deprecated Change name
  */
 // FIXME: better way to retain readonly and optional modifiers!???
-export type AwaitedValues<Type, Exclude extends keyof Type = never> = ExpandRecursively<{
-  [Property in keyof Type]: Property extends Exclude ? Type[Property] : Awaited<Type[Property]>
+export type AwaitedValuesExclusive<Type, Ex extends keyof Type = never> = ExpandRecursively<{
+  [Prop in keyof Type]: Prop extends Ex ? Type[Prop] : Awaited<Type[Prop]>
+}>
+export type AwaitedValuesInclusive<Type, In extends keyof Type = never> = ExpandRecursively<{
+  [Prop in keyof Type]: Prop extends In ? Awaited<Type[Prop]> : Type[Prop];
 }>
 
 /**
  * Lifts all direct properties of `obj` that are promises to the parent. 
  * @deprecated Change name
  */
-export async function liftPromises<Type, Exclude extends keyof Type = never>(
-  obj: Type, exclude: Exclude[] = []
-): Promise<AwaitedValues<Type, Exclude>> {
-  const props = (<Exclude[]>Object.keys(obj)).filter(x => !exclude.includes(x))
-  const results = await Promise.all(props.map(async prop => [prop, await obj[prop]] as const))
-  for (const [prop, awaited] of results) { obj[prop] = awaited }
+export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
+  obj: Type, opts: { include?: In[] },
+): Promise<AwaitedValuesInclusive<Type, In>>;
+export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
+  obj: Type, opts: { exclude?: Ex[] },
+): Promise<AwaitedValuesExclusive<Type, Ex>>;
+export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
+  obj: Type, { include, exclude }: { include?: In[], exclude?: Ex[] } = {}
+): Promise<any> {
+  if (exclude && include) throw TypeError('Can\'t be include and exclude keys at the same time');
+  if (exclude) {
+    const props = (<Ex[]>Object.keys(obj)).filter(x => !exclude.includes(x))
+    const results = await Promise.all(props.map(async prop => [prop, await obj[prop]] as const))
+    for (const [prop, awaited] of results) { obj[prop] = awaited }
+  } else if (include) {
+    const props = (<In[]>Object.keys(obj)).filter(x => include.includes(x))
+    const results = await Promise.all(props.map(async prop => [prop, await obj[prop]] as const))
+    for (const [prop, awaited] of results) { obj[prop] = awaited }
+  }
   return obj as any
 }
 

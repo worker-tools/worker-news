@@ -15,5 +15,6 @@ export interface RouteArgs {
 }
 
 export const mw = combine(basics(), contentTypes(['text/html', 'application/json']))
-export const router = new WorkerRouter()
+export const router = new WorkerRouter(x => x, { fatal: false })
+router.addEventListener('error', ({ error }) => console.warn(error))
 

@@ -46,14 +46,14 @@
     "@worker-tools/html": "^2.0.0-pre.10",
     "@worker-tools/html-rewriter": "^0.1.0-pre.12",
     "@worker-tools/json-fetch": "2.1.0-pre.5",
-    "@worker-tools/json-stream": "0.1.0-pre.5",
-    "@worker-tools/location-polyfill": "^0.4.0",
-    "@worker-tools/middleware": "^0.1.0-pre.16",
+    "@worker-tools/json-stream": "0.1.0-pre.8",
+    "@worker-tools/location-polyfill": "^0.4.1",
+    "@worker-tools/middleware": "^0.1.0-pre.17",
     "@worker-tools/parsed-html-rewriter": "^0.1.11",
     "@worker-tools/request-cookie-store": "^0.5.0-pre.9",
     "@worker-tools/resolvable-promise": "^0.2.0-pre.4",
     "@worker-tools/response-creators": "^1.0.8",
-    "@worker-tools/router": "0.2.0-pre.6",
+    "@worker-tools/router": "0.2.0-pre.7",
     "@worker-tools/signed-cookie-store": "^0.3.0-pre.7",
     "@worker-tools/stream-response": "^0.1.0-pre.3",
     "@worker-tools/stripe-webhook": "^1.1.4",
@@ -78,7 +78,7 @@
     "typeson-registry": "^1.0.0-alpha.39",
     "urlpattern-polyfill": "^4.0.3",
     "uuid-class": "^0.12.3",
-    "whatwg-stream-to-async-iter": "0.6.1"
+    "whatwg-stream-to-async-iter": "0.6.2"
   },
   "repository": {
     "type": "git",

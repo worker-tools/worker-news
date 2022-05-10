@@ -2,7 +2,7 @@ import { JSONRequest, ParamsURL } from "@worker-tools/json-fetch";
 import { ResolvablePromise } from "@worker-tools/resolvable-promise";
 import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface";
 import { JSONParseNexus } from '@worker-tools/json-stream';
-import { liftPromises, PromisedValues } from "../../vendor/awaited-values";
+import { liftAsync, PromisedValuesEx } from "../../vendor/awaited-values";
 import { notImplemented } from "@worker-tools/response-creators";
 
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
@@ -66,7 +66,7 @@ export async function stories(params: StoriesParams, type = Stories.TOP, args: M
   const jsonStream = new JSONParseNexus()
   const ret = {
     items: jsonStream.iterable('$.items.*'),
-    moreLink: jsonStream.lazy('$.moreLink'),
+    moreLink: jsonStream.promise('$.moreLink'),
     fromCacheDate: res.headers.has('x-from-sw-cache') ? new Date(res.headers.get('date')!) : undefined
   }
   res.body!.pipeThrough(jsonStream)
@@ -83,26 +83,26 @@ async function* log(iter: any) {
 export async function comments(id: number, p: number | undefined, args: MinArgs): Promise<APost> {
   const res = await networkFirst('comments')(args);
   const nxs = new JSONParseNexus()
-  const data: PromisedValues<Partial<APost>, 'moreLink' | 'fromCacheDate' | 'kids' | 'parts'> = {
-    type: nxs.eager('$.type'), // FIXME: ... deal with this madness
-    title: nxs.eager('$.title'),
-    score: nxs.eager('$.score'),
-    by: nxs.eager('$.by'),
-    descendants: nxs.eager('$.descendants'),
-    storyTitle: nxs.eager('$.storyTitle'),
-    text: nxs.eager('$.text'),
-    quality: nxs.eager('$.quality'),
-    dead: nxs.eager('$.dead'),
-    id: nxs.eager('$.id'),
-    url: nxs.eager('$.url'),
-    time: nxs.eager('$.time'),
+  const data: PromisedValuesEx<Partial<APost>, 'moreLink' | 'fromCacheDate' | 'kids' | 'parts'> = {
+    type: nxs.promise('$.type'), // FIXME: ... deal with this madness
+    title: nxs.promise('$.title'),
+    score: nxs.promise('$.score'),
+    by: nxs.promise('$.by'),
+    descendants: nxs.promise('$.descendants'),
+    storyTitle: nxs.promise('$.storyTitle'),
+    text: nxs.promise('$.text'),
+    quality: nxs.promise('$.quality'),
+    dead: nxs.promise('$.dead'),
+    id: nxs.promise('$.id'),
+    url: nxs.promise('$.url'),
+    time: nxs.promise('$.time'),
     parts: nxs.iterable('$.parts.*'),
     kids: nxs.iterable('$.kids.*'),
-    moreLink: nxs.lazy('$.moreLink').then(x => x!), // FIXME
+    moreLink: nxs.promise('$.moreLink').map(x => x!), // FIXME
     fromCacheDate: res.headers.has('x-from-sw-cache') ? new Date(res.headers.get('date')!) : undefined
   }
   res.body!.pipeThrough(nxs)
-  const lifted = await liftPromises(data, ['moreLink', 'fromCacheDate', 'kids', 'parts']);
+  const lifted = await liftAsync(data, { exclude: ['moreLink', 'fromCacheDate', 'kids', 'parts'] });
   return lifted as APost
 }
 

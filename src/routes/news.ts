@@ -11,6 +11,7 @@ import { router, RouteArgs, mw } from "../router";
 import { cachedWarning, del, favicon, identicon, pageLayout } from './components';
 
 import { stories, APost, Stories, StoriesParams, StoriesData } from './api'
+import { StreamResponse } from "@worker-tools/stream-response";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -165,7 +166,9 @@ const mkStories = (type: Stories) => async ({ request, searchParams, type: conte
     : stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    return new JSONStreamResponse(storiesPage)
+    return new StreamResponse(fastTTFB(jsonStringifyGenerator(storiesPage)), { 
+      headers: [['content-type', JSONStreamResponse.contentType]] 
+    })
   }
 
   return new HTMLResponse(pageLayout({ op: type, title, id: searchParams.get('id')! })(html`

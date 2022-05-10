@@ -10,6 +10,7 @@ import { threads as apiThreads } from "./api";
 import { pageLayout } from './components';
 import { commentEl } from "./item";
 import { fastTTFB } from "./news";
+import { StreamResponse } from "@worker-tools/stream-response";
 
 export const moreLinkEl = (moreLink: string) => html`
   <tr class="morespace" style="height:10px"></tr>
@@ -35,7 +36,9 @@ async function threads({ searchParams, type: contentType, url, handled, waitUnti
   const threadsPage = apiThreads(id, next, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
-    return new JSONStreamResponse(threadsPage)
+    return new StreamResponse(fastTTFB(jsonStringifyGenerator(threadsPage)), { 
+      headers: [['content-type', JSONStreamResponse.contentType]] 
+    })
   }
 
   return new HTMLResponse(pageLayout({ title, op: 'threads', id })(async () => {

@@ -1,5 +1,5 @@
 name = "news-dev"
-type = "javascript"
+main = "./dist/worker.js"
 account_id = "efb289061241436254219b424fcea4cf"
 workers_dev = true
 kv_namespaces = [ 
@@ -10,7 +10,6 @@ compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
 
 [site]
   bucket = "./public"
-  entry-point = "."
 
 [build]
   command = "npm run build"
