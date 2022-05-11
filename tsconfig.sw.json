@@ -2,8 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@worker-tools/kv-storage": ["./node_modules/kv-storage-polyfill/dist/kv-storage-polyfill.mjs"],
-      "perf_hooks": ["./src/vendor/perf_hooks.js"],
+      // "@worker-tools/kv-storage": ["./node_modules/kv-storage-polyfill/dist/kv-storage-polyfill.mjs"],
+      // "perf_hooks": ["./src/vendor/perf_hooks.js"],
+      "linkedom": ["./src/vendor/no-linkedom.ts"],
+      "device-detector-js": ["./src/vendor/no-device-detector.ts"],
     },
     "outDir": "./dist",
     "module": "ESNext",

@@ -9,8 +9,8 @@
     "build": "npm run build-sw && npm run build-cf",
     "build-cf": "esbuild src/entry/cf.ts --bundle --sourcemap --target=es2022 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=false --define:SW=false --minify",
     "watch-cf": "esbuild src/entry/cf.ts --bundle --sourcemap --target=es2022 --outfile=dist/worker.js --define:global=self --tsconfig=tsconfig.json --define:DEBUG=true --define:SW=false --watch",
-    "build-sw": "esbuild src/entry/sw.ts --bundle --sourcemap --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=false --define:SW=true --minify --external:device-detector-js --external:linkedom",
-    "watch-sw": "esbuild src/entry/sw.ts --bundle --sourcemap --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=true --define:SW=true --watch --external:device-detector-js --external:linkedom",
+    "build-sw": "esbuild src/entry/sw.ts --bundle --sourcemap --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=false --define:SW=true --minify",
+    "watch-sw": "esbuild src/entry/sw.ts --bundle --sourcemap --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=true --define:SW=true --watch",
     "serve": "deno run --allow-read=public --allow-net --watch --location=http://localhost:8000 --no-check=remote src/entry/deno.ts",
     "serve-wrangler-local": "wrangler dev --local",
     "serve-wrangler": "wrangler dev"
