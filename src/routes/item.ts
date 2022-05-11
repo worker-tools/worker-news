@@ -1,11 +1,11 @@
-import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "https://ghuc.cc/worker-tools/html/index.ts";
-import { basics, caching, combine, contentTypes } from "https://ghuc.cc/worker-tools/middleware/index.ts";
-import { notFound, ok } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
-import { JSONStreamResponse, jsonStringifyGenerator } from 'https://ghuc.cc/worker-tools/json-stream/index.ts';
-import { renderIconSVG } from "https://ghuc.cc/qwtel/blockies/src/blockies.mjs";
-import { formatDistanceToNowStrict } from 'https://cdn.skypack.dev/date-fns?dts';
-import { asyncIterableToStream, ForOfAwaitable } from "https://ghuc.cc/qwtel/whatwg-stream-to-async-iter/index.ts"; // FIXME
-import { StreamResponse } from "https://ghuc.cc/worker-tools/stream-response/index.ts";
+import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "@worker-tools/html";
+import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
+import { notFound, ok } from "@worker-tools/response-creators";
+import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream';
+import { renderIconSVG } from "@qwtel/blockies";
+import { formatDistanceToNowStrict } from 'date-fns';
+import { asyncIterableToStream, ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
+import { StreamResponse } from "@worker-tools/stream-response";
 
 import { mw, RouteArgs, router } from "../router.ts";
 

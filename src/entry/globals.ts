@@ -5,6 +5,7 @@ declare global {
   interface Window {
     readonly DEBUG: boolean;
     readonly SW: boolean;
+    readonly WORKER_LOCATION: string;
     readonly caches: CacheStorage;
   }
 

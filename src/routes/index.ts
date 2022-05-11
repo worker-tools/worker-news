@@ -1,4 +1,4 @@
-import { basics, caching, combine, contentTypes } from "https://ghuc.cc/worker-tools/middleware/index.ts";
+import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
 import { manifestHandler } from './manifest-handler.js';
 
 import { router, mw } from "../router.ts";

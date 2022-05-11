@@ -57,7 +57,7 @@ export async function blockquotify(text: string) {
   //   .transform(resp1)
   //   .text()
 
-  const { DOMParser } = await import('https://esm.sh/linkedom')
+  const { DOMParser } = await import('linkedom')
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
   for (const p of doc.querySelectorAll('p')) {

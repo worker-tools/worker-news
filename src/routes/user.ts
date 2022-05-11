@@ -1,13 +1,13 @@
-import { html, HTMLResponse, unsafeHTML } from "https://ghuc.cc/worker-tools/html/index.ts";
-import { notFound } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
-import { JSONStreamResponse, jsonStringifyGenerator } from "https://ghuc.cc/worker-tools/json-stream/index.ts";
+import { html, HTMLResponse, unsafeHTML } from "@worker-tools/html";
+import { notFound } from "@worker-tools/response-creators";
+import { JSONStreamResponse, jsonStringifyGenerator } from "@worker-tools/json-stream";
 
 import { router, RouteArgs, mw } from "../router.ts";
 
 import { user as apiUser } from "./api/index.ts";
 import { pageLayout, identicon } from './components.ts';
 import { fastTTFB } from "./news.ts";
-import { StreamResponse } from "https://ghuc.cc/worker-tools/stream-response/index.ts";
+import { StreamResponse } from "@worker-tools/stream-response";
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',

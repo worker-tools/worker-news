@@ -25,10 +25,9 @@ jobs:
         with:
           version: 6
           run_install: true
-      - run: cp -r public dist
       - uses: denoland/deployctl@v1
         with:
           project: worker-news
-          entrypoint: deno.js
-          root: dist
+          entrypoint: src/entry/deno.ts
+          import-map: import-map.json
       

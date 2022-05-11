@@ -1,5 +1,5 @@
-import { Awaitable } from "https://ghuc.cc/worker-tools/router/index.ts";
-import { ForOfAwaitable } from "https://ghuc.cc/qwtel/whatwg-stream-to-async-iter/index.ts";
+import { Awaitable } from "@worker-tools/router";
+import { ForOfAwaitable } from "whatwg-stream-to-async-iter";
 
 export enum Stories {
   TOP = 'news',

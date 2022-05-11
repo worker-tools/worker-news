@@ -1,5 +1,5 @@
-import { html, HTMLContent } from "https://ghuc.cc/worker-tools/html/index.ts";
-import { formatDistanceToNowStrict } from 'https://cdn.skypack.dev/date-fns?dts';
+import { html, HTMLContent } from "@worker-tools/html";
+import { formatDistanceToNowStrict } from 'date-fns';
 
 import { Stories } from "./api/interface.ts";
 import { location } from '../location.ts';

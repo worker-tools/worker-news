@@ -1,7 +1,7 @@
-import { html, unsafeHTML, HTMLResponse, HTMLContent } from "https://ghuc.cc/worker-tools/html/index.ts";
-import { notFound } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
-import { basics, combine, contentTypes } from "https://ghuc.cc/worker-tools/middleware/index.ts";
-import { JSONStreamResponse, jsonStringifyGenerator } from 'https://ghuc.cc/worker-tools/json-stream/index.ts'
+import { html, unsafeHTML, HTMLResponse, HTMLContent } from "@worker-tools/html";
+import { notFound } from "@worker-tools/response-creators";
+import { basics, combine, contentTypes } from "@worker-tools/middleware";
+import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream'
 
 import { router, RouteArgs, mw } from "../router.ts";
 
@@ -10,7 +10,7 @@ import { threads as apiThreads } from "./api/index.ts";
 import { pageLayout } from './components.ts';
 import { commentEl } from "./item.ts";
 import { fastTTFB } from "./news.ts";
-import { StreamResponse } from "https://ghuc.cc/worker-tools/stream-response/index.ts";
+import { StreamResponse } from "@worker-tools/stream-response";
 
 export const moreLinkEl = (moreLink: string) => html`
   <tr class="morespace" style="height:10px"></tr>

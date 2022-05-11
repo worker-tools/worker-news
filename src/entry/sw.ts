@@ -1,5 +1,5 @@
 import './globals.ts'
-import 'https://cdn.skypack.dev/urlpattern-polyfill?dts'
+import 'urlpattern-polyfill'
 
 // import './streams-polyfill'
 // import './html-rewriter-polyfill'

@@ -1,17 +1,17 @@
-import { html, HTMLContent, HTMLResponse, unsafeHTML } from "https://ghuc.cc/worker-tools/html/index.ts";
-import { basics, combine, contentTypes } from "https://ghuc.cc/worker-tools/middleware/index.ts";
-import { notFound, ok } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
-import { formatDistanceToNowStrict } from 'https://cdn.skypack.dev/date-fns?dts';
-import { fromUrl, parseDomain } from 'https://cdn.skypack.dev/parse-domain?dts';
-import { JSONStreamResponse, jsonStringifyGenerator } from 'https://ghuc.cc/worker-tools/json-stream/index.ts'
-import { JSONRequest } from "https://ghuc.cc/worker-tools/json-fetch/index.ts";
+import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
+import { basics, combine, contentTypes } from "@worker-tools/middleware";
+import { notFound, ok } from "@worker-tools/response-creators";
+import { formatDistanceToNowStrict } from 'date-fns';
+import { fromUrl, parseDomain } from 'parse-domain';
+import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream'
+import { JSONRequest } from "@worker-tools/json-fetch";
 import { location } from '../location.ts';
 
 import { router, RouteArgs, mw } from "../router.ts";
 import { cachedWarning, del, favicon, identicon, pageLayout } from './components.ts';
 
 import { stories, APost, Stories, StoriesParams, StoriesData } from './api/index.ts'
-import { StreamResponse } from "https://ghuc.cc/worker-tools/stream-response/index.ts";
+import { StreamResponse } from "@worker-tools/stream-response";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];

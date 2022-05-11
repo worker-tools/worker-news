@@ -1,6 +1,6 @@
 import { APost, AComment, Stories, StoriesParams, AUser, ThreadsData, StoriesData, Quality } from './interface.ts';
-import { default as PQueue } from 'https://cdn.skypack.dev/@qwtel/p-queue-browser?dts';
-import { ResolvablePromise } from 'https://ghuc.cc/worker-tools/resolvable-promise/index.ts';
+import { default as PQueue } from '@qwtel/p-queue-browser';
+import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { blockquotify } from './rewrite-content.ts';
 
 type APIFn = <T>(path: string) => Promise<T>;

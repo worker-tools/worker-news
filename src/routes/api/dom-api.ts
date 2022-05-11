@@ -1,14 +1,14 @@
 /**
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
-import { ParamsURL } from 'https://ghuc.cc/worker-tools/json-fetch/index.ts';
-import { ResolvablePromise } from 'https://ghuc.cc/worker-tools/resolvable-promise/index.ts';
-import { eventTargetToAsyncIter } from 'https://ghuc.cc/qwtel/event-target-to-async-iter/index.ts';
-import { unescape } from 'https://cdn.skypack.dev/html-escaper?dts';
+import { ParamsURL } from '@worker-tools/json-fetch';
+import { ResolvablePromise } from '@worker-tools/resolvable-promise';
+import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
+import { unescape } from 'html-escaper';
 
-// import type { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.ts'
-// import type { HTMLRewriter as HR, Element } from 'https://cdn.skypack.dev/html-rewriter-wasm?dts';
-import type { Element, HTMLRewriter as IHTMLRewriter } from 'https://deno.land/x/html_rewriter/index.ts'
+// import type { HTMLRewriter } from '@worker-tools/html-rewriter'
+// import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
+import type { Element, HTMLRewriter as IHTMLRewriter } from '@worker-tools/html-rewriter'
 
 import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface.ts';
 import { aMap } from './iter.ts';

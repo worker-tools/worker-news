@@ -1,5 +1,5 @@
-import { getAssetFromKV, mapRequestToAsset, Options } from 'https://cdn.skypack.dev/@cloudflare/kv-asset-handler?dts'
-import { internalServerError, notFound } from 'https://ghuc.cc/worker-tools/response-creators/index.ts'
+import { getAssetFromKV, mapRequestToAsset, Options } from '@cloudflare/kv-asset-handler'
+import { internalServerError, notFound } from '@worker-tools/response-creators'
 
 // addEventListener('fetch', event => {
 //   event.waitUntil(handleEvent(event))

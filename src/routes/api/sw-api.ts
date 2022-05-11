@@ -1,9 +1,9 @@
-import { JSONRequest, ParamsURL } from "https://ghuc.cc/worker-tools/json-fetch/index.ts";
-import { ResolvablePromise } from "https://ghuc.cc/worker-tools/resolvable-promise/index.ts";
+import { JSONRequest, ParamsURL } from "@worker-tools/json-fetch";
+import { ResolvablePromise } from "@worker-tools/resolvable-promise";
 import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface.ts";
-import { JSONParseNexus } from 'https://ghuc.cc/worker-tools/json-stream/index.ts';
+import { JSONParseNexus } from '@worker-tools/json-stream';
 import { liftAsync, PromisedValuesEx } from "../../vendor/awaited-values.ts";
-// import { notImplemented } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
+// import { notImplemented } from "@worker-tools/response-creators";
 
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
 
