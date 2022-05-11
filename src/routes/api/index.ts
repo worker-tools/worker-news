@@ -7,17 +7,17 @@ import * as fireAPI from './firebase';
 
 export const stories = SW === true
   ? swAPI.stories
-  : fireAPI.stories;
+  : domAPI.stories;
 
 export const comments = SW === true
   ? swAPI.comments
-  : fireAPI.comments;
+  : domAPI.comments;
 
 export const user = SW === true 
   ? swAPI.user
-  : fireAPI.user;
+  : domAPI.user;
 
 export const threads = SW === true
   ? swAPI.threads
-  : fireAPI.threads;
+  : domAPI.threads;
 

@@ -1,11 +1,11 @@
-import { APost, AComment, Stories, StoriesParams, AUser, ThreadsData, StoriesData } from './interface';
+import { APost, AComment, Stories, StoriesParams, AUser, ThreadsData, StoriesData, Quality } from './interface';
 import { default as PQueue } from '@qwtel/p-queue-browser';
 import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { blockquotify } from './util';
 
 type APIFn = <T>(path: string) => Promise<T>;
 
-const CONCURRENCY = 64;
+const CONCURRENCY = 32;
 
 const PAGE = 30;
 
@@ -49,8 +49,8 @@ export async function* storiesGenerator(api: APIFn, href: string, page: number) 
   }
 }
 
-type RESTPost = Omit<APost, 'kids'> & { kids: number[], time: number }
-type RESTComment = Omit<AComment, 'kids'> & { kids: number[], time: number, priority: number }
+type RESTPost = Omit<APost, 'kids'> & { kids?: number[], time: number }
+type RESTComment = Omit<AComment, 'kids'> & { kids?: number[], time: number, priority: number }
 type RESTUser = AUser;
 
 async function commentTask(
@@ -85,17 +85,46 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
     const item = await dict.get(kid);
     if (item) {
       const { kids, text, priority, ...rest } = item;
-      // console.log(' '.repeat(level), priority)
       yield {
         ...rest,
         level,
-        quality: 'c00', // REST API doesn't support quality..
+        quality: item.deleted ? Quality.default: item.dead ? Quality.cdd : Quality.c00, // REST API doesn't support quality..
         text: text && await blockquotify('<p>' + text),
         time: new Date(item.time * 1000),
-        kids: crawlCommentTree(kids || [], dict, level + 1),
-      };
+      }
+      yield* crawlCommentTree(kids || [], dict, level + 1)
     }
   }
+}
+
+function unclosed<T>(iterable: AsyncIterable<T>): AsyncIterableIterator<T> {
+  const iterator = iterable[Symbol.asyncIterator]();
+  return { 
+    next: iterator.next.bind(iterator),
+    [Symbol.asyncIterator]() { return this }
+  };
+}
+
+const C_PAGE = 200
+async function* paginator(iterable: AsyncIterableIterator<AComment>, total: number, page = 1): AsyncGenerator<AComment> {
+  let n = 0;
+  let comm;
+  for (let p = 1; p <= page; p++) {
+    for await (comm of unclosed(iterable)) { 
+      if (n >= C_PAGE * (p - 1) && comm.level === 0) break;
+      n++
+    }
+  }
+  let i = C_PAGE * (page - 1); // fixme
+  if (n > total || i > n) return;
+  if (comm) yield comm;
+  for await (const comm of iterable) { 
+    // if (comm.deleted) continue;
+    console.log(i, comm)
+    if (i >= C_PAGE * page && comm.level === 0) break;
+    yield comm;
+    i++
+  } 
 }
 
 // FIXME: Match HN behavior more closely
@@ -110,8 +139,9 @@ const truncateText = (text?: string | null) => {
 
 const stripHTML = (text?: string | null) => text ? text.replace(/(<([^>]+)>)/gi, "") : '';
 
-export async function comments(api: APIFn, id: number, p?: number): Promise<APost> {
+export async function comments(api: APIFn, id: number, p = 1): Promise<APost> {
   const post: RESTPost = await api(`/v0/item/${id}`);
+  console.log(post)
 
   if (post.type === 'comment') {
     let curr = post;
@@ -131,19 +161,32 @@ export async function comments(api: APIFn, id: number, p?: number): Promise<APos
   }
 
   const text = post.text != null ? await blockquotify('<p>' + post.text) : null;
-  return {
-    ...post,
-    time: new Date(post.time * 1000),
+  const commCrawler = paginator(crawlCommentTree(kids, results), post.descendants ?? Number.POSITIVE_INFINITY, p);
+
+  const retPost = {
+    type: post.type ?? '',
     title: post.title || truncateText(stripHTML(text)),
+    score: post.score ?? -1,
+    by: post.by ?? '',
+    descendants: post.descendants ?? -1,
+    storyTitle: post.storyTitle ?? '',
     text,
-    quality: 'c00', // REST API doesn't support quality..
+    quality: post.deleted ? Quality.default : post.dead ? Quality.cdd : Quality.c00,
+    deleted: post.deleted ?? false,
+    dead: post.dead ?? false,
+    id: post.id ?? null,
     url: post.text != null ? `item?id=${post.id}` : post.url, // FIXME
-    kids: crawlCommentTree(kids, results),
-  };
+    time: new Date(post.time * 1000) ?? null,
+    parts: post.parts ?? [],
+    kids: commCrawler,
+    moreLink: `item?id=${post.id}&p=${p + 1}`
+  }
+  return retPost
 }
 
 export async function user(api: APIFn, id: string): Promise<AUser> {
   const { about, ...user }: RESTUser = await api(`/v0/user/${id}`);
+  console.log(about, user)
   return {
     ...user,
     ...about ? { about: await blockquotify('<p>' + about) } : {},

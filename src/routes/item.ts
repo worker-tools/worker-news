@@ -35,7 +35,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
     <td class="default">
       <div style="margin-top:2px; margin-bottom:-10px;">
         <span class="comhead">
-          <a href="user?id=${by}" class="hnuser">${identicon(by)} ${by}</a> 
+          <a href="user?id=${by}" class="hnuser">${!deleted && identicon(by)} ${by}</a> 
           <span class="age" title="${time && new Date(time).toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
           <span id="unv_${id}"></span>
           <span class="navs">
@@ -49,7 +49,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
       </div><br/>
       <div class="comment">
         <span class="commtext ${quality}">
-          ${deleted ? '[flagged]' : text ? unsafeHTML(text) : ' '}
+          ${deleted ? '[deleted]' : text ? unsafeHTML(text) : ' '}
           <div class="reply">
             <p>
               ${showReply && !deleted ? html`<font size="1">
@@ -161,7 +161,7 @@ export class ExponentialJoinStream extends TransformStream<string, string> {
 async function getItem({ request, headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
-  const p = Number(searchParams.get('p'));
+  const p = Math.max(1, Number(searchParams.get('p') || '1'));
 
   const postPromise = apiComments(id, p, { url, handled, waitUntil });
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item', headers })

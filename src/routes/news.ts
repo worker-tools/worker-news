@@ -61,7 +61,7 @@ export const aThing = async ({ type, id, url: href, title, dead, deleted }: APos
             : html`<a id="up_${id}" onclick="popitup(this,event)" href="https://news.ycombinator.com/item?id=${id}#${id}"><div class="votearrow" title="upvote"></div></a>`
         }</center></td>
         <td class="title">${deleted 
-          ? '[flagged]' 
+          ? '[deleted]' 
           : html`<a href="${href}" class="titlelink">${favicon(url)} ${title}</a>${url?.host === location.host 
               ? '' 
               : url 

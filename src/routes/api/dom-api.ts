@@ -310,8 +310,8 @@ async function fixComment(comment: Partial<AComment>) {
     comment.text = await blockquotify('<p>' + comment.text)
   } else {
     // FIXME: is this how it works??
-    comment.deleted = true;
-    comment.text = ' [flagged] ';
+    // comment.deleted = true;
+    // comment.text = ' [deleted] ';
   }
   return comment as AComment;
 }

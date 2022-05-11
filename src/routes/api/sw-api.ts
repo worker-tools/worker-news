@@ -73,12 +73,12 @@ export async function stories(params: StoriesParams, type = Stories.TOP, args: M
   return ret;
 }
 
-async function* log(iter: any) {
-  for await (const x of iter) {
-    console.log(x)
-    yield x;
-  }
-}
+// async function* log(iter: any) {
+//   for await (const x of iter) {
+//     console.log(x)
+//     yield x;
+//   }
+// }
 
 export async function comments(id: number, p: number | undefined, args: MinArgs): Promise<APost> {
   const res = await networkFirst('comments')(args);
