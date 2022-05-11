@@ -130,6 +130,13 @@ export const pageLayout = ({ title, op, id, headers }: {
     <meta charset="UTF-8">
     <meta name="referrer" content="origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="${headers?.get('Sec-CH-Prefers-Color-Scheme') === 'dark' ? '#101114' : '#fff'}">
+    <script>
+      var meta = document.head.querySelector('meta[name=theme-color]');
+      var media = window.matchMedia('(prefers-color-scheme:dark)');
+      meta.content = media.matches ? '#101114' : '#fff';
+      media.onchange = function(e) { meta.content = e.matches ? '#101114' : '#fff'; }
+    </script>
     <link rel="stylesheet" type="text/css" href="news.css?v=20">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="manifest" href="app.webmanifest">
