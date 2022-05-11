@@ -1,8 +1,8 @@
 // @ts-nocheck
-import DeviceDetector from "device-detector-js";
 import * as assets from './assets';
 
 export async function manifestHandler(request, { waitUntil }) {
+  const { default: DeviceDetector } = await import("device-detector-js");
   const userAgent = request.headers.get('user-agent');
   const device = userAgent && new DeviceDetector({ skipBotDetection: true }).parse(userAgent);
   const response = await assets.handler(request, { request, waitUntil })

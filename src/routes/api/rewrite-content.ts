@@ -1,11 +1,11 @@
-import { DOMParser } from 'linkedom';
+// import { DOMParser } from 'linkedom';
 import type { TreeWalker } from 'linkedom/types/interface/tree-walker';
 import type { Node } from 'linkedom/types/interface/node';
-import { unescape } from 'html-escaper';
+// import { unescape } from 'html-escaper';
 import { location } from '../../location'
 
-import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
-import { Text } from 'linkedom/types/interface/text';
+// import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
+// import { Text } from 'linkedom/types/interface/text';
 
 const TEXT_NODE = 3;
 const SHOW_TEXT = 4;
@@ -55,6 +55,7 @@ export async function blockquotify(text: string) {
   //   .transform(resp1)
   //   .text()
 
+  const { DOMParser } = await import('linkedom')
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
   for (const p of doc.querySelectorAll('p')) {

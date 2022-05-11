@@ -10,7 +10,7 @@ import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 
 import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface';
 import { aMap } from './iter';
-import { blockquotify, consume } from './util';
+import { blockquotify, consume } from './rewrite-content';
 
 const h2r = (htmlRewriter: HR | HTMLRewriter) => htmlRewriter as unknown as HR;
 const r2h = (hTMLRewriter: HR | HTMLRewriter) => hTMLRewriter as unknown as HTMLRewriter;
