@@ -1,11 +1,12 @@
-import { HTMLRewriter } from 'https://deno.land/x/html_rewriter/index.ts'
-(<any>self).HTMLRewriter = HTMLRewriter;
+import { HTMLRewriter as HTMLRewriterImpl } from 'https://deno.land/x/html_rewriter/index.ts'
+(<any>self).HTMLRewriter = HTMLRewriterImpl;
 
 declare global {
+  const HTMLRewriter: typeof HTMLRewriterImpl
   interface Window {
-    HTMLRewriter: typeof HTMLRewriter;
+    HTMLRewriter: typeof HTMLRewriterImpl;
   }
 }
 
 // Trigger WASM initialization
-new HTMLRewriter()
+new HTMLRewriterImpl()

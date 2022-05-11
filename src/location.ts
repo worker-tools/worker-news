@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-ignore: worker location not defined in deno
 class WorkerLocationPolyfill2 implements WorkerLocation {
   #url: URL;
   constructor(href: string) { this.#url = new URL(href) }

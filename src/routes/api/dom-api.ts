@@ -57,7 +57,7 @@ function storiesGenerator(response: Response): Promise<StoriesData> {
   const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data', { returnEvent: 'return' });
 
   const moreLink = new ResolvablePromise<string>();
-  const rewriter = new self.HTMLRewriter()
+  const rewriter = new HTMLRewriter()
     .on('.athing[id]', {
       element(el) {
         if (post) data.dispatchEvent(newCustomEvent('data', post));
@@ -185,7 +185,7 @@ async function commentsGenerator(response: Response) {
   // console.log(response.status, response.url, ...response.headers, (await response.clone().arrayBuffer()).byteLength)
   let pollOpt: Partial<APollOpt>;
 
-  const rewriter = new self.HTMLRewriter()
+  const rewriter = new HTMLRewriter()
     .on('.fatitem > .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
@@ -328,7 +328,7 @@ function threadsGenerator(response: Response): Promise<ThreadsData> {
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data', { returnEvent: 'return' });
 
   const moreLink = new ResolvablePromise<string>();
-  const rewriter = new self.HTMLRewriter()
+  const rewriter = new HTMLRewriter()
     .on('a.morelink[href][rel="next"]', { 
       element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
     });
@@ -353,9 +353,9 @@ export async function user(id: string): Promise<AUser> {
   const response = await fetch(url.href);
   if (!response.ok) r2err(response);
 
-  let user: Partial<AUser> = { id, about: '', submitted: [] };
+  const user: Partial<AUser> = { id, about: '', submitted: [] };
 
-  const rewriter = new self.HTMLRewriter()
+  const rewriter = new HTMLRewriter()
     .on('tr.athing td[timestamp]', {
       element(el) { 
         user.created = Number(el.getAttribute('timestamp')) 

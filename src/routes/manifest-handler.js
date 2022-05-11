@@ -1,4 +1,3 @@
-// @ts-nocheck
 import * as assets from './assets.ts';
 
 export async function manifestHandler(request, { waitUntil }) {

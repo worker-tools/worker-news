@@ -145,13 +145,12 @@ export const pageLayout = ({ title, op, id, headers }: {
     <script type="module">(async () => {
       if ('serviceWorker' in navigator) {
         try {
-          // const regis = await navigator.serviceWorker.register('/sw.js')
-          // regis.addEventListener('updatefound', () => { console.log('update found')})
-          // regis.addEventListener('error', err => console.error(err))
+          const regis = await navigator.serviceWorker.register('/sw.js')
+          regis.addEventListener('updatefound', () => { console.log('update found')})
         } catch (err) {
           console.error(err)
         }
-        for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+        // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
       }
     })()</script>
   </head>

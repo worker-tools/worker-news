@@ -31,13 +31,13 @@ self.addEventListener('install', async (event: any) => {
   ])
   console.log('installed')
   // TODO: debug only?
-  console.log('skipWaiting');
-  (<any>self).skipWaiting();
+  // console.log('skipWaiting');
+  // (<any>self).skipWaiting();
 });
 
 self.addEventListener('activate', (event: any) => {
   console.log('activated')
   // TODO: debug only?
-  event.waitUntil((<any>self).clients.claim());
-  console.log('claim');
+  // event.waitUntil((<any>self).clients.claim());
+  // console.log('claim');
 });

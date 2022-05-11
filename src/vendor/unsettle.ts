@@ -1,4 +1,4 @@
-import { AggregateError } from "./aggregate-error";
+import { AggregateError } from "./aggregate-error.ts";
 
 export const isFulfilled = <T>(r: PromiseSettledResult<T>): r is PromiseFulfilledResult<T> => {
   return r.status === 'fulfilled';

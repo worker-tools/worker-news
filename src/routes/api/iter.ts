@@ -11,7 +11,7 @@ export async function* aTake<T>(n: number, xs: AsyncIterable<T>): AsyncIterableI
 }
 
 export async function slurp<T>(xs: AsyncIterable<T>): Promise<T[]> {
-  let ret: T[] = [];
+  const ret: T[] = [];
   for await (const x of xs) ret.push(x);
   return ret;
 }
