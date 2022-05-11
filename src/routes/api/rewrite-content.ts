@@ -1,3 +1,4 @@
+  import { DOMParser } from 'linkedom'
 // import type { TreeWalker } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/tree-walker.d.ts'; 
 // import type { Node } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/node.d.ts';
 // import { unescape } from 'html-escaper';
@@ -18,7 +19,7 @@ export function* treeWalkerToIter(walker: TreeWalker): IterableIterator<Node> {
 
 // Primitive support for 
 // Problem: item?id=26520957, item?id=30283264
-export async function blockquotify(text: string) {
+export function blockquotify(text: string) {
   const { protocol, host } = location;
 
   // const resp1 = new Response(text);
@@ -57,7 +58,6 @@ export async function blockquotify(text: string) {
   //   .transform(resp1)
   //   .text()
 
-  const { DOMParser } = await import('linkedom')
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
   for (const p of doc.querySelectorAll('p')) {
