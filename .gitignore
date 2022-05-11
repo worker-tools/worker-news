@@ -14,3 +14,4 @@ cert.pem
 /sw.js*
 /tmp
 /public/sw.js*
+_*

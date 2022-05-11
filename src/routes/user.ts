@@ -1,13 +1,13 @@
-import { html, HTMLResponse, unsafeHTML } from "@worker-tools/html";
-import { notFound } from "@worker-tools/response-creators";
-import { JSONStreamResponse, jsonStringifyGenerator } from "@worker-tools/json-stream";
+import { html, HTMLResponse, unsafeHTML } from "https://ghuc.cc/worker-tools/html/index.ts";
+import { notFound } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
+import { JSONStreamResponse, jsonStringifyGenerator } from "https://ghuc.cc/worker-tools/json-stream/index.ts";
 
-import { router, RouteArgs, mw } from "../router";
+import { router, RouteArgs, mw } from "../router.ts";
 
-import { user as apiUser } from "./api";
-import { pageLayout, identicon } from './components';
-import { fastTTFB } from "./news";
-import { StreamResponse } from "@worker-tools/stream-response";
+import { user as apiUser } from "./api/index.ts";
+import { pageLayout, identicon } from './components.ts';
+import { fastTTFB } from "./news.ts";
+import { StreamResponse } from "https://ghuc.cc/worker-tools/stream-response/index.ts";
 
 const dtf = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -21,7 +21,7 @@ const numDTF = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
 });
 
-const user = async ({ headers, searchParams, type, url, handled, waitUntil }: RouteArgs) => {
+const user = ({ headers, searchParams, type, url, handled, waitUntil }: RouteArgs) => {
   const un = searchParams.get('id');
   if (!un) return notFound('No such user.');
 

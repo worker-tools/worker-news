@@ -1,13 +1,18 @@
-import 'urlpattern-polyfill'
+import './globals.ts'
+import 'https://cdn.skypack.dev/urlpattern-polyfill?dts'
+
 // import './streams-polyfill'
 // import './html-rewriter-polyfill'
 
-import { router } from '../routes/index';
-self.addEventListener('fetch', <any>router);
+import './sw-def.ts'
 
-self.addEventListener('install', async () => {
+import { router } from '../routes/index.ts';
+
+self.addEventListener('fetch', router);
+
+self.addEventListener('install', async (event: any) => {
   console.log('install')
-  const cache = await caches.open('public')
+  const cache = await (<any>self).caches.open('public')
   await cache.addAll([
     '/darkbluearrow.png',
     '/darkbluearrow2x.png',

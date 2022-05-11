@@ -1,8 +1,8 @@
-import { html, HTMLContent } from "@worker-tools/html";
-import { formatDistanceToNowStrict } from 'date-fns';
+import { html, HTMLContent } from "https://ghuc.cc/worker-tools/html/index.ts";
+import { formatDistanceToNowStrict } from 'https://cdn.skypack.dev/date-fns?dts';
 
-import { Stories } from "./api/interface";
-import { location } from '../location';
+import { Stories } from "./api/interface.ts";
+import { location } from '../location.ts';
 
 export const isSafari = (ua?: string | null) => !!ua && /Safari\/\d+/.test(ua) && !/(Chrome|Chromium)\/\d+/.test(ua)
 
@@ -59,7 +59,7 @@ export const headerEl = ({ op, id }: {
                 | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
                 | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)}
                 | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
-                ${SW && topSel(op === Stories.OFFLINE, html`| <a href="offline">offline</a>`)}
+                ${self.SW && topSel(op === Stories.OFFLINE, html`| <a href="offline">offline</a>`)}
                 | <a onclick="popitup(this,event,850,380)" href="https://news.ycombinator.com/submit">submit</a>
                 ${op === Stories.SHOW_NEW
                     ? html`| <font color="#ffffff">${op}</font>` 
@@ -144,8 +144,13 @@ export const pageLayout = ({ title, op, id, headers }: {
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {
       if ('serviceWorker' in navigator) {
-        // const regis = await navigator.serviceWorker.register('/sw.js')
-        // regis.addEventListener('updatefound', () => { console.log('update found')})
+        try {
+          // const regis = await navigator.serviceWorker.register('/sw.js')
+          // regis.addEventListener('updatefound', () => { console.log('update found')})
+          // regis.addEventListener('error', err => console.error(err))
+        } catch (err) {
+          console.error(err)
+        }
         for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
       }
     })()</script>

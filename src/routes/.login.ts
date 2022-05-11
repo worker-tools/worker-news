@@ -1,7 +1,7 @@
-import { html, HTMLResponse } from '@worker-tools/html';
-import { ParamsURL } from '@worker-tools/json-fetch';
-import { StorageArea } from '@worker-tools/kv-storage';
-import { badRequest, found, internalServerError, ok, unauthorized } from '@worker-tools/response-creators';
+import { html, HTMLResponse } from 'https://ghuc.cc/worker-tools/html/index.ts';
+import { ParamsURL } from 'https://ghuc.cc/worker-tools/json-fetch/index.ts';
+import { StorageArea } from 'https://ghuc.cc/worker-tools/kv-storage/index.ts';
+import { badRequest, found, internalServerError, ok, unauthorized } from 'https://ghuc.cc/worker-tools/response-creators/index.ts';
 import { 
   combine,
   basics,
@@ -9,10 +9,10 @@ import {
   withStorageSession, 
   CookieSessionContext as SessionContext, 
   AnyCookieContext as CookiesContext 
-} from '@worker-tools/middleware';
+} from 'https://ghuc.cc/worker-tools/middleware/index.ts';
 
-import { RouteArgs, router } from "../router";
-import { consume } from './api/util';
+import { RouteArgs, router } from "../router.ts";
+import { consume } from './api/rewrite-content.ts';
 
 function newFormData(rec: Record<string, string | Blob> = {}) {
   const data = new FormData();

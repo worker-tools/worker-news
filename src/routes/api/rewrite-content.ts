@@ -1,14 +1,16 @@
-// import { DOMParser } from 'linkedom';
-import type { TreeWalker } from 'linkedom/types/interface/tree-walker';
-import type { Node } from 'linkedom/types/interface/node';
+// import type { TreeWalker } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/tree-walker.d.ts'; 
+// import type { Node } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/node.d.ts';
 // import { unescape } from 'html-escaper';
-import { location } from '../../location'
+import { location } from '../../location.ts'
 
 // import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 // import { Text } from 'linkedom/types/interface/text';
 
 const TEXT_NODE = 3;
 const SHOW_TEXT = 4;
+
+type TreeWalker = any;
+type Node = any;
 
 export function* treeWalkerToIter(walker: TreeWalker): IterableIterator<Node> {
   let node; while (node = walker.nextNode()) yield node;
@@ -55,7 +57,7 @@ export async function blockquotify(text: string) {
   //   .transform(resp1)
   //   .text()
 
-  const { DOMParser } = await import('linkedom')
+  const { DOMParser } = await import('https://esm.sh/linkedom')
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
   for (const p of doc.querySelectorAll('p')) {

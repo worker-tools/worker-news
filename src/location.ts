@@ -1,3 +1,4 @@
+// @ts-ignore
 class WorkerLocationPolyfill2 implements WorkerLocation {
   #url: URL;
   constructor(href: string) { this.#url = new URL(href) }

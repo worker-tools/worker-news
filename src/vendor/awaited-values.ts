@@ -1,4 +1,4 @@
-import type { Awaitable } from './common-types'
+import type { Awaitable } from './common-types.ts'
 
 /** Force intellisense to expand the typing to hide merging typings */
 type ExpandRecursively<T> = T extends Record<PropertyKey, unknown>

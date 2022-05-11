@@ -15,12 +15,12 @@
  * It also works in a Service Worker, but due to the limit of 4 (?) open connections per page, it's noticeably slower.
  */
 
-import { Stories, StoriesParams } from './interface';
-import * as mkAPI from './make-api';
+import { Stories, StoriesParams } from './interface.ts';
+import * as mkAPI from './make-api.ts';
 
 export const API = 'https://hacker-news.firebaseio.com';
 
-export const api = async <T>(path: string): Promise<T> => {
+export const api = <T>(path: string): Promise<T> => {
   const url = new URL(path.endsWith('.json') ? path : `${path}.json`, API);
   return fetch(url.href).then(x => x.json());
 }

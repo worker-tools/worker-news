@@ -1,5 +1,5 @@
-import { basics, combine, contentTypes } from '@worker-tools/middleware';
-import { WorkerRouter, Method } from '@worker-tools/router';
+import { basics, combine, contentTypes } from 'https://ghuc.cc/worker-tools/middleware/index.ts';
+import { WorkerRouter, Method } from 'https://ghuc.cc/worker-tools/router/index.ts';
 
 export interface RouteArgs {
   request: Request;

@@ -1,19 +1,19 @@
-import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "@worker-tools/html";
-import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
-import { notFound, ok } from "@worker-tools/response-creators";
-import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream';
-import { renderIconSVG } from "@download/blockies";
-import { formatDistanceToNowStrict } from 'date-fns';
-import { asyncIterableToStream, ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
+import { html, unsafeHTML, HTMLResponse, HTMLContent, BufferedHTMLResponse } from "https://ghuc.cc/worker-tools/html/index.ts";
+import { basics, caching, combine, contentTypes } from "https://ghuc.cc/worker-tools/middleware/index.ts";
+import { notFound, ok } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
+import { JSONStreamResponse, jsonStringifyGenerator } from 'https://ghuc.cc/worker-tools/json-stream/index.ts';
+import { renderIconSVG } from "https://ghuc.cc/qwtel/blockies/src/blockies.mjs";
+import { formatDistanceToNowStrict } from 'https://cdn.skypack.dev/date-fns?dts';
+import { asyncIterableToStream, ForOfAwaitable } from "https://ghuc.cc/qwtel/whatwg-stream-to-async-iter/index.ts"; // FIXME
+import { StreamResponse } from "https://ghuc.cc/worker-tools/stream-response/index.ts";
 
-import { mw, RouteArgs, router } from "../router";
+import { mw, RouteArgs, router } from "../router.ts";
 
-import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api";
+import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api/index.ts";
 
-import { pageLayout, identicon, cachedWarning, isSafari } from './components';
-import { aThing, fastTTFB, subtext } from './news';
-import { moreLinkEl } from "./threads";
-import { StreamResponse } from "@worker-tools/stream-response";
+import { pageLayout, identicon, cachedWarning, isSafari } from './components.ts';
+import { aThing, fastTTFB, subtext } from './news.ts';
+import { moreLinkEl } from "./threads.ts";
 
 export interface CommOpts {
   showToggle?: boolean,
@@ -158,7 +158,7 @@ export class ExponentialJoinStream extends TransformStream<string, string> {
 
 
 // Dead items: 26841031
-async function getItem({ request, headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
+function getItem({ request, headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs)  {
   const id = Number(searchParams.get('id'));
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Math.max(1, Number(searchParams.get('p') || '1'));
@@ -215,7 +215,6 @@ async function getItem({ request, headers, searchParams, type: contentType, url,
     } catch (err) {
       return html`<tr id="pagespace" title="Error" style="height:10px"></tr>
         <tr><td>${err instanceof Error ? err.message : err as string}</td></tr>`
-    } finally {
     }
   });
   let stream = asyncIterableToStream(content)

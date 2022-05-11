@@ -1,8 +1,8 @@
 // @ts-nocheck
-import * as assets from './assets';
+import * as assets from './assets.ts';
 
 export async function manifestHandler(request, { waitUntil }) {
-  const { default: DeviceDetector } = await import("device-detector-js");
+  const { default: DeviceDetector } = await import("https://cdn.skypack.dev/device-detector-js?dts");
   const userAgent = request.headers.get('user-agent');
   const device = userAgent && new DeviceDetector({ skipBotDetection: true }).parse(userAgent);
   const response = await assets.handler(request, { request, waitUntil })

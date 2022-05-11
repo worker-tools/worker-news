@@ -1,5 +1,5 @@
-import { getAssetFromKV, mapRequestToAsset, Options } from '@cloudflare/kv-asset-handler'
-import { internalServerError, notFound } from '@worker-tools/response-creators'
+import { getAssetFromKV, mapRequestToAsset, Options } from 'https://cdn.skypack.dev/@cloudflare/kv-asset-handler?dts'
+import { internalServerError, notFound } from 'https://ghuc.cc/worker-tools/response-creators/index.ts'
 
 // addEventListener('fetch', event => {
 //   event.waitUntil(handleEvent(event))
@@ -15,7 +15,7 @@ export async function handler(req: Request, event: { request: Request, waitUntil
   // options.mapRequestToAsset = handlePrefix(/^\/docs/)
 
   try {
-    if (DEBUG) {
+    if (self.DEBUG) {
       // customize caching
       options.cacheControl = {
         bypassCache: false,
@@ -27,8 +27,9 @@ export async function handler(req: Request, event: { request: Request, waitUntil
       page = await getAssetFromKV(event, options)
     } else if ('Deno' in globalThis) {
       const url = new URL(event.request.url);
-      const assetURL = new URL(`./public${url.pathname}`, import.meta.url).href;
-      page = await fetch(assetURL)
+      const assetHref = new URL(`../../public${url.pathname}`, import.meta.url).href;
+      console.log(assetHref)
+      page = await fetch(assetHref)
     } else { // Service Worker
       page = (await self.caches.match(event.request)) ?? await fetch(event.request)
     }

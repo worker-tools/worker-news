@@ -1,4 +1,4 @@
-import { append } from "./map-append";
+import { append } from "./map-append.ts";
 
 const descriptorMap = new WeakMap<any, [string, PropertyDescriptor][]>();
 

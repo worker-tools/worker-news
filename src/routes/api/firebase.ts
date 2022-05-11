@@ -1,8 +1,8 @@
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { initializeApp } from 'https://cdn.skypack.dev/firebase/app?dts';
+import { getDatabase, ref, onValue } from 'https://cdn.skypack.dev/firebase/database?dts';
 
-import { Stories, StoriesParams } from './interface';
-import * as mkAPI from './make-api';
+import { Stories, StoriesParams } from './interface.ts';
+import * as mkAPI from './make-api.ts';
 
 const db = getDatabase(initializeApp({
   databaseURL: "https://hacker-news.firebaseio.com",

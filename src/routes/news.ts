@@ -1,17 +1,17 @@
-import { html, HTMLContent, HTMLResponse, unsafeHTML } from "@worker-tools/html";
-import { basics, combine, contentTypes } from "@worker-tools/middleware";
-import { notFound, ok } from "@worker-tools/response-creators";
-import { formatDistanceToNowStrict } from 'date-fns';
-import { fromUrl, parseDomain } from 'parse-domain';
-import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream'
-import { JSONRequest } from "@worker-tools/json-fetch";
-import { location } from '../location';
+import { html, HTMLContent, HTMLResponse, unsafeHTML } from "https://ghuc.cc/worker-tools/html/index.ts";
+import { basics, combine, contentTypes } from "https://ghuc.cc/worker-tools/middleware/index.ts";
+import { notFound, ok } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
+import { formatDistanceToNowStrict } from 'https://cdn.skypack.dev/date-fns?dts';
+import { fromUrl, parseDomain } from 'https://cdn.skypack.dev/parse-domain?dts';
+import { JSONStreamResponse, jsonStringifyGenerator } from 'https://ghuc.cc/worker-tools/json-stream/index.ts'
+import { JSONRequest } from "https://ghuc.cc/worker-tools/json-fetch/index.ts";
+import { location } from '../location.ts';
 
-import { router, RouteArgs, mw } from "../router";
-import { cachedWarning, del, favicon, identicon, pageLayout } from './components';
+import { router, RouteArgs, mw } from "../router.ts";
+import { cachedWarning, del, favicon, identicon, pageLayout } from './components.ts';
 
-import { stories, APost, Stories, StoriesParams, StoriesData } from './api'
-import { StreamResponse } from "@worker-tools/stream-response";
+import { stories, APost, Stories, StoriesParams, StoriesData } from './api/index.ts'
+import { StreamResponse } from "https://ghuc.cc/worker-tools/stream-response/index.ts";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
@@ -47,7 +47,7 @@ const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
 const rankEl = (index?: number) => html`
   <span class="rank">${index != null && !Number.isNaN(index) ? `${index + 1}.` : ''}</span>`;
 
-export const aThing = async ({ type, id, url: href, title, dead, deleted }: APost, index?: number, op?: Stories) => {
+export const aThing = ({ type, id, url: href, title, dead, deleted }: APost, index?: number, op?: Stories) => {
   try {
     const url = tryURL(href);
     const upVoted = false // session?.votes.has(id);
@@ -73,7 +73,7 @@ export const aThing = async ({ type, id, url: href, title, dead, deleted }: APos
   }
 }
 
-export const subtext = async (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
+export const subtext = (post: APost, index?: number, op?: Stories, { showPast = false }: { showPast?: boolean } = {}) => {
   const { type, id, title, time, score, by, descendants, dead } = post;
   const timeAgo = time && formatDistanceToNowStrict(new Date(time), { addSuffix: true })
   return html`
@@ -98,7 +98,7 @@ export const subtext = async (post: APost, index?: number, op?: Stories, { showP
             ? 'discuss' 
             : unsafeHTML(`${descendants}&nbsp;comments`)}</a>`
           : ''}
-        ${SW && caches?.open('comments').then(cache => cache.match(new JSONRequest(`item?id=${id}`)))
+        ${self.SW && self.caches?.open('comments').then(cache => cache.match(new JSONRequest(`item?id=${id}`)))
           .then(x => x && html`| <a href="item?id=${id}&force=cache">Offline&nbsp;✓</a>`)}
       </td>
     </tr>
@@ -135,7 +135,7 @@ const messageEl = (message: HTMLContent, marginBottom = 12) => html`
 const toTime = (r: Response) => new Date(r.headers.get('date')!).getTime()
 
 async function offlineStories({ p }: { p: number }): Promise<StoriesData> {
-  const cache = await caches.open('comments')
+  const cache = await self.caches.open('comments')
   const keys = await cache.keys()
   // FIXME: should probably manage an index in indexeddb
   const responses = await Promise.all(keys.map(async key => (await cache.match(key))!))
@@ -149,7 +149,7 @@ async function offlineStories({ p }: { p: number }): Promise<StoriesData> {
 }
 
 const PAGE = 30
-const mkStories = (type: Stories) => async ({ request, headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs) => {
+const mkStories = (type: Stories) => ({ request, headers, searchParams, type: contentType, url, handled, waitUntil }: RouteArgs) => {
   const p = Math.max(1, Number(searchParams.get('p') || '1'));
   if (p > Math.ceil(500 / 30)) return notFound('Not supported by Worker News');
   const next = Number(searchParams.get('next'))
@@ -204,7 +204,6 @@ const mkStories = (type: Stories) => async ({ request, headers, searchParams, ty
                 }
               } catch (err) {
                 yield html`<tr><td colspan="2"></td><td>${err instanceof Error ? err.message : err as string}</td></tr>`;
-              } finally {
               }
             }}
           </tbody>
@@ -217,7 +216,7 @@ router.get('/favicon/:hostname.ico', basics(), async (req, { params, waitUntil, 
   const cache = await self.caches?.open('favicon')
   const res = await cache?.match(req)
   if (!res) {
-    let res2 = await fetch(SW ? req.url : `https://icons.duckduckgo.com/ip3/${params.hostname}.ico`, req)
+    let res2 = await fetch(self.SW ? req.url : `https://icons.duckduckgo.com/ip3/${params.hostname}.ico`, req)
     if (res2.status === 404) {
       res2 = new Response(res2.body, { ...res2, status: 200 })
     }
@@ -254,6 +253,6 @@ router.get('/submitted', mw, (_req, x) => submitted(x))
 router.get('/classic', mw, (_req, x) => classic(x))
 router.get('/from', mw, (_req, x) => from(x))
 
-if (SW) {
+if (self.SW) {
   router.get('/offline', mw, (_req, x) => offline(x))
 }

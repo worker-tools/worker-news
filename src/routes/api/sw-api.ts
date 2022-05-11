@@ -1,9 +1,9 @@
-import { JSONRequest, ParamsURL } from "@worker-tools/json-fetch";
-import { ResolvablePromise } from "@worker-tools/resolvable-promise";
-import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface";
-import { JSONParseNexus } from '@worker-tools/json-stream';
-import { liftAsync, PromisedValuesEx } from "../../vendor/awaited-values";
-import { notImplemented } from "@worker-tools/response-creators";
+import { JSONRequest, ParamsURL } from "https://ghuc.cc/worker-tools/json-fetch/index.ts";
+import { ResolvablePromise } from "https://ghuc.cc/worker-tools/resolvable-promise/index.ts";
+import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface.ts";
+import { JSONParseNexus } from 'https://ghuc.cc/worker-tools/json-stream/index.ts';
+import { liftAsync, PromisedValuesEx } from "../../vendor/awaited-values.ts";
+// import { notImplemented } from "https://ghuc.cc/worker-tools/response-creators/index.ts";
 
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
 
@@ -31,7 +31,7 @@ const networkFirst = (cacheKey: string) => async ({ url, handled, waitUntil }: M
       forceFetch 
         ? NEVER 
         : timeout(useFetch ? MIN_WAIT : 0)
-          .then(() => !race.over ? caches.match(req) : undefined)
+          .then(() => !race.over ? self.caches.match(req) : undefined)
           // .then(res => !res && !race.over && !race.rejected && !forceCache ? NEVER : res)
     ])
     race.over = true;
@@ -48,7 +48,7 @@ const networkFirst = (cacheKey: string) => async ({ url, handled, waitUntil }: M
         await handled
         const res_ = new Response(res.body, res);
         res_.headers.set('x-from-sw-cache', 'true')
-        const cache = await caches.open(cacheKey)
+        const cache = await self.caches.open(cacheKey)
         await cache.put(req, res_)
       })().finally(() => done.resolve())
     }

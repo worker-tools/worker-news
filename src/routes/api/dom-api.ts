@@ -1,19 +1,21 @@
 /**
  * A web scraping (DOM-based) implementation of the Hacker News API.
  */
-import { ParamsURL } from '@worker-tools/json-fetch';
-import { ResolvablePromise } from '@worker-tools/resolvable-promise';
-import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
-import { unescape } from 'html-escaper';
+import { ParamsURL } from 'https://ghuc.cc/worker-tools/json-fetch/index.ts';
+import { ResolvablePromise } from 'https://ghuc.cc/worker-tools/resolvable-promise/index.ts';
+import { eventTargetToAsyncIter } from 'https://ghuc.cc/qwtel/event-target-to-async-iter/index.ts';
+import { unescape } from 'https://cdn.skypack.dev/html-escaper?dts';
 
-import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
+// import type { HTMLRewriter } from 'https://ghuc.cc/worker-tools/html-rewriter/index.ts'
+// import type { HTMLRewriter as HR, Element } from 'https://cdn.skypack.dev/html-rewriter-wasm?dts';
+import type { Element, HTMLRewriter as IHTMLRewriter } from 'https://deno.land/x/html_rewriter/index.ts'
 
-import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface';
-import { aMap } from './iter';
-import { blockquotify, consume } from './rewrite-content';
+import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface.ts';
+import { aMap } from './iter.ts';
+import { blockquotify, consume } from './rewrite-content.ts';
 
-const h2r = (htmlRewriter: HR | HTMLRewriter) => htmlRewriter as unknown as HR;
-const r2h = (hTMLRewriter: HR | HTMLRewriter) => hTMLRewriter as unknown as HTMLRewriter;
+// const h2r = (htmlRewriter: HR | HTMLRewriter) => htmlRewriter as unknown as HR;
+// const r2h = (hTMLRewriter: HR | HTMLRewriter) => hTMLRewriter as unknown as HTMLRewriter;
 
 const HN = 'https://news.ycombinator.com'
 
@@ -48,14 +50,14 @@ function newCustomEvent<T>(event: string, detail?: T) {
   return new CustomEvent<T>(event, { detail });
 }
 
-async function storiesGenerator(response: Response): Promise<StoriesData> {
+function storiesGenerator(response: Response): Promise<StoriesData> {
   let post: Partial<APost>;
 
   const data = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data', { returnEvent: 'return' });
 
   const moreLink = new ResolvablePromise<string>();
-  const rewriter = h2r(new HTMLRewriter())
+  const rewriter = new self.HTMLRewriter()
     .on('.athing[id]', {
       element(el) {
         if (post) data.dispatchEvent(newCustomEvent('data', post));
@@ -91,12 +93,12 @@ async function storiesGenerator(response: Response): Promise<StoriesData> {
       }
     })
 
-  consume(r2h(rewriter).transform(response).body!)
+  consume(rewriter.transform(response).body!)
     .then(() => iter.return())
     .then(() => moreLink.resolve(''))
     .catch(err => iter.throw(err));
 
-  return {
+  return Promise.resolve({
     items: aMap(iter, ({ detail: post }) => {
       post.type = post.type || 'story';
       if (!post.by) { // No users post this = job ads
@@ -105,7 +107,7 @@ async function storiesGenerator(response: Response): Promise<StoriesData> {
       return post as APost;
     }),
     moreLink,
-  }
+  })
 }
 
 export async function comments(id: number, p?: number): Promise<APost> {
@@ -122,7 +124,7 @@ export async function threads(id: string, next?: number) {
   return threadsGenerator(body)
 }
 
-function scrapeComments(rewriter: HR, data: EventTarget, prefix = '') {
+function scrapeComments(rewriter: IHTMLRewriter, data: EventTarget, prefix = '') {
   let comment!: Partial<AComment>;
 
   return rewriter
@@ -183,7 +185,7 @@ async function commentsGenerator(response: Response) {
   // console.log(response.status, response.url, ...response.headers, (await response.clone().arrayBuffer()).byteLength)
   let pollOpt: Partial<APollOpt>;
 
-  const rewriter = h2r(new HTMLRewriter())
+  const rewriter = new self.HTMLRewriter()
     .on('.fatitem > .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
@@ -273,7 +275,7 @@ async function commentsGenerator(response: Response) {
 
   scrapeComments(rewriter, data, '.comment-tree');
     
-  consume(r2h(rewriter).transform(response).body!)
+  consume(rewriter.transform(response).body!)
     .then(() => iter.return())
     .then(() => moreLink.resolve(''))
     .catch(err => iter.throw(err));
@@ -321,29 +323,29 @@ function fixPollOpt(pollOpt: Partial<APollOpt>) {
   return pollOpt as APollOpt;
 }
 
-async function threadsGenerator(response: Response): Promise<ThreadsData> {
+function threadsGenerator(response: Response): Promise<ThreadsData> {
   const target = new EventTarget();
   const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data', { returnEvent: 'return' });
 
   const moreLink = new ResolvablePromise<string>();
-  const rewriter = h2r(new HTMLRewriter())
+  const rewriter = new self.HTMLRewriter()
     .on('a.morelink[href][rel="next"]', { 
       element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
     });
 
   scrapeComments(rewriter, target, '');
 
-  consume(r2h(rewriter).transform(response).body!)
+  consume(rewriter.transform(response).body!)
     .then(() => iter.return())
     .then(() => moreLink.resolve(''))
     .catch(e => iter.throw(e));
 
-  return {
+  return Promise.resolve({
     items: aMap(iter, ({ detail: comment }) => {
       return fixComment(comment)
     }),
     moreLink,
-  }
+  })
 };
 
 export async function user(id: string): Promise<AUser> {
@@ -353,7 +355,7 @@ export async function user(id: string): Promise<AUser> {
 
   let user: Partial<AUser> = { id, about: '', submitted: [] };
 
-  const rewriter = h2r(new HTMLRewriter())
+  const rewriter = new self.HTMLRewriter()
     .on('tr.athing td[timestamp]', {
       element(el) { 
         user.created = Number(el.getAttribute('timestamp')) 
@@ -372,7 +374,7 @@ export async function user(id: string): Promise<AUser> {
       }
     })
 
-  await consume(r2h(rewriter).transform(response).body!);
+  await consume(rewriter.transform(response).body!);
 
   if (user.about?.trim()) user.about = '<p>' + user.about.trim();
 

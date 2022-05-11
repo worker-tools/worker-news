@@ -1,21 +1,19 @@
-import { basics, caching, combine, contentTypes } from "@worker-tools/middleware";
-import { renderIconSVG } from "@download/blockies";
-import { ok } from "@worker-tools/response-creators";
-import { manifestHandler } from './manifest-handler';
+import { basics, caching, combine, contentTypes } from "https://ghuc.cc/worker-tools/middleware/index.ts";
+import { manifestHandler } from './manifest-handler.js';
 
-import { router, mw } from "../router";
+import { router, mw } from "../router.ts";
 
-import * as assets from './assets';
-import { news } from './news';
-import './item';
-import './user';
-import './threads';
+import * as assets from './assets.ts';
+import { news } from './news.ts';
+import './item.ts';
+import './user.ts';
+import './threads.ts';
 // import './login';
 
 router.get('/yc500.gif', req => fetch('https://news.ycombinator.com/yc500.gif', req))
 router.get('/yc.css', req => fetch('https://news.ycombinator.com/yc.css', req))
 
-if (!SW) {
+if (!self.SW) {
   // TODO: redirect instead?
   router.get('/newsfaq.html', req => fetch('https://news.ycombinator.com/newsfaq.html', req))
   router.get('/newsguidelines.html', req => fetch('https://news.ycombinator.com/newsguidelines.html', req))
