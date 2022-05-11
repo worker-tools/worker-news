@@ -28,9 +28,7 @@ export type ThreadsData = {
   fromCacheDate?: Date,
 }
 
-// export type Quality = 'c00' | 'c5a' | 'c73' | 'c82' | 'c88' | 'c9c' | 'cae' | 'cbe' | 'cce' | 'cdd';
 export enum Quality {
-  default = '',
   c00 = 'c00',
   c5a = 'c5a',
   c73 = 'c73',
@@ -41,6 +39,7 @@ export enum Quality {
   cbe = 'cbe',
   cce = 'cce',
   cdd = 'cdd',
+  default = '',
 }
 
 export interface AThing {

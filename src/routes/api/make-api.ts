@@ -120,7 +120,7 @@ async function* paginator(iterable: AsyncIterableIterator<AComment>, total: numb
   if (comm) yield comm;
   for await (const comm of iterable) { 
     // if (comm.deleted) continue;
-    console.log(i, comm)
+    // console.log(i, comm)
     if (i >= C_PAGE * page && comm.level === 0) break;
     yield comm;
     i++
@@ -141,7 +141,7 @@ const stripHTML = (text?: string | null) => text ? text.replace(/(<([^>]+)>)/gi,
 
 export async function comments(api: APIFn, id: number, p = 1): Promise<APost> {
   const post: RESTPost = await api(`/v0/item/${id}`);
-  console.log(post)
+  // console.log(post)
 
   if (post.type === 'comment') {
     let curr = post;
@@ -186,7 +186,7 @@ export async function comments(api: APIFn, id: number, p = 1): Promise<APost> {
 
 export async function user(api: APIFn, id: string): Promise<AUser> {
   const { about, ...user }: RESTUser = await api(`/v0/user/${id}`);
-  console.log(about, user)
+  // console.log(about, user)
   return {
     ...user,
     ...about ? { about: await blockquotify('<p>' + about) } : {},
