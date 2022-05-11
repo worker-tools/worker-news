@@ -4,6 +4,10 @@
   "start_url": ".",
   "display": "minimal-ui",
   "description": "A drop-in replacement for Hacker News",
+  "background_color": "#f6f6ef",
+  "color_scheme_dark": {
+    "background_color": "#373a43"
+  },
   "icons": [
     {
       "__os": "Mac",

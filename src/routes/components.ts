@@ -12,12 +12,12 @@ const topSel = (wrap: boolean, content: HTMLContent) => wrap
 
 export const favicon = (url?: { hostname?: string } | null) => {
   const img = url?.hostname && url.hostname !== location.hostname ? `favicon/${url.hostname}.ico` : `darky18.png`
-  return html`<img class="favicon" src="${img}" alt="Favicon" width="11" height="11" loading="lazy" />`
+  return html`<img class="favicon" src="${img}" alt="" width="11" height="11" loading="lazy" />`
 }
 
 export const identicon = (by: string, size = 11) => {
   const img = by === 'dang' ? 'y18.gif' : `identicon/${by}.svg`;
-  return html`<img class="identicon" src="${img}" alt="Identicon" width="${size}" height="${size}" loading="lazy" />`
+  return html`<img class="identicon" src="${img}" alt="" width="${size}" height="${size}" loading="lazy" />`
 }
 
 export const cachedWarning = ({ fromCacheDate }: { fromCacheDate?: Date | null }, request: Request) => {

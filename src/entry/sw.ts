@@ -21,6 +21,8 @@ self.addEventListener('install', async () => {
     '/s.gif',
     '/y18.png',
     '/y18.gif',
+    '/app.webmanifest',
+    ...await fetch('/app.webmanifest').then(x => x.json()).then((m: any) => m.icons.map((i: any) => i.src))
   ])
   console.log('installed')
   // TODO: debug only?

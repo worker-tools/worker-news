@@ -96,7 +96,7 @@ export async function blockquotify(text: string) {
     }
 
     // Test: item?id=30244534
-    if (match = /^([-*]{3,})$/.exec(p.textContent.trim())) {
+    if (match = /^([-*=]{3,})$/.exec(p.textContent.trim())) {
       p.outerHTML = `<hr/><span class="sr-only">${match[1]}</span>`;
     }
   }
