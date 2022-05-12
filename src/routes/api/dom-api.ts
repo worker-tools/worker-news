@@ -295,7 +295,7 @@ async function commentsGenerator(response: Response) {
 
   post.moreLink = moreLink;
 
-  console.log(post)
+  // console.log(post)
 
   return post as APost;
 };

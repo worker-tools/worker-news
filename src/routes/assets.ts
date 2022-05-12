@@ -28,7 +28,7 @@ export async function handler(req: Request, event: { request: Request, waitUntil
     } else if ('Deno' in globalThis) {
       const url = new URL(event.request.url);
       const assetHref = new URL(`../../public${url.pathname}`, import.meta.url).href;
-      console.log(assetHref)
+      // console.log(assetHref)
       page = await fetch(assetHref)
     } else { // Service Worker
       page = (await self.caches.match(event.request)) ?? await fetch(event.request)
