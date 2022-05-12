@@ -2,6 +2,8 @@ import { APost, AComment, Stories, StoriesParams, AUser, ThreadsData, StoriesDat
 import { default as PQueue } from '@qwtel/p-queue-browser';
 import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { blockquotify } from './rewrite-content.ts';
+import * as domAPI from './dom-api.ts';
+import { Awaitable } from "../../vendor/common-types.ts";
 
 type APIFn = <T>(path: string) => Promise<T>;
 
@@ -9,7 +11,7 @@ const CONCURRENCY = 32;
 
 const PAGE = 30;
 
-const x = {
+const storiesToPaths = {
   [Stories.TOP]: `/v0/topstories`,
   [Stories.NEW]: '/v0/newstories',
   [Stories.BEST]: '/v0/beststories',
@@ -23,10 +25,11 @@ const x = {
   [Stories.OFFLINE]: '',
 };
 
-export function stories(api: APIFn, { p }: StoriesParams, type = Stories.TOP): StoriesData {
+export function stories(api: APIFn, params: StoriesParams, type = Stories.TOP): Awaitable<StoriesData> {
+  const { p } = params;
   const page = Math.max(1, p || 1);
-  const href = x[type];
-  if (!href) throw Error('Unsupported by HN REST API')
+  const href = storiesToPaths[type];
+  if (href === '') return domAPI.stories(params, type)
 
   return {
     items: storiesGenerator(api, href, page),
@@ -194,5 +197,5 @@ export async function user(api: APIFn, id: string): Promise<AUser> {
 }
 
 export function threads(api: APIFn, id: string, next?: number): Promise<ThreadsData> {
-  throw Error('Unsupported by HN REST API')
+  return domAPI.threads(id, next);
 }

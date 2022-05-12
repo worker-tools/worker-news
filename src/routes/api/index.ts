@@ -8,7 +8,7 @@ import * as fireAPI from './firebase.ts';
 export const api = SW === true 
   ? swAPI 
   : 'Deno' in self 
-    ? { ...fireAPI, threads: domAPI.threads } 
+    ? fireAPI 
     : domAPI
 
 export const stories = SW === true
