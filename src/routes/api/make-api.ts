@@ -40,12 +40,12 @@ export async function* storiesGenerator(api: APIFn, href: string, page: number) 
     .map(id => api<RESTPost>(`/v0/item/${id}`));
 
   for await (const { kids, text, url, ...p } of ps) {
-    yield <APost>{
+    yield {
       ...p,
       time: new Date(p.time * 1000),
       text: text != null ? await blockquotify(text) : null,
       url: text != null ? `item?id=${p.id}` : url,
-    };
+    } as APost;
   }
 }
 
