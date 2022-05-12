@@ -13,7 +13,7 @@ import './threads.ts';
 router.get('/yc500.gif', req => fetch('https://news.ycombinator.com/yc500.gif', req))
 router.get('/yc.css', req => fetch('https://news.ycombinator.com/yc.css', req))
 
-if (!self.SW) {
+if (!SW) {
   // TODO: redirect instead?
   router.get('/newsfaq.html', req => fetch('https://news.ycombinator.com/newsfaq.html', req))
   router.get('/newsguidelines.html', req => fetch('https://news.ycombinator.com/newsguidelines.html', req))

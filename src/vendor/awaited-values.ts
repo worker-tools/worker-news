@@ -10,11 +10,11 @@ type ExpandRecursively<T> = T extends Record<PropertyKey, unknown>
 //  * @deprecated Change name
  */
 // FIXME: better way to retain readonly and optional modifiers!???
-export type PromisedValuesIn<Type, In extends keyof Type = never> = ExpandRecursively<{
+export type PromisedIn<Type, In extends keyof Type = never> = ExpandRecursively<{
   [Property in keyof Type]: Property extends In ? Awaitable<Type[Property]> : Type[Property]
 }>
 
-export type PromisedValuesEx<Type, Ex extends keyof Type = never> = ExpandRecursively<{
+export type PromisedEx<Type, Ex extends keyof Type = never> = ExpandRecursively<{
   [Property in keyof Type]: Property extends Ex ? Type[Property] : Awaitable<Type[Property]>
 }>
 
@@ -23,10 +23,10 @@ export type PromisedValuesEx<Type, Ex extends keyof Type = never> = ExpandRecurs
 //  * @deprecated Change name
  */
 // FIXME: better way to retain readonly and optional modifiers!???
-export type AwaitedValuesExclusive<Type, Ex extends keyof Type = never> = ExpandRecursively<{
+export type AwaitedValuesEx<Type, Ex extends keyof Type = never> = ExpandRecursively<{
   [Prop in keyof Type]: Prop extends Ex ? Type[Prop] : Awaited<Type[Prop]>
 }>
-export type AwaitedValuesInclusive<Type, In extends keyof Type = never> = ExpandRecursively<{
+export type AwaitedValuesIn<Type, In extends keyof Type = never> = ExpandRecursively<{
   [Prop in keyof Type]: Prop extends In ? Awaited<Type[Prop]> : Type[Prop];
 }>
 
@@ -36,10 +36,10 @@ export type AwaitedValuesInclusive<Type, In extends keyof Type = never> = Expand
  */
 export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
   obj: Type, opts: { include?: In[] },
-): Promise<AwaitedValuesInclusive<Type, In>>;
+): Promise<AwaitedValuesIn<Type, In>>;
 export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
   obj: Type, opts: { exclude?: Ex[] },
-): Promise<AwaitedValuesExclusive<Type, Ex>>;
+): Promise<AwaitedValuesEx<Type, Ex>>;
 export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
   obj: Type, { include, exclude }: { include?: In[], exclude?: Ex[] } = {}
 ): Promise<any> {

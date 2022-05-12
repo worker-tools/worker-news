@@ -1,6 +1,6 @@
 declare global {
-  // const DEBUG: boolean;
-  // const SW: boolean;
+  const DEBUG: boolean;
+  const SW: boolean;
 
   interface Window {
     readonly DEBUG: boolean;

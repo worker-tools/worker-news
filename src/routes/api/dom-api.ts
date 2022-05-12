@@ -6,16 +6,9 @@ import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 import { unescape } from 'html-escaper';
 
-// import type { HTMLRewriter } from '@worker-tools/html-rewriter'
-// import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
-import type { Element, HTMLRewriter as IHTMLRewriter } from '@worker-tools/html-rewriter'
-
 import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface.ts';
 import { aMap } from './iter.ts';
 import { blockquotify, consume } from './rewrite-content.ts';
-
-// const h2r = (htmlRewriter: HR | HTMLRewriter) => htmlRewriter as unknown as HR;
-// const r2h = (hTMLRewriter: HR | HTMLRewriter) => hTMLRewriter as unknown as HTMLRewriter;
 
 const HN = 'https://news.ycombinator.com'
 
@@ -124,7 +117,7 @@ export async function threads(id: string, next?: number) {
   return threadsGenerator(body)
 }
 
-function scrapeComments(rewriter: IHTMLRewriter, data: EventTarget, prefix = '') {
+function scrapeComments(rewriter: HTMLRewriter, data: EventTarget, prefix = '') {
   let comment!: Partial<AComment>;
 
   return rewriter

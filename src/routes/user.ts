@@ -4,7 +4,7 @@ import { JSONStreamResponse, jsonStringifyGenerator } from "@worker-tools/json-s
 
 import { router, RouteArgs, mw } from "../router.ts";
 
-import { user as apiUser } from "./api/index.ts";
+import { api } from "./api/index.ts";
 import { pageLayout, identicon } from './components.ts';
 import { fastTTFB } from "./news.ts";
 import { StreamResponse } from "@worker-tools/stream-response";
@@ -25,7 +25,7 @@ const user = ({ headers, searchParams, type, url, handled, waitUntil }: RouteArg
   const un = searchParams.get('id');
   if (!un) return notFound('No such user.');
 
-  const userPromise = apiUser(un, { url, handled, waitUntil })
+  const userPromise = api.user(un, { url, handled, waitUntil })
   const title = `Profile: ${un}`;
 
   if (type === 'application/json') {

@@ -2,7 +2,7 @@ import { JSONRequest, ParamsURL } from "@worker-tools/json-fetch";
 import { ResolvablePromise } from "@worker-tools/resolvable-promise";
 import { JSONParseNexus } from '@worker-tools/json-stream';
 // import { notImplemented } from "@worker-tools/response-creators";
-import { liftAsync, PromisedValuesEx } from "../../vendor/awaited-values.ts";
+import { liftAsync, PromisedEx } from "../../vendor/awaited-values.ts";
 import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface.ts";
 
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
@@ -37,19 +37,16 @@ const networkFirst = (cacheKey: string) => async ({ url, handled, waitUntil }: M
     race.over = true;
     if (!res) throw Error('You are offline');
 
-    // const data = await res.clone().json() as any;
-    // res.clone().body!.pipeThrough(new JSONParseStream)
-
     const fromCache = res.headers.has('x-from-sw-cache');
     if (fromCache) {
       done.resolve()
     } else {
       (async () => {
         await handled
-        const res_ = new Response(res.body, res);
-        res_.headers.set('x-from-sw-cache', 'true')
+        const mutRes = new Response(res.body, res);
+        mutRes.headers.set('x-from-sw-cache', 'true')
         const cache = await self.caches.open(cacheKey)
-        await cache.put(req, res_)
+        await cache.put(req, mutRes)
       })().finally(() => done.resolve())
     }
 
@@ -83,8 +80,8 @@ export async function stories(params: StoriesParams, type = Stories.TOP, args: M
 export async function comments(id: number, p: number | undefined, args: MinArgs): Promise<APost> {
   const res = await networkFirst('comments')(args);
   const nxs = new JSONParseNexus()
-  const data: PromisedValuesEx<Partial<APost>, 'moreLink' | 'fromCacheDate' | 'kids' | 'parts'> = {
-    type: nxs.promise('$.type'), // FIXME: ... deal with this madness
+  const data: PromisedEx<Partial<APost>, 'moreLink' | 'fromCacheDate' | 'kids' | 'parts'> = {
+    type: nxs.promise('$.type'),
     title: nxs.promise('$.title'),
     score: nxs.promise('$.score'),
     by: nxs.promise('$.by'),
@@ -98,7 +95,7 @@ export async function comments(id: number, p: number | undefined, args: MinArgs)
     time: nxs.promise('$.time'),
     parts: nxs.iterable('$.parts.*'),
     kids: nxs.iterable('$.kids.*'),
-    moreLink: nxs.promise('$.moreLink').map(x => x!), // FIXME
+    moreLink: nxs.promise('$.moreLink').map(x => x!),
     fromCacheDate: res.headers.has('x-from-sw-cache') ? new Date(res.headers.get('date')!) : undefined
   }
   res.body!.pipeThrough(nxs)

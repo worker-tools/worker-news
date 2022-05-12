@@ -15,7 +15,7 @@ export async function handler(req: Request, event: { request: Request, waitUntil
   // options.mapRequestToAsset = handlePrefix(/^\/docs/)
 
   try {
-    if (self.DEBUG) {
+    if (DEBUG) {
       // customize caching
       options.cacheControl = {
         bypassCache: false,

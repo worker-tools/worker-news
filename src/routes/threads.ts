@@ -5,7 +5,7 @@ import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-s
 
 import { router, RouteArgs, mw } from "../router.ts";
 
-import { threads as apiThreads } from "./api/index.ts";
+import { api } from "./api/index.ts";
 
 import { pageLayout } from './components.ts';
 import { commentEl } from "./item.ts";
@@ -33,7 +33,7 @@ function threads({ headers, searchParams, type: contentType, url, handled, waitU
 
   const next = Number(searchParams.get('next'));
 
-  const threadsPage = apiThreads(id, next, { url, handled, waitUntil });
+  const threadsPage = api.threads(id, next, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
     return new StreamResponse(fastTTFB(jsonStringifyGenerator(threadsPage)), { 

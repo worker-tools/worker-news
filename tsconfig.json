@@ -3,7 +3,9 @@
     "baseUrl": ".",
     "paths": {
       "@worker-tools/kv-storage": ["./node_modules/@worker-tools/cloudflare-kv-storage"],
-      "perf_hooks": ["./src/vendor/perf_hooks.js"],
+      "perf_hooks": ["./src/stubs/perf_hooks.js"],
+      "firebase/app": ["./src/stubs/firebase.js"],
+      "firebase/database": ["./src/stubs/firebase.js"],
     },
     "outDir": "./dist",
     "module": "ESNext",

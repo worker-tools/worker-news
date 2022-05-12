@@ -59,7 +59,7 @@ export const headerEl = ({ op, id }: {
                 | ${topSel(op === Stories.SHOW, html`<a href="show">show</a>`)}
                 | ${topSel(op === Stories.JOB, html`<a href="jobs">jobs</a>`)}
                 | ${topSel(op === Stories.BEST, html`<a href="best">best</a>`)}
-                ${self.SW && topSel(op === Stories.OFFLINE, html`| <a href="offline">offline</a>`)}
+                ${SW && topSel(op === Stories.OFFLINE, html`| <a href="offline">offline</a>`)}
                 | <a onclick="popitup(this,event,850,380)" href="https://news.ycombinator.com/submit">submit</a>
                 ${op === Stories.SHOW_NEW
                     ? html`| <font color="#ffffff">${op}</font>` 

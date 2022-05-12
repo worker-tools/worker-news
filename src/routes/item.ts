@@ -9,7 +9,7 @@ import { StreamResponse } from "@worker-tools/stream-response";
 
 import { mw, RouteArgs, router } from "../router.ts";
 
-import { comments as apiComments, AComment, APost, Stories, APollOpt } from "./api/index.ts";
+import { api, AComment, APost, Stories, APollOpt } from "./api/index.ts";
 
 import { pageLayout, identicon, cachedWarning, isSafari } from './components.ts';
 import { aThing, fastTTFB, subtext } from './news.ts';
@@ -163,7 +163,7 @@ function getItem({ request, headers, searchParams, type: contentType, url, handl
   if (Number.isNaN(id)) return notFound('No such item.');
   const p = Math.max(1, Number(searchParams.get('p') || '1'));
 
-  const postPromise = apiComments(id, p, { url, handled, waitUntil });
+  const postPromise = api.comments(id, p, { url, handled, waitUntil });
   const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item', headers })
 
   if (contentType === 'application/json') {

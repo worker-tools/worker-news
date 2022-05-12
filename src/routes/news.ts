@@ -10,7 +10,7 @@ import { location } from '../location.ts';
 import { router, RouteArgs, mw } from "../router.ts";
 import { cachedWarning, del, favicon, identicon, pageLayout } from './components.ts';
 
-import { stories, APost, Stories, StoriesParams, StoriesData } from './api/index.ts'
+import { api, stories, APost, Stories, StoriesParams, StoriesData } from './api/index.ts'
 import { StreamResponse } from "@worker-tools/stream-response";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
@@ -98,7 +98,7 @@ export const subtext = (post: APost, index?: number, op?: Stories, { showPast = 
             ? 'discuss' 
             : unsafeHTML(`${descendants}&nbsp;comments`)}</a>`
           : ''}
-        ${self.SW && self.caches?.open('comments').then(cache => cache.match(new JSONRequest(`item?id=${id}`)))
+        ${SW && self.caches?.open('comments').then(cache => cache.match(new JSONRequest(`item?id=${id}`)))
           .then(x => x && html`| <a href="item?id=${id}&force=cache">Offline&nbsp;✓</a>`)}
       </td>
     </tr>
@@ -163,7 +163,7 @@ const mkStories = (type: Stories) => ({ request, headers, searchParams, type: co
 
   const storiesPage = type === Stories.OFFLINE
     ? offlineStories({ p })
-    : stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
+    : api.stories({ p, n, next, id, site }, type, { url, handled, waitUntil });
 
   if (contentType === 'application/json') {
     return new StreamResponse(fastTTFB(jsonStringifyGenerator(storiesPage)), { 
@@ -216,7 +216,7 @@ router.get('/favicon/:hostname.ico', basics(), async (req, { params, waitUntil, 
   const cache = await self.caches?.open('favicon')
   const res = await cache?.match(req)
   if (!res) {
-    let res2 = await fetch(self.SW ? req.url : `https://icons.duckduckgo.com/ip3/${params.hostname}.ico`, req)
+    let res2 = await fetch(SW ? req.url : `https://icons.duckduckgo.com/ip3/${params.hostname}.ico`, req)
     if (res2.status === 404) {
       res2 = new Response(res2.body, { ...res2, status: 200 })
     }
@@ -253,6 +253,6 @@ router.get('/submitted', mw, (_req, x) => submitted(x))
 router.get('/classic', mw, (_req, x) => classic(x))
 router.get('/from', mw, (_req, x) => from(x))
 
-if (self.SW) {
+if (SW) {
   router.get('/offline', mw, (_req, x) => offline(x))
 }

@@ -15,6 +15,7 @@
         "no-unused-vars",
         "no-explicit-any",
         "no-cond-assign",
+        "no-extra-semi",
       ],
     },
   },
