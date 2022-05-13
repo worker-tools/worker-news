@@ -10,7 +10,7 @@ import { location } from '../location.ts';
 import { router, RouteArgs, mw } from "../router.ts";
 import { cachedWarning, del, favicon, identicon, pageLayout } from './components.ts';
 
-import { api, stories, APost, Stories, StoriesParams, StoriesData } from './api/index.ts'
+import { api, APost, Stories, StoriesParams, StoriesData } from './api/index.ts'
 import { StreamResponse } from "@worker-tools/stream-response";
 
 const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']

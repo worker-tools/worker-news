@@ -1,0 +1,27 @@
+{
+  "imports": {
+    "@worker-tools/router": "../worker-tools/packages/router/index.ts",
+    "@worker-tools/middleware": "../worker-tools/packages/middleware/index.ts",
+    "@worker-tools/html": "../worker-tools/packages/html/index.ts",
+    "@worker-tools/json-stream": "../worker-tools/packages/json-stream/index.ts",
+    "@worker-tools/json-fetch": "../worker-tools/packages/json-fetch/index.ts",
+    "@worker-tools/stream-response": "../worker-tools/packages/stream-response/index.ts",
+    "@worker-tools/resolvable-promise": "../worker-tools/packages/resolvable-promise/index.ts",
+    "@worker-tools/response-creators": "../worker-tools/packages/response-creators/index.ts",
+    "@worker-tools/html-rewriter/polyfill": "../worker-tools/packages/html-rewriter/polyfill.ts",
+    "@worker-tools/location-polyfill": "https://ghuc.cc/worker-tools/location-polyfill/index.ts",
+    "device-detector-js": "https://cdn.skypack.dev/device-detector-js?dts",
+    "linkedom": "https://esm.sh/linkedom",
+    "firebase/app": "https://esm.sh/firebase/app",
+    "firebase/database": "https://esm.sh/firebase/database",
+    "date-fns": "https://cdn.skypack.dev/date-fns?dts",
+    "@qwtel/blockies": "https://ghuc.cc/qwtel/blockies/src/blockies.mjs",
+    "@qwtel/p-queue-browser": "https://cdn.skypack.dev/@qwtel/p-queue-browser?dts",
+    "whatwg-stream-to-async-iter": "https://ghuc.cc/qwtel/whatwg-stream-to-async-iter/index.ts",
+    "event-target-to-async-iter": "https://ghuc.cc/qwtel/event-target-to-async-iter/index.ts",
+    "@cloudflare/kv-asset-handler": "https://cdn.skypack.dev/@cloudflare/kv-asset-handler?dts",
+    "parse-domain": "https://cdn.skypack.dev/parse-domain?dts",
+    "html-escaper": "https://cdn.skypack.dev/html-escaper?dts",
+    "urlpattern-polyfill": "https://cdn.skypack.dev/urlpattern-polyfill?dts"
+  }
+}

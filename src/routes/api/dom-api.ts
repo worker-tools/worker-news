@@ -12,7 +12,7 @@ import { blockquotify, consume } from './rewrite-content.ts';
 
 const HN = 'https://news.ycombinator.com'
 
-const x = {
+const storiesToPaths = {
   [Stories.TOP]: '/news',
   [Stories.NEW]: '/newest',
   [Stories.BEST]: '/best',
@@ -32,7 +32,7 @@ const elToDate = (el: Element) => new Date(unescape(el.getAttribute('title') ?? 
 const r2err = (body: Response) => { throw Error(`${body.status} ${body.statusText} ${body.url}`) }
 
 export async function stories(params: StoriesParams, type = Stories.TOP) {
-  const pathname = x[type];
+  const pathname = storiesToPaths[type];
   const url = new ParamsURL(pathname, params, HN);
   const body = await fetch(url.href)
   if (!body.ok) r2err(body)
