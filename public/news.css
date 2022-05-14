@@ -74,9 +74,9 @@
   }
 }
 
-html  { background-color: var(--page-background);}
+html  { background-color: var(--page-background); scrollbar-gutter:stable; }
 
-body  { font-family:var(--font); font-size:10pt; color:var(--text); scrollbar-gutter:stable; }
+body  { font-family:var(--font); font-size:10pt; color:var(--text); }
 td    { font-family:var(--font); font-size:10pt; color:var(--text); }
 
 .admin td   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }

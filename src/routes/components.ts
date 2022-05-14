@@ -137,7 +137,7 @@ export const pageLayout = ({ title, op, id, headers }: {
       meta.content = media.matches ? '#101114' : '#fff';
       media.onchange = function(e) { meta.content = e.matches ? '#101114' : '#fff'; }
     </script>
-    <link rel="stylesheet" type="text/css" href="news.css?v=20">
+    <link rel="stylesheet" type="text/css" href="news.css?v=21">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="manifest" href="app.webmanifest">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
