@@ -146,6 +146,7 @@ class Paginator {
 
     for await (const comm of iterable) if (!comm.dead) {
       this.#more.resolve({ done: false, value: comm })
+      break;
     }
     this.#more.resolve({ done: true, value: undefined })
   }
