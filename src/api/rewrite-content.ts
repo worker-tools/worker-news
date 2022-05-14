@@ -1,11 +1,5 @@
-  import { DOMParser } from 'linkedom'
-// import type { TreeWalker } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/tree-walker.d.ts'; 
-// import type { Node } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/node.d.ts';
-// import { unescape } from 'html-escaper';
+import { DOMParser } from 'linkedom'
 import { location } from '../location.ts'
-
-// import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
-// import { Text } from 'linkedom/types/interface/text';
 
 const TEXT_NODE = 3;
 const SHOW_TEXT = 4;
@@ -21,42 +15,6 @@ export function* treeWalkerToIter(walker: TreeWalker): IterableIterator<Node> {
 // Problem: item?id=26520957, item?id=30283264
 export function blockquotify(text: string) {
   const { protocol, host } = location;
-
-  // const resp1 = new Response(text);
-  // // const resp2 = resp1.clone();
-
-  // const rewriter = h2r(new HTMLRewriter())
-  //   .on('a[href^="http:&#x2F;&#x2F;news.ycombinator.com"], a[href^="https:&#x2F;&#x2F;news.ycombinator.com"]', {
-  //     element(a) {
-  //       const href = a.getAttribute('href')!
-  //         .replace(/https?:&#x2F;&#x2F;news.ycombinator.com/g, `${protocol}//${host}`);
-  //       a.setAttribute('href', href)
-  //     },
-  //   })
-  //   .on('p', {
-  //     element(el) {
-  //     },
-  //     text(chunk) {
-  //       const text = chunk.text;
-  //       let match;
-  //       if (text.startsWith('&gt;')) {
-  //         const bq = `<blockquote><span class="sr-only">&gt;</span>${text.substring(4)}</blockquote>`
-  //         chunk.replace(bq, { html: true })
-  //       }
-  //       else if (match = /^([-*])[^-*]/.exec(text)) {
-  //         const li = `<li><span class="sr-only">${match[1]}</span>${text.substring(1)}</li>`
-  //         chunk.replace(li, { html: true })
-  //       }
-  //       else if (match = /^([-*]{3,})$/.exec(text)) {
-  //         const hr = `<hr/><span class="sr-only">${match[1]}</span>`
-  //         chunk.replace(hr, { html: true })
-  //       }
-  //     }
-  //   })
-
-  // return await r2h(rewriter)
-  //   .transform(resp1)
-  //   .text()
 
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
@@ -105,6 +63,42 @@ export function blockquotify(text: string) {
   }
 
   return doc.toString();
+
+  // const resp1 = new Response(text);
+  // // const resp2 = resp1.clone();
+
+  // const rewriter = h2r(new HTMLRewriter())
+  //   .on('a[href^="http:&#x2F;&#x2F;news.ycombinator.com"], a[href^="https:&#x2F;&#x2F;news.ycombinator.com"]', {
+  //     element(a) {
+  //       const href = a.getAttribute('href')!
+  //         .replace(/https?:&#x2F;&#x2F;news.ycombinator.com/g, `${protocol}//${host}`);
+  //       a.setAttribute('href', href)
+  //     },
+  //   })
+  //   .on('p', {
+  //     element(el) {
+  //     },
+  //     text(chunk) {
+  //       const text = chunk.text;
+  //       let match;
+  //       if (text.startsWith('&gt;')) {
+  //         const bq = `<blockquote><span class="sr-only">&gt;</span>${text.substring(4)}</blockquote>`
+  //         chunk.replace(bq, { html: true })
+  //       }
+  //       else if (match = /^([-*])[^-*]/.exec(text)) {
+  //         const li = `<li><span class="sr-only">${match[1]}</span>${text.substring(1)}</li>`
+  //         chunk.replace(li, { html: true })
+  //       }
+  //       else if (match = /^([-*]{3,})$/.exec(text)) {
+  //         const hr = `<hr/><span class="sr-only">${match[1]}</span>`
+  //         chunk.replace(hr, { html: true })
+  //       }
+  //     }
+  //   })
+
+  // return await r2h(rewriter)
+  //   .transform(resp1)
+  //   .text()
 }
 
 /** 
