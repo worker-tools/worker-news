@@ -11,6 +11,7 @@
     "@worker-tools/html-rewriter/polyfill": "https://deno.land/x/html_rewriter/polyfill.ts",
     "@worker-tools/location-polyfill": "https://ghuc.cc/worker-tools/location-polyfill/index.ts",
     "device-detector-js": "https://cdn.skypack.dev/device-detector-js?dts",
+    "ts-functional-pipe": "https://cdn.skypack.dev/ts-functional-pipe?dts",
     "linkedom": "https://esm.sh/linkedom",
     "firebase/app": "https://esm.sh/firebase/app",
     "firebase/database": "https://esm.sh/firebase/database",

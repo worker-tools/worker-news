@@ -108,17 +108,17 @@ function unclosed<T>(iterable: AsyncIterable<T>): AsyncIterableIterator<T> {
   };
 }
 
-const C_PAGE = 200
+const C_PAGE = 250
 
 class Paginator {
   #iterable;
   #total;
   #page;
+  #more = new ResolvablePromise<IteratorResult<AComment>>();
   constructor(iterable: AsyncIterableIterator<AComment>, total: number, page = 1) {
     this.#iterable = iterable;
     this.#total = total;
     this.#page = page;
-
   }
   async *[Symbol.asyncIterator]() {
     const iterable = this.#iterable;
@@ -127,24 +127,31 @@ class Paginator {
 
     let n = 0;
     let comm;
-    for (let p = 1; p <= page; p++) {
-      for await (comm of unclosed(iterable)) { 
-        if (n >= C_PAGE * (p - 1) && comm.level === 0) break;
-        n++
+    for (let p = 1; p < page; p++) {
+      let i = 0;
+      for await (comm of unclosed(iterable)) if (!comm.dead) {
+        if (i >= C_PAGE && comm.level === 0) break;
+        i++
       }
+      n += i;
     }
-    let i = C_PAGE * (page - 1); // fixme
-    if (n > total || i > n) return;
+    if (n > total) return;
     if (comm) yield comm;
-    for await (const comm of iterable) { 
-      // if (comm.deleted) continue;
-      // console.log(i, comm)
-      if (i >= C_PAGE * page && comm.level === 0) break;
+    let i = 0;
+    for await (const comm of unclosed(iterable)) if (!comm.dead) {
+      if (i >= C_PAGE && comm.level === 0) break;
       yield comm;
       i++
-    } 
-  }
+    }
 
+    for await (const comm of iterable) if (!comm.dead) {
+      this.#more.resolve({ done: false, value: comm })
+    }
+    this.#more.resolve({ done: true, value: undefined })
+  }
+  get more() {
+    return Promise.resolve(this.#more)
+  }
 }
 
 // FIXME: Match HN behavior more closely
@@ -199,7 +206,7 @@ export async function comments(api: APIFn, id: number, p = 1): Promise<APost> {
     time: new Date(post.time * 1000) ?? null,
     parts: post.parts ?? [],
     kids: commCrawler,
-    moreLink: `item?id=${post.id}&p=${p + 1}`
+    moreLink: commCrawler.more.then(({ done, value }) => done ? '' : `item?id=${post.id}&p=${p + 1}&next=${value.id}`),
   }
   return retPost
 }
