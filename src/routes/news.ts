@@ -142,7 +142,9 @@ async function offlineStories({ p }: { p: number }): Promise<StoriesData> {
   const items = await Promise.all(responses
     .sort((a, b) => toTime(b) - toTime(a))
     .slice(PAGE * (p - 1), PAGE * p)
-    .map(res => res.json() as Promise<APost>)
+    .filter(res => res.ok)
+    .map(res => res.json().catch(() => null) as Promise<APost>)
+    .filter(json => json != null)
   );
   const moreLink = PAGE * p < responses.length ? `offline?p=${p + 1}` : ''
   return { items, moreLink }
