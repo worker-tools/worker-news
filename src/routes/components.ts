@@ -1,7 +1,7 @@
 import { html, HTMLContent } from "@worker-tools/html";
 import { formatDistanceToNowStrict } from 'date-fns';
 
-import { Stories } from "./api/interface.ts";
+import { Stories } from "../api/interface.ts";
 import { location } from '../location.ts';
 
 export const isSafari = (ua?: string | null) => !!ua && /Safari\/\d+/.test(ua) && !/(Chrome|Chromium)\/\d+/.test(ua)

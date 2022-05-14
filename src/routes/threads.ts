@@ -5,7 +5,7 @@ import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-s
 
 import { router, RouteArgs, mw } from "../router.ts";
 
-import { api } from "./api/index.ts";
+import { api } from "../api/index.ts";
 
 import { pageLayout } from './components.ts';
 import { commentEl } from "./item.ts";

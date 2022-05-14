@@ -12,7 +12,7 @@ import {
 } from '@worker-tools/middleware';
 
 import { RouteArgs, router } from "../router.ts";
-import { consume } from './api/rewrite-content.ts';
+import { consume } from '../api/rewrite-content.ts';
 
 function newFormData(rec: Record<string, string | Blob> = {}) {
   const data = new FormData();

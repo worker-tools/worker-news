@@ -9,7 +9,7 @@ import { StreamResponse } from "@worker-tools/stream-response";
 
 import { mw, RouteArgs, router } from "../router.ts";
 
-import { api, AComment, APost, Stories, APollOpt } from "./api/index.ts";
+import { api, AComment, APost, Stories, APollOpt } from "../api/index.ts";
 
 import { pageLayout, identicon, cachedWarning, isSafari } from './components.ts';
 import { aThing, fastTTFB, subtext } from './news.ts';

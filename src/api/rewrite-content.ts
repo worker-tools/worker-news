@@ -2,7 +2,7 @@
 // import type { TreeWalker } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/tree-walker.d.ts'; 
 // import type { Node } from 'https://ghuc.cc/WebReflection/linkedom/types/interface/node.d.ts';
 // import { unescape } from 'html-escaper';
-import { location } from '../../location.ts'
+import { location } from '../location.ts'
 
 // import type { HTMLRewriter as HR, Element } from 'html-rewriter-wasm';
 // import { Text } from 'linkedom/types/interface/text';

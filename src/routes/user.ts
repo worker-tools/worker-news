@@ -4,7 +4,7 @@ import { JSONStreamResponse, jsonStringifyGenerator } from "@worker-tools/json-s
 
 import { router, RouteArgs, mw } from "../router.ts";
 
-import { api } from "./api/index.ts";
+import { api } from "../api/index.ts";
 import { pageLayout, identicon } from './components.ts';
 import { fastTTFB } from "./news.ts";
 import { StreamResponse } from "@worker-tools/stream-response";

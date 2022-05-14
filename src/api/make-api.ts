@@ -3,7 +3,7 @@ import { default as PQueue } from '@qwtel/p-queue-browser';
 import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { blockquotify } from './rewrite-content.ts';
 import * as domAPI from './dom-api.ts';
-import { Awaitable } from "../../vendor/common-types.ts";
+import { Awaitable } from "../vendor/common-types.ts";
 
 type APIFn = <T>(path: string) => Promise<T>;
 

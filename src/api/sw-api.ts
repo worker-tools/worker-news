@@ -2,7 +2,7 @@ import { JSONRequest, ParamsURL } from "@worker-tools/json-fetch";
 import { ResolvablePromise } from "@worker-tools/resolvable-promise";
 import { JSONParseNexus } from '@worker-tools/json-stream';
 // import { notImplemented } from "@worker-tools/response-creators";
-import { liftAsync, PromisedEx } from "../../vendor/awaited-values.ts";
+import { liftAsync, PromisedEx } from "../vendor/awaited-values.ts";
 import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface.ts";
 
 type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
