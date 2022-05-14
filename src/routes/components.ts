@@ -102,11 +102,11 @@ export const footerEl = () => html`
           href="https://workers.tools">Worker&nbsp;Tools</a> and <a
           href="https://deno.com">Deno&nbsp;Deploy</a>.</center><br/>
       <center><span class="yclinks">YC: 
-            <a href="newsguidelines.html">Guidelines</a>
-          | <a href="newsfaq.html">FAQ</a>
+            <a href="https://news.ycombinator.com/newsguidelines.html">Guidelines</a>
+          | <a href="https://news.ycombinator.com/newsfaq.html">FAQ</a>
           <!-- | <a href="lists">Lists</a> -->
           | <a href="https://github.com/HackerNews/API">API</a>
-          | <a href="security.html">Security</a>
+          | <a href="https://news.ycombinator.com/security.html">Security</a>
           | <a href="https://www.ycombinator.com/legal/">Legal</a>
           | <a href="https://www.ycombinator.com/apply/">Apply to YC</a>
           | <a href="mailto:hn@ycombinator.com">Contact YC</a></span><br/><br/>

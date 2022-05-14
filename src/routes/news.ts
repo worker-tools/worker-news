@@ -180,7 +180,7 @@ const mkStories = (type: Stories) => ({ request, headers, searchParams, type: co
         <table border="0" cellpadding="0" cellspacing="0" class="itemlist">
           <tbody>
             ${type === Stories.SHOW ? messageEl(html`
-              Please read the <a href="showhn.html"><u>rules</u></a>. You can also
+              Please read the <a href="https://news.ycombinator.com/showhn.html"><u>rules</u></a>. You can also
               browse the <a href="shownew"><u>newest</u></a> Show HNs.`) : ''}
             ${type === Stories.JOB ? messageEl(html`
               These are jobs at YC startups. See more at

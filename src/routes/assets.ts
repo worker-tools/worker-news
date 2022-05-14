@@ -1,10 +1,6 @@
 import { getAssetFromKV, mapRequestToAsset, Options } from '@cloudflare/kv-asset-handler'
 import { internalServerError, notFound } from '@worker-tools/response-creators'
 
-// addEventListener('fetch', event => {
-//   event.waitUntil(handleEvent(event))
-// })
-
 export async function handler(req: Request, event: { request: Request, waitUntil: (_f: any) => void }) {
   const options: Partial<Options> = {}
 
