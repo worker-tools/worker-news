@@ -109,25 +109,42 @@ function unclosed<T>(iterable: AsyncIterable<T>): AsyncIterableIterator<T> {
 }
 
 const C_PAGE = 200
-async function* paginator(iterable: AsyncIterableIterator<AComment>, total: number, page = 1): AsyncGenerator<AComment> {
-  let n = 0;
-  let comm;
-  for (let p = 1; p <= page; p++) {
-    for await (comm of unclosed(iterable)) { 
-      if (n >= C_PAGE * (p - 1) && comm.level === 0) break;
-      n++
-    }
+
+class Paginator {
+  #iterable;
+  #total;
+  #page;
+  constructor(iterable: AsyncIterableIterator<AComment>, total: number, page = 1) {
+    this.#iterable = iterable;
+    this.#total = total;
+    this.#page = page;
+
   }
-  let i = C_PAGE * (page - 1); // fixme
-  if (n > total || i > n) return;
-  if (comm) yield comm;
-  for await (const comm of iterable) { 
-    // if (comm.deleted) continue;
-    // console.log(i, comm)
-    if (i >= C_PAGE * page && comm.level === 0) break;
-    yield comm;
-    i++
-  } 
+  async *[Symbol.asyncIterator]() {
+    const iterable = this.#iterable;
+    const total = this.#total;
+    const page = this.#page
+
+    let n = 0;
+    let comm;
+    for (let p = 1; p <= page; p++) {
+      for await (comm of unclosed(iterable)) { 
+        if (n >= C_PAGE * (p - 1) && comm.level === 0) break;
+        n++
+      }
+    }
+    let i = C_PAGE * (page - 1); // fixme
+    if (n > total || i > n) return;
+    if (comm) yield comm;
+    for await (const comm of iterable) { 
+      // if (comm.deleted) continue;
+      // console.log(i, comm)
+      if (i >= C_PAGE * page && comm.level === 0) break;
+      yield comm;
+      i++
+    } 
+  }
+
 }
 
 // FIXME: Match HN behavior more closely
@@ -164,7 +181,7 @@ export async function comments(api: APIFn, id: number, p = 1): Promise<APost> {
   }
 
   const text = post.text != null ? await blockquotify('<p>' + post.text) : null;
-  const commCrawler = paginator(crawlCommentTree(kids, results), post.descendants ?? Number.POSITIVE_INFINITY, p);
+  const commCrawler = new Paginator(crawlCommentTree(kids, results), post.descendants ?? Number.POSITIVE_INFINITY, p);
 
   const retPost = {
     type: post.type ?? '',
