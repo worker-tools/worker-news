@@ -10,20 +10,3 @@ export const api = SW === true
   : 'Deno' in self 
     ? fireAPI 
     : domAPI
-
-// export const stories = SW === true
-//   ? swAPI.stories
-//   : fireAPI.stories;
-
-// export const comments = SW === true
-//   ? swAPI.comments
-//   : fireAPI.comments;
-
-// export const user = SW === true 
-//   ? swAPI.user
-//   : fireAPI.user;
-
-// export const threads = SW === true
-//   ? swAPI.threads
-//   : domAPI.threads;
-
