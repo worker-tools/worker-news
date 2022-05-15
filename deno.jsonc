@@ -1,5 +1,11 @@
 {
   "importMap": "import-map.json",
+  "tasks": {
+    "clean": "rm -rf dist",
+    "serve": "deno run --allow-read=public --allow-net --allow-env=NODE_DEBUG,FIREBASE_DATABASE_EMULATOR_HOST --watch --location=http://localhost:8000 src/entry/deno.ts",
+    "build-sw": "deno run -A 'https://deno.land/x/esbuild/mod.js' src/entry/sw.ts --bundle --sourcemap --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=false --define:SW=true --minify",
+    "watch-sw": "deno run -A 'https://deno.land/x/esbuild/mod.js' src/entry/sw.ts --bundle --sourcemap --target=es2020 --outfile=public/sw.js --define:global=self --tsconfig=tsconfig.sw.json --define:DEBUG=true --define:SW=true --watch",
+  },
   "lint": {
     "files": {
       "include": [
