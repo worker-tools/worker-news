@@ -15,10 +15,17 @@ jobs:
     name: Deploy
     steps:
       - uses: actions/checkout@v2
-      - uses: denoland/setup-deno@v1
+      - uses: actions/cache@v2
         with:
-          deno-version: v1.x
-      - run: deno task build-sw
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6
+          run_install: true
+      - run: rm -r node_modules
       - uses: denoland/deployctl@v1
         with:
           project: worker-news
