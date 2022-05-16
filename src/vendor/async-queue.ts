@@ -17,10 +17,7 @@ export interface AsyncQueueOptions<T> {
    */
   signal?: AbortSignal,
 
-  /**
-   * TODO
-   */
-  underlyingSource?: UnderlyingSource<T>,
+  // underlyingSource?: UnderlyingSource<T>,
 }
 
 /**
@@ -48,7 +45,7 @@ export class AsyncQueue<T = any> implements AsyncIterableIterator<T>, ReadableSt
   #signal?: AbortSignal;
   #error?: any = null;
   #finished = false;
-  #src?: UnderlyingSource<T>;
+  // #src?: UnderlyingSource<T>;
 
   /** @deprecated TODO */
   get desiredSize() { return 0 }
@@ -60,8 +57,8 @@ export class AsyncQueue<T = any> implements AsyncIterableIterator<T>, ReadableSt
       signal.addEventListener('abort', this.#abortListener, { once: true });
     }
     this.#signal = signal
-    this.#src = options?.underlyingSource;
-    options?.underlyingSource?.start?.(this);
+    // this.#src = options?.underlyingSource;
+    // options?.underlyingSource?.start?.(this);
   }
 
   #errorHandler = (err: any) => {
@@ -92,19 +89,14 @@ export class AsyncQueue<T = any> implements AsyncIterableIterator<T>, ReadableSt
     }
   }
 
-  // push(...items: T[]) {
-  //   for (const item of items) this.#push(item)
-  //   return this.length
-  // }
-
   enqueue(item: T) {
     this.#push(item);
   }
 
-  // async dequeue(): Promise<T | undefined> {
-  //   const { done, value } = await this.next();
-  //   return done ? undefined : value;
-  // }
+  async dequeue(): Promise<T | undefined> {
+    const { done, value } = await this.next();
+    return done ? undefined : value;
+  }
 
   next(): Promise<IteratorResult<T, void>> {
     // First, we consume all unread events
@@ -134,15 +126,15 @@ export class AsyncQueue<T = any> implements AsyncIterableIterator<T>, ReadableSt
 
       // FIXME: should it keep calling pull until the size is 1 again??
       // Compare with streams spec
-      if (typeof this.#src?.pull === 'function') (async () => {
-        while (this.size < 0) await this.#src?.pull?.(this)
-      })();
+      // if (typeof this.#src?.pull === 'function') (async () => {
+      //   while (this.size < 0) await this.#src?.pull?.(this)
+      // })();
     });
   }
 
   /**
    * Get the length of the queue. 
-   * _Note that the length can be negative_, meaning more values have been requested than have been provided.
+   * _Note that the length can be negative_, meaning more values have been requested than can be provided.
    */
   get size() {
     return this.#unconsumedValues.length - this.#unconsumedPromises.length

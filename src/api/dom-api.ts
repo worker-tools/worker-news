@@ -6,7 +6,7 @@ import { ResolvablePromise } from '@worker-tools/resolvable-promise';
 import { unescape } from 'html-escaper';
 import { AsyncQueue } from '../vendor/async-queue.ts';
 
-import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface.ts';
+import { APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface.ts';
 import { aMap } from './iter.ts';
 import { blockquotify } from './rewrite-content.ts';
 
@@ -40,112 +40,10 @@ export async function stories(params: StoriesParams, type = Stories.TOP) {
   return storiesGenerator(body);
 }
 
-// function mkSource<T>(response: Response, rewriter: HTMLRewriter): UnderlyingSource<T> {
-//   let reader: ReadableStreamDefaultReader;
-//   return {
-//     start() {
-//       reader = rewriter.transform(response).body!.getReader()
-//     },
-//     async pull() {
-//       const { value } = await reader.read()
-//       console.log('pulled', value?.byteLength)
-//     },
-//   }
-// }
-
 function storiesGenerator(response: Response): Promise<StoriesData> {
   let post: Partial<APost>;
 
   const moreLink = new ResolvablePromise<string>();
-
-  // const iter = new AsyncQueue<Partial<APost>>({
-  //   underlyingSource: mkSource(response, new HTMLRewriter()
-  //     .on('.athing[id]', {
-  //       element(el) {
-  //         if (post) iter.enqueue(post);
-
-  //         const id = Number(el.getAttribute('id'));
-  //         console.log('element!', id)
-  //         post = { id, title: '', score: 0, by: '', descendants: 0, story: post?.story };
-  //       }
-  //     })
-  //     .on('.athing[id] > .title > a.titlelink', {
-  //       element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
-  //       text({ text }) { post.title += text },
-  //     })
-  //     // // FIXME: concatenate text before parseInt jtbs..
-  //     .on('.subtext > .score', {
-  //       text({ text }) { if (text?.trimStart().match(/^\d/)) post.score = parseInt(text, 10) }
-  //     })
-  //     .on('.subtext > .hnuser', {
-  //       text({ text }) { post.by += text }
-  //     })
-  //     .on('.subtext > .age[title]', {
-  //       element(el) { post.time = elToDate(el) }
-  //     })
-  //     .on('.subtext > a[href^=item]', {
-  //       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
-  //     })
-  //     .on('.morelink[href]', {
-  //       element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) }
-  //     })
-  //     .on('.yclinks', {
-  //       element() {
-  //         if (post) iter.enqueue(post)
-  //         iter.close();
-  //       }
-  //     })
-  //   ),
-  // });
-
-  // let reader!: ReadableStreamDefaultReader;
-  // const iter = new AsyncQueue<Partial<APost>>({
-  //   underlyingSource: {
-  //     start(controller) {
-  //       const rewriter = new HTMLRewriter()
-  //         .on('.athing[id]', {
-  //           element(el) {
-  //             if (post) controller.enqueue(post);
-
-  //             const id = Number(el.getAttribute('id'));
-  //             console.log('element!', id)
-  //             post = { id, title: '', score: 0, by: '', descendants: 0, story: post?.story };
-  //           }
-  //         })
-  //         .on('.athing[id] > .title > a.titlelink', {
-  //           element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
-  //           text({ text }) { post.title += text },
-  //         })
-  //         // // FIXME: concatenate text before parseInt jtbs..
-  //         .on('.subtext > .score', {
-  //           text({ text }) { if (text?.trimStart().match(/^\d/)) post.score = parseInt(text, 10) }
-  //         })
-  //         .on('.subtext > .hnuser', {
-  //           text({ text }) { post.by += text }
-  //         })
-  //         .on('.subtext > .age[title]', {
-  //           element(el) { post.time = elToDate(el) }
-  //         })
-  //         .on('.subtext > a[href^=item]', {
-  //           text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
-  //         })
-  //         .on('.morelink[href]', {
-  //           element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) }
-  //         })
-  //         .on('.yclinks', {
-  //           element() {
-  //             if (post) controller.enqueue(post)
-  //             controller.close();
-  //           }
-  //         })
-  //       reader = rewriter.transform(response).body!.getReader()
-  //     },
-  //     async pull() {
-  //       const { value } = await reader.read()
-  //       console.log('pulled', value?.byteLength)
-  //     },
-  //   },
-  // });
 
   const iter = new AsyncQueue<Partial<APost>>()
   const rewriter = new HTMLRewriter()
@@ -191,7 +89,7 @@ function storiesGenerator(response: Response): Promise<StoriesData> {
 
   return Promise.resolve({
     items: aMap(iter, post => {
-      console.log(response.url, iter.size)
+      // console.log(response.url, iter.size)
       post.type = post.type || 'story';
       if (!post.by) { // No users post this = job ads
         post.type = 'job';
