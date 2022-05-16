@@ -61,6 +61,7 @@ export class AsyncQueue<T = any> implements AsyncIterableIterator<T>, ReadableSt
     }
     this.#signal = signal
     this.#src = options?.underlyingSource;
+    options?.underlyingSource?.start?.(this);
   }
 
   #errorHandler = (err: any) => {
@@ -130,17 +131,22 @@ export class AsyncQueue<T = any> implements AsyncIterableIterator<T>, ReadableSt
     // Wait until an event happens
     return new Promise((resolve, reject) => {
       this.#unconsumedPromises.push({ resolve, reject });
-      this.#src?.pull?.(this)
+
+      // FIXME: should it keep calling pull until the size is 1 again??
+      // Compare with streams spec
+      if (typeof this.#src?.pull === 'function') (async () => {
+        while (this.size < 0) await this.#src?.pull?.(this)
+      })();
     });
   }
 
-  // /**
-  //  * Get the length of the queue. 
-  //  * _Note that the length can be negative_, meaning more values have been requested than have been provided.
-  //  */
-  // get relativeSize() {
-  //   return this.#unconsumedValues.length - this.#unconsumedPromises.length
-  // }
+  /**
+   * Get the length of the queue. 
+   * _Note that the length can be negative_, meaning more values have been requested than have been provided.
+   */
+  get size() {
+    return this.#unconsumedValues.length - this.#unconsumedPromises.length
+  }
 
   return(): Promise<IteratorResult<T, void>> {
     if (this.#signal) {
