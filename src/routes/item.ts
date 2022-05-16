@@ -164,7 +164,7 @@ function getItem({ request, headers, searchParams, type: contentType, url, handl
   const p = Math.max(1, Number(searchParams.get('p') || '1'));
 
   const postPromise = api.comments(id, p, { url, handled, waitUntil });
-  const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item', headers })
+  const pageRenderer = pageLayout({ title: PLACEHOLDER, op: 'item', p, headers })
 
   if (contentType === 'application/json') {
     return new StreamResponse(fastTTFB(jsonStringifyGenerator(postPromise)), { 

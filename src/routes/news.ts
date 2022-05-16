@@ -113,7 +113,7 @@ const rowEl = (post: APost, i: number, type: Stories) => {
     <tr class="spacer" style="height:5px"></tr>`;
 }
 
-const x = {
+const typesToTitles = {
   [Stories.TOP]: '',
   [Stories.JOB]: 'jobs', // sic!
   [Stories.ASK]: 'Ask',
@@ -159,7 +159,7 @@ const mkStories = (type: Stories) => ({ request, headers, searchParams, type: co
   const id = Stories.USER ? searchParams.get('id')! : '';
   const site = Stories.FROM ? searchParams.get('site')! : '';
 
-  const title = x[type]
+  const title = typesToTitles[type]
     .replace('$user', searchParams.get('id')!)
     .replace('$site', searchParams.get('site')!)
 

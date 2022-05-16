@@ -32,9 +32,10 @@ export const cachedWarning = ({ fromCacheDate }: { fromCacheDate?: Date | null }
 
 export const del = (content: HTMLContent) => navigator.onLine ? content : html`<del>${content}</del>`
 
-export const headerEl = ({ op, id }: { 
+export const headerEl = ({ op, id, p = 1 }: { 
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string,  
+  p?: number,
 }) => html`
   <tr>
     <td id="header" bgcolor="#ee9b33">
@@ -72,6 +73,9 @@ export const headerEl = ({ op, id }: {
                     : ''}
                 ${op === 'from'
                     ? html`| <font color="#ffffff">from</font>` 
+                    : ''}
+                ${op === 'item' && p > 1
+                    ? html`| <font color="#ffffff">page ${p}</font>` 
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
@@ -118,10 +122,11 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-export const pageLayout = ({ title, op, id, headers }: { 
+export const pageLayout = ({ title, op, id, p, headers }: { 
   title?: string, 
   op: Stories | 'item' | 'user' | 'threads', 
   id?: string,
+  p?: number,
   headers?: Headers,
 }) => (content: HTMLContent) => html`
   <!DOCTYPE html>
@@ -158,7 +163,7 @@ export const pageLayout = ({ title, op, id, headers }: {
     <center>
       <table id="hnmain" border="0" cellpadding="0" cellspacing="0" width="85%" bgcolor="#f6f6ef">
         <tbody>
-          ${headerEl({ op, id })}
+          ${headerEl({ op, id, p })}
           ${content}
           ${footerEl()}
         </tbody>
