@@ -3,8 +3,8 @@
  */
 import { ParamsURL } from '@worker-tools/json-fetch';
 import { ResolvablePromise } from '@worker-tools/resolvable-promise';
-import { eventTargetToAsyncIter } from 'event-target-to-async-iter';
 import { unescape } from 'html-escaper';
+import { AsyncQueue } from '../vendor/async-queue.ts';
 
 import { AThing, APost, AComment, APollOpt, Quality, Stories, AUser, StoriesParams, StoriesData, ThreadsData } from './interface.ts';
 import { aMap } from './iter.ts';
@@ -39,21 +39,16 @@ export async function stories(params: StoriesParams, type = Stories.TOP) {
   return storiesGenerator(body);
 }
 
-function newCustomEvent<T>(event: string, detail?: T) {
-  return new CustomEvent<T>(event, { detail });
-}
-
 function storiesGenerator(response: Response): Promise<StoriesData> {
   let post: Partial<APost>;
 
-  const data = new EventTarget();
-  const iter = eventTargetToAsyncIter<CustomEvent<APost>>(data, 'data', { returnEvent: 'return' });
+  const iter = new AsyncQueue<Partial<APost>>();
 
   const moreLink = new ResolvablePromise<string>();
   const rewriter = new HTMLRewriter()
     .on('.athing[id]', {
       element(el) {
-        if (post) data.dispatchEvent(newCustomEvent('data', post));
+        if (post) iter.enqueue(post);
 
         const id = Number(el.getAttribute('id'));
         post = { id, title: '', score: 0, by: '', descendants: 0, story: post?.story };
@@ -81,8 +76,8 @@ function storiesGenerator(response: Response): Promise<StoriesData> {
     })
     .on('.yclinks', {
       element() { 
-        if (post) data.dispatchEvent(newCustomEvent('data', post)) 
-        data.dispatchEvent(newCustomEvent('return'))
+        if (post) iter.enqueue(post)
+        iter.return();
       }
     })
 
@@ -92,7 +87,7 @@ function storiesGenerator(response: Response): Promise<StoriesData> {
     .catch(err => iter.throw(err));
 
   return Promise.resolve({
-    items: aMap(iter, ({ detail: post }) => {
+    items: aMap(iter, post => {
       post.type = post.type || 'story';
       if (!post.by) { // No users post this = job ads
         post.type = 'job';
@@ -117,13 +112,13 @@ export async function threads(id: string, next?: number) {
   return threadsGenerator(body)
 }
 
-function scrapeComments(rewriter: HTMLRewriter, data: EventTarget, prefix = '') {
+function scrapeComments(rewriter: HTMLRewriter, iter: AsyncQueue<Partial<AComment>>, prefix = '') {
   let comment!: Partial<AComment>;
 
   return rewriter
     .on(`${prefix} .athing.comtr[id]`, {
       element(thing) {
-        if (comment) data.dispatchEvent(newCustomEvent('data', comment));
+        if (comment) iter.enqueue(comment);
         const id = Number(thing.getAttribute('id'))
         comment = { id, type: 'comment', by: '', text: '', storyTitle: '' };
       },
@@ -159,8 +154,8 @@ function scrapeComments(rewriter: HTMLRewriter, data: EventTarget, prefix = '') 
     })
     .on('.yclinks', {
       element() { 
-        if (comment) data.dispatchEvent(newCustomEvent('data', comment)) 
-        data.dispatchEvent(newCustomEvent('return'))
+        if (comment) iter.enqueue(comment)
+        iter.return()
       }
     })
 }
@@ -168,11 +163,10 @@ function scrapeComments(rewriter: HTMLRewriter, data: EventTarget, prefix = '') 
 async function commentsGenerator(response: Response) {
   const post: Partial<APost> = { title: '', score: 0, by: '', descendants: 0, text: '', storyTitle: '', dead: true };
 
-  const data = new EventTarget();
-  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(data, 'data', { returnEvent: 'return' });
-  const opts = eventTargetToAsyncIter<CustomEvent<APollOpt>>(data, 'pollopt', { returnEvent: 'return' });
-  let hasParts = undefined;
+  const comm = new AsyncQueue<Partial<AComment>>();
+  const opts = new AsyncQueue<Partial<APollOpt>>();
 
+  const postPromise = new ResolvablePromise<Partial<APost>>();
   const moreLink = new ResolvablePromise<string>();
 
   // console.log(response.status, response.url, ...response.headers, (await response.clone().arrayBuffer()).byteLength)
@@ -217,10 +211,9 @@ async function commentsGenerator(response: Response) {
     // Poll: item?id=30210378
     .on('.fatitem > tr:nth-child(6) tr.athing[id]', {
       element(el) {
-        hasParts = true;
         post.type = 'poll';
 
-        if (pollOpt) data.dispatchEvent(newCustomEvent('pollopt', pollOpt))
+        if (pollOpt) opts.enqueue(pollOpt)
         const id = Number(el.getAttribute('id'));
         pollOpt = { id, text: '', score: 0 };
       }
@@ -258,7 +251,7 @@ async function commentsGenerator(response: Response) {
       }
     })
     .on('.comment-tree', {
-      element() { data.dispatchEvent(newCustomEvent('data', post)) },
+      element() { postPromise.resolve(post) },
     })
     .on('a.morelink[href][rel="next"]', { 
       element(el) { 
@@ -266,28 +259,28 @@ async function commentsGenerator(response: Response) {
       }, 
     })
 
-  scrapeComments(rewriter, data, '.comment-tree');
+  scrapeComments(rewriter, comm, '.comment-tree');
     
   consume(rewriter.transform(response).body!)
-    .then(() => iter.return())
+    .then(() => (comm.return(), opts.return()))
     .then(() => moreLink.resolve(''))
-    .catch(err => iter.throw(err));
+    .catch(err => (comm.throw(err), opts.throw(err)));
 
   // wait for `post` to be populated
-  await iter.next();
+  await postPromise;
 
   if (post.text?.trim()) {
     post.text = await blockquotify('<p>' + post.text)
   } else delete post.text
 
-  post.parts = hasParts && aMap(opts, ({ detail: pollOpt }) => {
+  post.parts = aMap(opts, pollOpt => {
     pollOpt.poll = post.id!;
     pollOpt.by = post.by!;
     pollOpt.dead = post.dead;
     return fixPollOpt(pollOpt);
   })
 
-  post.kids = aMap(iter, ({ detail: comment }) => {
+  post.kids = aMap(comm, comment => {
     comment.story = post.id;
     comment.dead = post.dead;
     return fixComment(comment)
@@ -317,8 +310,7 @@ function fixPollOpt(pollOpt: Partial<APollOpt>) {
 }
 
 function threadsGenerator(response: Response): Promise<ThreadsData> {
-  const target = new EventTarget();
-  const iter = eventTargetToAsyncIter<CustomEvent<AComment>>(target, 'data', { returnEvent: 'return' });
+  const comm = new AsyncQueue<Partial<AComment>>();
 
   const moreLink = new ResolvablePromise<string>();
   const rewriter = new HTMLRewriter()
@@ -326,15 +318,15 @@ function threadsGenerator(response: Response): Promise<ThreadsData> {
       element(el) { moreLink.resolve(unescape(el.getAttribute('href') ?? '')) } 
     });
 
-  scrapeComments(rewriter, target, '');
+  scrapeComments(rewriter, comm, '');
 
   consume(rewriter.transform(response).body!)
-    .then(() => iter.return())
+    .then(() => comm.return())
     .then(() => moreLink.resolve(''))
-    .catch(e => iter.throw(e));
+    .catch(e => comm.throw(e));
 
   return Promise.resolve({
-    items: aMap(iter, ({ detail: comment }) => {
+    items: aMap(comm, comment => {
       return fixComment(comment)
     }),
     moreLink,

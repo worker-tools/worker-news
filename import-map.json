@@ -19,7 +19,6 @@
     "@qwtel/blockies": "https://ghuc.cc/qwtel/blockies/src/blockies.mjs",
     "@qwtel/p-queue-browser": "https://cdn.skypack.dev/@qwtel/p-queue-browser?dts",
     "whatwg-stream-to-async-iter": "https://ghuc.cc/qwtel/whatwg-stream-to-async-iter/index.ts",
-    "event-target-to-async-iter": "https://ghuc.cc/qwtel/event-target-to-async-iter/index.ts",
     "@cloudflare/kv-asset-handler": "https://cdn.skypack.dev/@cloudflare/kv-asset-handler?dts",
     "parse-domain": "https://cdn.skypack.dev/parse-domain?dts",
     "html-escaper": "https://cdn.skypack.dev/html-escaper?dts",
