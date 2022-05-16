@@ -10,7 +10,6 @@ export async function* aTake<T>(n: number, xs: AsyncIterable<T>): AsyncIterableI
   }
 }
 
-export type ForAwaitable<T> = Iterable<T> | AsyncIterable<T>;
 export async function* aConcat<A, B>(as: ForAwaitable<A>, bs: ForAwaitable<B>): AsyncIterableIterator<A | B> {
   for await (const a of as) yield a;
   for await (const b of bs) yield b;
@@ -22,6 +21,7 @@ export const isIterable = <T>(x: unknown): x is Iterable<T> =>
 export const isAsyncIterable = <T>(x: unknown): x is AsyncIterable<T> =>
   x != null && typeof x === 'object' && Symbol.asyncIterator in x
 
+export type ForAwaitable<T> = Iterable<T> | AsyncIterable<T>;
 export type ForAwaitIterator<T> = AsyncIterator<T> | Iterator<T>
 export type ForAwaitIterableIterator<T> = AsyncIterableIterator<T> | IterableIterator<T>
 

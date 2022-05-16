@@ -16,7 +16,7 @@ compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
 
 [vars]
   WORKER_LOCATION = 'http://localhost:8787'
-  # CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
+  # DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
 
 [env.staging]
   name = "news-stage"
@@ -26,16 +26,15 @@ compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
 
   [env.staging.vars]
     WORKER_LOCATION = 'https://news-stage.qwtel.workers.dev'
-    # CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
+    # DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
 
 [env.production]
-  name = "news"
+  name = "worker-news"
   route = "https://news.workers.tools/*"
-  zone_id = "8596da6f65777e058a00ce7ccb64e882"
   # kv_namespaces = [
   #   { binding = "KV_STORAGE", id = "7cc25899ab754777a85c05bcd66076f9" }
   # ]
 
   [env.production.vars]
     WORKER_LOCATION = 'https://news.workers.tools'
-    # CF_STORAGE_AREA__DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
+    # DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
