@@ -29,7 +29,6 @@ specifiers:
   date-fns: ^2.28.0
   device-detector-js: ^3.0.3
   esbuild: ^0.14.39
-  event-target-to-async-iter: ^0.2.1
   firebase: ^9.8.1
   html-escaper: ^3.0.3
   kv-storage-interface: ^0.2.0
@@ -54,7 +53,6 @@ dependencies:
   '@stardazed/streams-compression': 1.0.0
   '@stardazed/streams-fetch-adapter': 3.0.0
   '@stardazed/streams-text-encoding': 1.0.2
-  '@types/html-escaper': 3.0.0
   '@worker-tools/cloudflare-kv-storage': 0.8.0
   '@worker-tools/deno-fetch-event-adapter': 1.0.5
   '@worker-tools/deno-kv-storage': 0.4.4
@@ -72,7 +70,6 @@ dependencies:
   base64-encoding: 0.14.3
   date-fns: 2.28.0
   device-detector-js: 3.0.3
-  event-target-to-async-iter: 0.2.1
   firebase: 9.8.1
   html-escaper: 3.0.3
   kv-storage-interface: 0.2.0
@@ -89,6 +86,7 @@ dependencies:
 
 devDependencies:
   '@cloudflare/workers-types': 3.10.0
+  '@types/html-escaper': 3.0.0
   '@types/node': 17.0.32
   esbuild: 0.14.39
   miniflare: 2.4.0
@@ -806,7 +804,7 @@ packages:
 
   /@types/html-escaper/3.0.0:
     resolution: {integrity: sha512-OcJcvP3Yk8mjYwf/IdXZtTE1tb/u0WF0qa29ER07ZHCYUBZXSN29Z1mBS+/96+kNMGTFUAbSz9X+pHmHpZrTCw==}
-    dev: false
+    dev: true
 
   /@types/long/4.0.2:
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
@@ -1340,10 +1338,6 @@ packages:
   /escalade/3.1.1:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
     engines: {node: '>=6'}
-    dev: false
-
-  /event-target-to-async-iter/0.2.1:
-    resolution: {integrity: sha512-wY71SfkhmB/BcbzJZQdCGbx2Y1eBN+/C+cRcX+8/1jORyQuPmasSgbRbi0UuSlaM0LlBZmQW9JNBJfvwQhmvRg==}
     dev: false
 
   /faye-websocket/0.11.4:
