@@ -2,6 +2,8 @@
 
 A drop in replacement for Hacker News with support for dark mode, quotes in comments, user identicons and submission favicons. 
 
+![Screenshot](./worker-news.jpg)
+
 ## What's cool about this?
 - Developed against a generic [Worker Runtime](https://workers.js.org) so that it can run on Cloudflare Workers, Deno Deploy and even the browser's Service Worker.
 - Can be installed + offline support --- same code that runs on the edge powers the PWA.
