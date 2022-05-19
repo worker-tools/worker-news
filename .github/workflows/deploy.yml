@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy-cf:
     runs-on: ubuntu-latest
@@ -25,3 +29,25 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: production
+  deploy-deno:
+    runs-on: ubuntu-latest
+    name: Deploy Deno
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6
+          run_install: true
+      - run: rm -r node_modules
+      - uses: denoland/deployctl@v1
+        with:
+          project: worker-news
+          entrypoint: src/entry/deno.ts
+          import-map: import-map.json
+      
