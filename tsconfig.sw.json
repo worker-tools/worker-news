@@ -2,7 +2,6 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      // "@worker-tools/kv-storage": ["./node_modules/kv-storage-polyfill/dist/kv-storage-polyfill.mjs"],
       "perf_hooks": ["./src/stubs/perf_hooks.js"],
       "firebase/app": ["./src/stubs/firebase.js"],
       "firebase/database": ["./src/stubs/firebase.js"],
