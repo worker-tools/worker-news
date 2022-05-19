@@ -2,11 +2,11 @@
 
 A drop in replacement for Hacker News with support for dark mode, quotes in comments, user identicons and submission favicons. 
 
-![Screenshot](./worker-news.jpg)
+[![Screenshot](./worker-news.jpg)](https://worker-news.deno.dev)
 
 ## What's cool about this?
 - Developed against a generic [Worker Runtime](https://workers.js.org) so that it can run on Cloudflare Workers, Deno Deploy and even the browser's Service Worker.
-- Can be installed + offline support --- same code that runs on the edge powers the PWA.
+- Can be installed + offline support: Same code that runs on the edge powers the PWA.
 - Everything is stream/async generator-based: API calls, HTML scraping, HTML responses, even JSON stringification and parsing.
 - Supports 3 API backends: HTML scraping from news.ycombinator.com, HTTP requests to HN API and HN API via Firebase.
 - Built using my own web framework, [Worker Tools](https://workers.tools), which is specifically developed to run across CF Workers, Deno and Service Workers.
