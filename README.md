@@ -26,3 +26,9 @@ If you have Wrangler 2.0 is installed, run `wrangler dev --local` instead.
 
 Deno users can simply run `deno task serve` and open <http://localhost:8000>. 
 
+### Note on Running on Cloudflare Workers
+While the app runs fine with Miniflare/`wrangler dev --local`, it works poorly when running on Cloudflare's edge network. 
+The reason is that the HN API is not usable from CF Workers. Firebase is missing dependencies in the runtime (probably WebSocket or similar), 
+while the REST API runs into CF Workers' 50 subrequest limit. 
+This only leaves the DOM API (HTML scraping), which usually triggers HN's scrape shield...
+
