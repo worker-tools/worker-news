@@ -4,9 +4,6 @@ account_id = "efb289061241436254219b424fcea4cf"
 workers_dev = true
 compatibility_date = "2022-04-05"
 compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
-# kv_namespaces = [ 
-#   { binding = "KV_STORAGE", id = "a713f738814e4de6939b8f9906e01de5", preview_id = "41a0e5dd97134debac212ea90d2d9061" }
-# ]
 
 [site]
   bucket = "./public"
@@ -16,25 +13,9 @@ compatibility_flags = ["html_rewriter_treats_esi_include_as_void_tag"]
 
 [vars]
   WORKER_LOCATION = 'http://localhost:8787'
-  # DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
-
-[env.staging]
-  name = "news-stage"
-  # kv_namespaces = [
-  #   { binding = "KV_STORAGE", id = "c2cd7359703f4eddba909ebfb0ec1a35" }
-  # ]
-
-  [env.staging.vars]
-    WORKER_LOCATION = 'https://news-stage.qwtel.workers.dev'
-    # DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
 
 [env.production]
   name = "worker-news"
-  route = "https://news.workers.tools/*"
-  # kv_namespaces = [
-  #   { binding = "KV_STORAGE", id = "7cc25899ab754777a85c05bcd66076f9" }
-  # ]
 
   [env.production.vars]
-    WORKER_LOCATION = 'https://news.workers.tools'
-    # DEFAULT_KV_NAMESPACE = 'KV_STORAGE'
+    WORKER_LOCATION = 'https://worker-news.qwtel.workers.dev'

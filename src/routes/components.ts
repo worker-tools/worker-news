@@ -104,7 +104,7 @@ export const footerEl = () => html`
       </table><br/>
       <center>Made by <a href="/user?id=qwtel">${identicon('qwtel', 12)} qwtel</a> with <a
           href="https://workers.tools">Worker&nbsp;Tools</a> and <a
-          href="https://deno.com">Deno&nbsp;Deploy</a>.</center><br/>
+          href="https://deno.com/deploy">Deno&nbsp;Deploy</a>.</center><br/>
       <center><span class="yclinks">YC: 
             <a href="https://news.ycombinator.com/newsguidelines.html">Guidelines</a>
           | <a href="https://news.ycombinator.com/newsfaq.html">FAQ</a>
