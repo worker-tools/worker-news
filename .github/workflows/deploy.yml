@@ -32,6 +32,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: production
+      - name: Fix permissions borked by cloudflare/wrangler-action
+        run: sudo chown -R $(id -un):$(id -gn) ${{ github.workspace }}
   deploy-deno:
     runs-on: ubuntu-latest
     name: Deploy Deno
