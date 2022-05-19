@@ -15,12 +15,6 @@ jobs:
     name: Deploy Cloudflare
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
       - uses: pnpm/action-setup@v2
         with:
           version: 7
@@ -34,12 +28,6 @@ jobs:
     name: Deploy Deno
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-
       - uses: pnpm/action-setup@v2
         with:
           version: 7
