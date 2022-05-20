@@ -12,7 +12,7 @@ self.addEventListener('fetch', router);
 
 self.addEventListener('install', async (event: any) => {
   console.log('install')
-  const cache = await (<any>self).caches.open('public')
+  const cache = await self.caches.open('public')
   await cache.addAll([
     '/darkbluearrow.png',
     '/darkbluearrow2x.png',
@@ -22,7 +22,7 @@ self.addEventListener('install', async (event: any) => {
     '/grayarrow2x.gif',
     '/hn.js',
     '/new.png',
-    '/news.css?v=22',
+    '/news.css?v=23',
     '/s.gif',
     '/y18.png',
     '/y18.gif',

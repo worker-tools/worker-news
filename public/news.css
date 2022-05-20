@@ -266,9 +266,6 @@ and (max-width : 750px) {
 }
 
 .sr-only { clip: rect(1px, 1px, 1px, 1px); -webkit-clip-path: inset(50%); clip-path: inset(50%); height: 1px; overflow: hidden; margin-left: -2px; padding: 0; display: inline-block; position: absolute; width: 1px; white-space: nowrap; }
-#footer a[href$="workers.tools"]:before { content:'⚙️ ' }
-#footer a[href$="workers.cloudflare.com"]:before { content:'〈》'; margin-left: -5px; position: inline-block;}
-#footer a[href$="deno.com"]:before { content:'🦕 '}
 
 .identicon { position: relative; top: 1px }
 
@@ -276,7 +273,7 @@ and (max-width : 750px) {
 .about { overflow:hidden; }
 .about > p:first-child { margin-top: 0 }
 
-@media only screen and (display-mode: minimal-ui), only screen and (display-mode: standalone) {
+@media only screen and (display-mode: minimal-ui) {
   body { padding: 0; margin: 0; }
   #hnmain { width:100% }
   #header { position: sticky; top: 0; z-index: 2; padding: 0 5px }

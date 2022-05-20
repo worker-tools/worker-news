@@ -10,8 +10,8 @@ declare global {
   }
 
   interface Navigator {
+    // @ts-ignore: avoid error i.c. Deno implements this property
     readonly onLine?: boolean;
-    readonly userAgent?: string;
   }
 
   abstract class Cache {
@@ -24,7 +24,10 @@ declare global {
       options?: CacheQueryOptions
     ): Promise<Response | undefined>;
     put(request: Request | string, response: Response): Promise<void>;
+    /** @deprecated SW only */
     keys(): Promise<string[]>;
+    /** @deprecated SW only */
+    addAll(requests: (Request | string)[]): Promise<void>;
   }
 
   interface CacheQueryOptions {
