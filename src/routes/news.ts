@@ -13,7 +13,7 @@ import { cachedWarning, del, favicon, identicon, pageLayout } from './components
 import { api, APost, Stories, StoriesParams, StoriesData } from '../api/index.ts'
 import { StreamResponse } from "@worker-tools/stream-response";
 
-const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org']
+const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org', 'bearblog.dev']
 const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
 
 // const at = <T>(xs: T[], i: number) => i >= 0 ? xs[i] : xs[xs.length + i]
