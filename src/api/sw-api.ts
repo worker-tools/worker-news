@@ -76,10 +76,12 @@ export async function comments(id: number, p: number | undefined, args: MinArgs)
   const data: PromisedEx<Partial<APost>, 'moreLink' | 'fromCacheDate' | 'kids' | 'parts'> = {
     type: nxs.promise('$.type'),
     title: nxs.promise('$.title'),
+    parent: nxs.promise('$.parent'),
+    storyTitle: nxs.promise('$.storyTitle'),
+    story: nxs.promise('$.story'),
     score: nxs.promise('$.score'),
     by: nxs.promise('$.by'),
     descendants: nxs.promise('$.descendants'),
-    storyTitle: nxs.promise('$.storyTitle'),
     text: nxs.promise('$.text'),
     quality: nxs.promise('$.quality'),
     dead: nxs.promise('$.dead'),

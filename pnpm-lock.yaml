@@ -2,7 +2,7 @@ lockfileVersion: 5.4
 
 specifiers:
   '@cloudflare/kv-asset-handler': ^0.2.0
-  '@cloudflare/workers-types': ^3.10.0
+  '@cloudflare/workers-types': ^3.11.0
   '@qwtel/blockies': github:qwtel/blockies
   '@qwtel/p-queue-browser': ^6.6.2
   '@stardazed/streams': ^3.1.0
@@ -10,20 +10,20 @@ specifiers:
   '@stardazed/streams-fetch-adapter': ^3.0.0
   '@stardazed/streams-text-encoding': ^1.0.2
   '@types/html-escaper': ^3.0.0
-  '@types/node': ^17.0.32
+  '@types/node': ^17.0.35
   '@worker-tools/cloudflare-kv-storage': ^0.8.0
   '@worker-tools/deno-fetch-event-adapter': ^1.0.5
   '@worker-tools/deno-kv-storage': ^0.4.4
-  '@worker-tools/extendable-promise': 0.2.0-pre.8
-  '@worker-tools/html': ^2.0.0-pre.10
-  '@worker-tools/html-rewriter': ^0.1.0-pre.15
+  '@worker-tools/extendable-promise': 0.2.0-pre.9
+  '@worker-tools/html': ^2.0.0-pre.11
+  '@worker-tools/html-rewriter': ^0.1.0-pre.16
   '@worker-tools/json-fetch': 2.1.0-pre.5
-  '@worker-tools/json-stream': 0.1.0-pre.8
+  '@worker-tools/json-stream': 0.1.0-pre.12
   '@worker-tools/location-polyfill': ^0.4.1
-  '@worker-tools/middleware': ^0.1.0-pre.17
-  '@worker-tools/resolvable-promise': ^0.2.0-pre.4
+  '@worker-tools/middleware': ^0.1.0-pre.19
+  '@worker-tools/resolvable-promise': ^0.2.0-pre.5
   '@worker-tools/response-creators': ^1.0.8
-  '@worker-tools/router': 0.2.0-pre.8
+  '@worker-tools/router': 0.2.0-pre.9
   '@worker-tools/stream-response': ^0.1.0-pre.3
   base64-encoding: ^0.14.3
   date-fns: ^2.28.0
@@ -56,16 +56,16 @@ dependencies:
   '@worker-tools/cloudflare-kv-storage': 0.8.0
   '@worker-tools/deno-fetch-event-adapter': 1.0.5
   '@worker-tools/deno-kv-storage': 0.4.4
-  '@worker-tools/extendable-promise': 0.2.0-pre.8
-  '@worker-tools/html': 2.0.0-pre.10
-  '@worker-tools/html-rewriter': 0.1.0-pre.15
+  '@worker-tools/extendable-promise': 0.2.0-pre.9
+  '@worker-tools/html': 2.0.0-pre.11
+  '@worker-tools/html-rewriter': 0.1.0-pre.16
   '@worker-tools/json-fetch': 2.1.0-pre.5
-  '@worker-tools/json-stream': 0.1.0-pre.8
+  '@worker-tools/json-stream': 0.1.0-pre.12
   '@worker-tools/location-polyfill': 0.4.1
-  '@worker-tools/middleware': 0.1.0-pre.17
-  '@worker-tools/resolvable-promise': 0.2.0-pre.4
+  '@worker-tools/middleware': 0.1.0-pre.19
+  '@worker-tools/resolvable-promise': 0.2.0-pre.5
   '@worker-tools/response-creators': 1.0.8
-  '@worker-tools/router': 0.2.0-pre.8
+  '@worker-tools/router': 0.2.0-pre.9
   '@worker-tools/stream-response': 0.1.0-pre.3
   base64-encoding: 0.14.3
   date-fns: 2.28.0
@@ -85,9 +85,9 @@ dependencies:
   whatwg-stream-to-async-iter: 0.6.2
 
 devDependencies:
-  '@cloudflare/workers-types': 3.10.0
+  '@cloudflare/workers-types': 3.11.0
   '@types/html-escaper': 3.0.0
-  '@types/node': 17.0.32
+  '@types/node': 17.0.35
   esbuild: 0.14.39
   miniflare: 2.4.0
   typescript: 4.6.4
@@ -104,8 +104,8 @@ packages:
     resolution: {integrity: sha512-kaMn2rueJ0PL1TYVGknTCh0X0x0d9G+FNXAFep7/4uqecEZoQb/63o6rOmMuiqI09zLuHV6xhKRXinokV/MY9A==}
     dev: false
 
-  /@cloudflare/workers-types/3.10.0:
-    resolution: {integrity: sha512-gn+H5Ps9yV1VYz8FJ08bMfXLW8ubNblRF9Z+m+0ctNMyl3CdoZmUfH1pMTxYE8SMUJbLxuNvpdlZhwLDoGFXaw==}
+  /@cloudflare/workers-types/3.11.0:
+    resolution: {integrity: sha512-XmKgZZHrCdPsoVQkdd365R7GvwTwDVJsMyEG3Dq/Tgxz6vgrps2c8PXBqEutguwvl0zDAF0AL0e2Z8WG9Dffjw==}
     dev: true
 
   /@firebase/analytics-compat/0.1.10_nl2xbfjx4m6epdjz4gqb77kzfy:
@@ -567,7 +567,7 @@ packages:
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.6.9
-      '@types/node': 17.0.32
+      '@types/node': 17.0.35
     dev: false
 
   /@grpc/proto-loader/0.6.9:
@@ -810,8 +810,8 @@ packages:
     resolution: {integrity: sha512-MqTGEo5bj5t157U6fA/BiDynNkn0YknVdh48CMPkTSpFTVmvao5UQmm7uEF6xBEo7qIMAlY/JSleYaE6VOdpaA==}
     dev: false
 
-  /@types/node/17.0.32:
-    resolution: {integrity: sha512-eAIcfAvhf/BkHcf4pkLJ7ECpBAhh9kcxRBpip9cTiO+hf+aJrsxYxBeS6OXvOd9WqNAJmavXVpZvY1rBjNsXmw==}
+  /@types/node/17.0.35:
+    resolution: {integrity: sha512-vu1SrqBjbbZ3J6vwY17jBs8Sr/BKA+/a/WtjRG+whKg1iuLFOosq872EXS0eXWILdO36DHQQeku/ZcL6hz2fpg==}
 
   /@types/stack-trace/0.0.29:
     resolution: {integrity: sha512-TgfOX+mGY/NyNxJLIbDWrO9DjGoVSW9+aB8H2yy1fy32jsvxijhmyJI9fDFgvz3YP4lvJaq9DzdR/M1bOgVc9g==}
@@ -852,21 +852,21 @@ packages:
       typed-array-utils: 0.2.2
     dev: false
 
-  /@worker-tools/extendable-promise/0.2.0-pre.8:
-    resolution: {integrity: sha512-pr5eBJY21kUyT9QAGaquZRKzsckPgydSonCiRai2uSU1wEP77ZJYfvdLMKwxSJay0fS///9NPNrIJOKyxYuWfA==}
+  /@worker-tools/extendable-promise/0.2.0-pre.9:
+    resolution: {integrity: sha512-Pu5jzCVx7HBZMVsbqpb1jV8BroD/30921wUrw+Jwy9o66IEjfcrTqBum0rlB1Kdu0Y41xrZuPz3z7j8BTFwH+A==}
     dependencies:
-      '@worker-tools/resolvable-promise': 0.2.0-pre.4
+      '@worker-tools/resolvable-promise': 0.2.0-pre.5
     dev: false
 
-  /@worker-tools/html-rewriter/0.1.0-pre.15:
-    resolution: {integrity: sha512-8s55FTCxSJe5ZyulCg3aY8B5CFh+yOFiPOQWWp+y3R+ewlASf3P6bIibK6Lr7GDueq9HChJo9/5hstmGnisN7A==}
+  /@worker-tools/html-rewriter/0.1.0-pre.16:
+    resolution: {integrity: sha512-wRPDDA89YLKMv+hWhhrF52ojho8Wx6RoC2mOrVmkdtpkXB9E7S8JgEtezHICF5At3wwi/3yAhReuuY448cNP3g==}
     dependencies:
       '@stardazed/streams-compression': 1.0.0
-      '@worker-tools/resolvable-promise': 0.2.0-pre.4
+      '@worker-tools/resolvable-promise': 0.2.0-pre.5
     dev: false
 
-  /@worker-tools/html/2.0.0-pre.10:
-    resolution: {integrity: sha512-lqXrD4gD32A8LOpwLOQKcSopWg8PZk0wGpUxOOtI00hFJhijlIrnRnW/0f4d6E2jTpqA2unD6dXJErVPk11ySQ==}
+  /@worker-tools/html/2.0.0-pre.11:
+    resolution: {integrity: sha512-hvLQgMLWaT28HxUIk4XGvyhnI4qpvCgBqLPlyDU69gJNrIKrxZNqPVr3l18iWEDYFFIO9RS+se0dW+AULtCnhQ==}
     dependencies:
       '@worker-tools/stream-response': 0.1.0-pre.3
     dev: false
@@ -875,13 +875,12 @@ packages:
     resolution: {integrity: sha512-gP+7Cjv+O1uDbCsTecr3UdAG5GaUbGX5VwaUryp3QBQpZ+ulsjoqmVdptPL74Iv74//Em+XBv27CjRcmTxiynQ==}
     dev: false
 
-  /@worker-tools/json-stream/0.1.0-pre.8:
-    resolution: {integrity: sha512-Dzd2Qp0OLRFp1J9hpuG5V9y2Je8pVD6GJJOyOUUwT+WfOyplJOLMM3J0CPEBwURhPubGfzGJfQdu2RzC3os8oQ==}
+  /@worker-tools/json-stream/0.1.0-pre.12:
+    resolution: {integrity: sha512-ck6wPkVEF+fx5baltebDlSAGusMIJ8D4K6x/C5ca7JJaINZ1bP6AfBSkN98hY4uRVe2G+n5B07CPH77sSVdoag==}
     dependencies:
-      '@worker-tools/resolvable-promise': 0.2.0-pre.4
+      '@worker-tools/resolvable-promise': 0.2.0-pre.5
       '@worker-tools/stream-response': 0.1.0-pre.3
       ts-functional-pipe: 3.1.2
-      typed-array-utils: 0.2.2
       whatwg-stream-to-async-iter: 0.6.2
     dev: false
 
@@ -891,13 +890,13 @@ packages:
       '@cloudflare/workers-types': 2.2.2
     dev: false
 
-  /@worker-tools/middleware/0.1.0-pre.17:
-    resolution: {integrity: sha512-ncJlrEJAdQj7lyQ8C/Eo2a8y0/gu3w9s0gB9d3HxbhPysIGEzz/v8ezcunm9QrpBsR/C4ZQwrUwTGkMZl+PNmA==}
+  /@worker-tools/middleware/0.1.0-pre.19:
+    resolution: {integrity: sha512-en4abiK/LTM7sgTOcMM2ScWwc8FJBX8WO8SCtRXSjyou2nazRAEPSUM8I6g7/+WM5uuIJZTgxcRjkOHPiu0AbA==}
     dependencies:
       '@worker-tools/encrypted-cookie-store': 0.3.0-pre.5
-      '@worker-tools/extendable-promise': 0.2.0-pre.8
-      '@worker-tools/request-cookie-store': 0.5.0-pre.9
-      '@worker-tools/resolvable-promise': 0.2.0-pre.4
+      '@worker-tools/extendable-promise': 0.2.0-pre.9
+      '@worker-tools/request-cookie-store': 0.5.0-pre.10
+      '@worker-tools/resolvable-promise': 0.2.0-pre.5
       '@worker-tools/response-creators': 1.2.0-pre.5
       '@worker-tools/signed-cookie-store': 0.3.0-pre.7
       base64-encoding: 0.15.0-alpha.0
@@ -908,14 +907,14 @@ packages:
       uuid-class: 0.13.0-alpha.0
     dev: false
 
-  /@worker-tools/request-cookie-store/0.5.0-pre.9:
-    resolution: {integrity: sha512-bF/+BH8oanp5q4PsZW1i2zGuFf2wfrH6xO+Pxzz0Av9VBgIO74TwqZsSHSDlDvAfjKH6am9ZUqSo0eXPx5ZtZw==}
+  /@worker-tools/request-cookie-store/0.5.0-pre.10:
+    resolution: {integrity: sha512-BQO6B8igCwEGf9LEY14cy/WOrHKPDJHsLlNYoYH+r3/YzO9/7K6wHVZCl6QPXYKeOg4Slnu/hnsJBNNvOnLgaQ==}
     dependencies:
       cookie-store-interface: 0.1.1
     dev: false
 
-  /@worker-tools/resolvable-promise/0.2.0-pre.4:
-    resolution: {integrity: sha512-NoXQU2hv+/e4hWExN6J3yTU8n0PUD3yY+JzjHBWB4gwh40xtbee8Z/fKLNZzYHOfujfVvMK6PY7TDJzxha4Geg==}
+  /@worker-tools/resolvable-promise/0.2.0-pre.5:
+    resolution: {integrity: sha512-iWerbgDjwLFr9DkAoSnCbsHd9NJCmY4xqaA5c0nKT99o7KzwkFYhjXV4yfwXuYwSVlBp9WOLLjf0L4sdogdpmQ==}
     dev: false
 
   /@worker-tools/response-creators/1.0.8:
@@ -926,11 +925,11 @@ packages:
     resolution: {integrity: sha512-T5Q4CoW4JGv/kVrbuwTN0C0kgfwFj7j/8LPrScUGnk+2BIXdm9Be2YGtNpMgQRqs263yYHij2YRgFKK8bOdBaQ==}
     dev: false
 
-  /@worker-tools/router/0.2.0-pre.8:
-    resolution: {integrity: sha512-ExkikdMhKfLGlE5Uf2MLdkWTPtj27GJ/qD8OCsjWAk+3hnj7FrVk6uI6T5q4ht6SWlgDiL7cetKa5s7lbV/TvQ==}
+  /@worker-tools/router/0.2.0-pre.9:
+    resolution: {integrity: sha512-EQcjojzb7jC/iu6ovlY+7jXOe/JzQ4Wlqz0dSyATmF16jUMxTY6gJMmQxPp6Njrn9qdf48sIIqMq4XRK+wXqgA==}
     dependencies:
-      '@worker-tools/middleware': 0.1.0-pre.17
-      '@worker-tools/resolvable-promise': 0.2.0-pre.4
+      '@worker-tools/middleware': 0.1.0-pre.19
+      '@worker-tools/resolvable-promise': 0.2.0-pre.5
       '@worker-tools/response-creators': 1.2.0-pre.5
     dev: false
 
@@ -1768,7 +1767,7 @@ packages:
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
       '@types/long': 4.0.2
-      '@types/node': 17.0.32
+      '@types/node': 17.0.35
       long: 4.0.0
     dev: false
 

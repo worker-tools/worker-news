@@ -233,7 +233,7 @@ async function commentsGenerator(response: Response) {
       element(el) { post.time = elToDate(el) }
     })
     .on('.fatitem .comhead > .navs > a[href^="item"]', {
-      element(a) { post.parent = extractId(a.getAttribute('href')) }
+      element(a) { post.parent = extractId(a.getAttribute('href')); }
     })
     .on('.fatitem .comhead > .onstory > a[href]', {
       element(a) { post.story = extractId(a.getAttribute('href')) },

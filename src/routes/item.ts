@@ -39,7 +39,7 @@ export const commentTr = (comm: AComment, { showToggle = true, showReply = true,
           <span class="age" title="${time && new Date(time).toUTCString()}"><a href="item?id=${id}">${timeAgo}</a></span>
           <span id="unv_${id}"></span>
           <span class="navs">
-            <span class="par">${showParent ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
+            <span class="par">${showParent && parent ? html` | <a href="item?id=${parent}">parent</a>` : ''}</span> 
           </span>
           ${showToggle 
             ? html`<a class="togg clicky" id="${id}" n="${(comm.descendants ?? 0) + 1}" href="javascript:void(0)">[–]</a>` 
