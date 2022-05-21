@@ -13,8 +13,34 @@ import { cachedWarning, del, favicon, identicon, pageLayout } from './components
 import { api, APost, Stories, StoriesParams, StoriesData } from '../api/index.ts'
 import { StreamResponse } from "@worker-tools/stream-response";
 
-const SUB_SITES = ['medium.com', 'substack.com', 'mozilla.org', 'mit.edu', 'hardvard.edu', 'google.com', 'apple.com', 'notion.site', 'js.org', 'bearblog.dev']
-const GIT_SITES = ['twitter.com', 'github.com', 'gitlab.com', 'vercel.app'];
+// For some sites (which?) HN shows the subdomain. Here's are some that I've discovered...
+const SUB_SITES = [
+  'github.io', 
+  'gitlab.io', 
+  'medium.com', 
+  'substack.com', 
+  'mozilla.org', 
+  'mit.edu', 
+  'hardvard.edu', 
+  'google.com', 
+  'apple.com', 
+  'notion.site', 
+  'js.org', 
+  'bearblog.dev', 
+  'free.fr', 
+  'bl.uk', 
+  'azurewebsites.net', 
+  'wordpress.com', 
+  'blogspot.com', 
+  'posthaven.com',
+  'twitter.com',
+]
+
+// Sites that are like GitHub, where HN shows the first path segment after the domain, e.g. github.com/qwtel
+const GIT_SITES = ['github.com', 'gitlab.com', 'twitter.com', 'vercel.app', 'bitbucket.org'];
+
+// Sites that are like Forbes, where HN shows two path segment after the domain
+const FORBES_SITES = ['www.forbes.com']
 
 // const at = <T>(xs: T[], i: number) => i >= 0 ? xs[i] : xs[xs.length + i]
 
@@ -35,7 +61,9 @@ const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
 
       const allowedPathname = GIT_SITES.includes(url.hostname)
         ? url.pathname.split(/\/+/).slice(0, 2).join('/').toLowerCase()
-        : '';
+        : FORBES_SITES.includes(url.hostname) 
+          ? url.pathname.split(/\/+/).slice(0, 3).join('/').toLowerCase()
+          : '';
 
       const sitebit = `${allowedSubDomains}${domain}.${tld.join('.')}${allowedPathname}`;
       return Object.assign(url, { sitebit });
