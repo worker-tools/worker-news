@@ -14,8 +14,8 @@ specifiers:
   '@worker-tools/cloudflare-kv-storage': ^0.8.0
   '@worker-tools/deno-fetch-event-adapter': ^1.0.5
   '@worker-tools/deno-kv-storage': ^0.4.4
-  '@worker-tools/extendable-promise': 0.2.0-pre.9
-  '@worker-tools/html': ^2.0.0-pre.11
+  '@worker-tools/extendable-promise': 0.2.0-pre.10
+  '@worker-tools/html': ^2.0.0-pre.12
   '@worker-tools/html-rewriter': ^0.1.0-pre.16
   '@worker-tools/json-fetch': 2.1.0-pre.5
   '@worker-tools/json-stream': 0.1.0-pre.12
@@ -56,8 +56,8 @@ dependencies:
   '@worker-tools/cloudflare-kv-storage': 0.8.0
   '@worker-tools/deno-fetch-event-adapter': 1.0.5
   '@worker-tools/deno-kv-storage': 0.4.4
-  '@worker-tools/extendable-promise': 0.2.0-pre.9
-  '@worker-tools/html': 2.0.0-pre.11
+  '@worker-tools/extendable-promise': 0.2.0-pre.10
+  '@worker-tools/html': 2.0.0-pre.12
   '@worker-tools/html-rewriter': 0.1.0-pre.16
   '@worker-tools/json-fetch': 2.1.0-pre.5
   '@worker-tools/json-stream': 0.1.0-pre.12
@@ -852,8 +852,8 @@ packages:
       typed-array-utils: 0.2.2
     dev: false
 
-  /@worker-tools/extendable-promise/0.2.0-pre.9:
-    resolution: {integrity: sha512-Pu5jzCVx7HBZMVsbqpb1jV8BroD/30921wUrw+Jwy9o66IEjfcrTqBum0rlB1Kdu0Y41xrZuPz3z7j8BTFwH+A==}
+  /@worker-tools/extendable-promise/0.2.0-pre.10:
+    resolution: {integrity: sha512-Y1wKASuP4PP7pZK1+6F8vXoyLnxECuks/QPWI4CH5rqfBqoAC9VwCuCUj8ZbYURyz+KnCiAmXRbkx0EvJk+4Tg==}
     dependencies:
       '@worker-tools/resolvable-promise': 0.2.0-pre.5
     dev: false
@@ -865,8 +865,8 @@ packages:
       '@worker-tools/resolvable-promise': 0.2.0-pre.5
     dev: false
 
-  /@worker-tools/html/2.0.0-pre.11:
-    resolution: {integrity: sha512-hvLQgMLWaT28HxUIk4XGvyhnI4qpvCgBqLPlyDU69gJNrIKrxZNqPVr3l18iWEDYFFIO9RS+se0dW+AULtCnhQ==}
+  /@worker-tools/html/2.0.0-pre.12:
+    resolution: {integrity: sha512-PM3zQ4H8zmSweQbAd4HazHeV5x9NGG7WhwpgOyxEG+8FsZ9bxT5hXbLxcZefJPgcoDJQy5GA6OsHqXUxd5E4/A==}
     dependencies:
       '@worker-tools/stream-response': 0.1.0-pre.3
     dev: false
@@ -894,7 +894,7 @@ packages:
     resolution: {integrity: sha512-en4abiK/LTM7sgTOcMM2ScWwc8FJBX8WO8SCtRXSjyou2nazRAEPSUM8I6g7/+WM5uuIJZTgxcRjkOHPiu0AbA==}
     dependencies:
       '@worker-tools/encrypted-cookie-store': 0.3.0-pre.5
-      '@worker-tools/extendable-promise': 0.2.0-pre.9
+      '@worker-tools/extendable-promise': 0.2.0-pre.10
       '@worker-tools/request-cookie-store': 0.5.0-pre.10
       '@worker-tools/resolvable-promise': 0.2.0-pre.5
       '@worker-tools/response-creators': 1.2.0-pre.5

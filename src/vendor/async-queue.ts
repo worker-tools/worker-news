@@ -1,4 +1,4 @@
-// deno-lint-ignore-file
+// deno-lint-ignore-file no-explicit-any
 
 // Based on node.js event utility: <https://github.com/nodejs/node/blob/5b59e14dafb43b907e711cb418bb9c302bce2890/lib/events.js#L1017>
 // Copyright Joyent, Inc. and other Node contributors.
