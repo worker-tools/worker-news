@@ -5,7 +5,7 @@ import { JSONParseNexus } from '@worker-tools/json-stream';
 import { liftAsync, PromisedEx } from "../vendor/awaited-values.ts";
 import { APost, AUser, Stories, StoriesData, StoriesParams, ThreadsData } from "./interface.ts";
 
-type MinArgs = { url: URL, handled: Promise<void>, waitUntil: (f?: any) => void };
+type MinArgs = { url: URL, handled: Promise<Response>, waitUntil: (f?: any) => void };
 
 const MIN_WAIT = 350;
 const NEVER = new Promise<never>(() => {});

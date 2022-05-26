@@ -20,10 +20,10 @@ specifiers:
   '@worker-tools/json-fetch': 2.1.0-pre.5
   '@worker-tools/json-stream': 0.1.0-pre.12
   '@worker-tools/location-polyfill': ^0.4.1
-  '@worker-tools/middleware': ^0.1.0-pre.19
+  '@worker-tools/middleware': ^0.1.0-pre.24
   '@worker-tools/resolvable-promise': ^0.2.0-pre.5
   '@worker-tools/response-creators': ^1.0.8
-  '@worker-tools/router': 0.2.0-pre.9
+  '@worker-tools/router': 0.3.0-pre.0
   '@worker-tools/stream-response': ^0.1.0-pre.3
   base64-encoding: ^0.14.3
   date-fns: ^2.28.0
@@ -38,10 +38,10 @@ specifiers:
   parse-domain: ^7.0.0
   ts-functional-pipe: ^3.1.2
   typed-array-utils: ^0.2.2
-  typescript: ^4.6.4
-  typeson: ^6.1.0
-  typeson-registry: ^1.0.0-alpha.39
-  urlpattern-polyfill: ^4.0.3
+  typescript: ^4.7.2
+  typeson: ^7.0.2
+  typeson-registry: ^3.0.0
+  urlpattern-polyfill: '4'
   uuid-class: ^0.12.3
   whatwg-stream-to-async-iter: 0.6.2
 
@@ -62,10 +62,10 @@ dependencies:
   '@worker-tools/json-fetch': 2.1.0-pre.5
   '@worker-tools/json-stream': 0.1.0-pre.12
   '@worker-tools/location-polyfill': 0.4.1
-  '@worker-tools/middleware': 0.1.0-pre.19
+  '@worker-tools/middleware': 0.1.0-pre.24
   '@worker-tools/resolvable-promise': 0.2.0-pre.5
   '@worker-tools/response-creators': 1.0.8
-  '@worker-tools/router': 0.2.0-pre.9
+  '@worker-tools/router': 0.3.0-pre.0
   '@worker-tools/stream-response': 0.1.0-pre.3
   base64-encoding: 0.14.3
   date-fns: 2.28.0
@@ -78,8 +78,8 @@ dependencies:
   parse-domain: 7.0.0
   ts-functional-pipe: 3.1.2
   typed-array-utils: 0.2.2
-  typeson: 6.1.0
-  typeson-registry: 1.0.0-alpha.39
+  typeson: 7.0.2
+  typeson-registry: 3.0.0
   urlpattern-polyfill: 4.0.3
   uuid-class: 0.12.3
   whatwg-stream-to-async-iter: 0.6.2
@@ -90,7 +90,7 @@ devDependencies:
   '@types/node': 17.0.35
   esbuild: 0.14.39
   miniflare: 2.4.0
-  typescript: 4.6.4
+  typescript: 4.7.2
 
 packages:
 
@@ -890,8 +890,8 @@ packages:
       '@cloudflare/workers-types': 2.2.2
     dev: false
 
-  /@worker-tools/middleware/0.1.0-pre.19:
-    resolution: {integrity: sha512-en4abiK/LTM7sgTOcMM2ScWwc8FJBX8WO8SCtRXSjyou2nazRAEPSUM8I6g7/+WM5uuIJZTgxcRjkOHPiu0AbA==}
+  /@worker-tools/middleware/0.1.0-pre.24:
+    resolution: {integrity: sha512-yWNWWLRYU8ELuKt8SBcE7le2dgSW0u2EtBnU3V23SFxisrMclHx1ounE7haRwt5ZxAioi31SHUL9deRfmqv+Ug==}
     dependencies:
       '@worker-tools/encrypted-cookie-store': 0.3.0-pre.5
       '@worker-tools/extendable-promise': 0.2.0-pre.10
@@ -900,11 +900,12 @@ packages:
       '@worker-tools/response-creators': 1.2.0-pre.5
       '@worker-tools/signed-cookie-store': 0.3.0-pre.7
       base64-encoding: 0.15.0-alpha.0
+      immer: 9.0.14
       kv-storage-interface: 0.2.0
       msgpackr: 1.5.7
       negotiated: 1.0.2
       ts-functional-pipe: 3.1.2
-      uuid-class: 0.13.0-alpha.0
+      web-uuid: 0.1.0-pre.1
     dev: false
 
   /@worker-tools/request-cookie-store/0.5.0-pre.10:
@@ -925,11 +926,10 @@ packages:
     resolution: {integrity: sha512-T5Q4CoW4JGv/kVrbuwTN0C0kgfwFj7j/8LPrScUGnk+2BIXdm9Be2YGtNpMgQRqs263yYHij2YRgFKK8bOdBaQ==}
     dev: false
 
-  /@worker-tools/router/0.2.0-pre.9:
-    resolution: {integrity: sha512-EQcjojzb7jC/iu6ovlY+7jXOe/JzQ4Wlqz0dSyATmF16jUMxTY6gJMmQxPp6Njrn9qdf48sIIqMq4XRK+wXqgA==}
+  /@worker-tools/router/0.3.0-pre.0:
+    resolution: {integrity: sha512-LVJLr6uW+/oY8JOB2308Qd/QFo6375NyeopMJ7gUBr4JkrHP5erl3fNPB6NFQ1hhepmLafU9zNrUKD08lo7oGg==}
     dependencies:
-      '@worker-tools/middleware': 0.1.0-pre.19
-      '@worker-tools/resolvable-promise': 0.2.0-pre.5
+      '@worker-tools/middleware': 0.1.0-pre.24
       '@worker-tools/response-creators': 1.2.0-pre.5
     dev: false
 
@@ -967,6 +967,11 @@ packages:
   /base64-arraybuffer-es6/0.7.0:
     resolution: {integrity: sha512-ESyU/U1CFZDJUdr+neHRhNozeCv72Y7Vm0m1DCbjX3KBjT6eYocvAJlSk6+8+HkVwXlT1FNxhGW6q3UKAlCvvw==}
     engines: {node: '>=6.0.0'}
+    dev: false
+
+  /base64-arraybuffer-es6/1.0.0:
+    resolution: {integrity: sha512-cPau+CwFZLR/HeQrOCWhbmGcUiyfl8kvnKoazNX9zW/Tn7nKJCRe9Vfz2qOEf/rODgCTCvvCXMf0acV8vB0uOw==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: false
 
   /base64-encoding/0.14.3:
@@ -1461,6 +1466,10 @@ packages:
     resolution: {integrity: sha1-nbHb0Pr43m++D13V5Wu2BigN5ps=}
     dev: false
 
+  /immer/9.0.14:
+    resolution: {integrity: sha512-ubBeqQutOSLIFCUBN03jGeOS6a3DoYlSYwYJTa+gSKEZKU5redJIqkIdZ3JVv/4RZpfcXdAWH5zCNLWPRv2WDw==}
+    dev: false
+
   /inflight/1.0.6:
     resolution: {integrity: sha1-Sb1jMdfQLQwJvJEKEHW6gWW1bfk=}
     dependencies:
@@ -1902,6 +1911,13 @@ packages:
       punycode: 2.1.1
     dev: false
 
+  /tr46/3.0.0:
+    resolution: {integrity: sha512-l7FvfAHlcmulp8kr+flpQZmVwtu7nfRV7NZujtN0OqES8EL4O4e0qqzL0DC5gAvx/ZC/9lk6rhcUwYvkBnBnYA==}
+    engines: {node: '>=12'}
+    dependencies:
+      punycode: 2.1.1
+    dev: false
+
   /ts-functional-pipe/3.1.2:
     resolution: {integrity: sha512-3Zmj39yTFtzrwrLn5ifQKHmUQQ6uh7+NUVUZ2hsBgeF2JzwkmlVErbxoktNA20E4lmbEJK8NEoEZOrETLRiWzw==}
     engines: {node: '>=6.0.0'}
@@ -1917,8 +1933,8 @@ packages:
     resolution: {integrity: sha512-xq2oNAgDAZKsmzu7KQXDe9cLKiOYZn+6h5VMzcg1BmiiGPlCxMu1mh+tiWzydfIFGdNBs8/WS78ZPkTdHhnxlg==}
     dev: false
 
-  /typescript/4.6.4:
-    resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
+  /typescript/4.7.2:
+    resolution: {integrity: sha512-Mamb1iX2FDUpcTRzltPxgWMKy3fhg0TN378ylbktPGPK/99KbDtMQ4W1hwgsbPAsG3a0xKa1vmw4VKZQbkvz5A==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
@@ -1932,6 +1948,15 @@ packages:
       whatwg-url: 8.7.0
     dev: false
 
+  /typeson-registry/3.0.0:
+    resolution: {integrity: sha512-xPBsm6LhQnU2HOQq1770MjbtIXMd7s7Q7VWFyexe9hRVSIvx+PXPXh/Snh2+HgT6fffxAADVHIBCSjrVrsbrhw==}
+    engines: {node: ^14.17.0 || >=16.0.0}
+    dependencies:
+      base64-arraybuffer-es6: 1.0.0
+      typeson: 7.0.2
+      whatwg-url: 11.0.0
+    dev: false
+
   /typeson/5.18.2:
     resolution: {integrity: sha512-Vetd+OGX05P4qHyHiSLdHZ5Z5GuQDrHHwSdjkqho9NSCYVSLSfRMjklD/unpHH8tXBR9Z/R05rwJSuMpMFrdsw==}
     engines: {node: '>=0.1.14'}
@@ -1943,6 +1968,11 @@ packages:
   /typeson/6.1.0:
     resolution: {integrity: sha512-6FTtyGr8ldU0pfbvW/eOZrEtEkczHRUtduBnA90Jh9kMPCiFNnXIon3vF41N0S4tV1HHQt4Hk1j4srpESziCaA==}
     engines: {node: '>=0.1.14'}
+    dev: false
+
+  /typeson/7.0.2:
+    resolution: {integrity: sha512-Rc/BXqUq+pgAc9D3Na+A2iiTlenfzZW9VA2H9DzpYWKOqUMwUaLyu6OQWXCIEiFs1AQ6Fssbed1/subMY/cEag==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: false
 
   /uhyphen/0.1.0:
@@ -1969,8 +1999,8 @@ packages:
       typed-array-utils: 0.2.2
     dev: false
 
-  /uuid-class/0.13.0-alpha.0:
-    resolution: {integrity: sha512-RIjnc3V/nTdHp9NU9yaCBpLUF6HaNH+Zm/f6HGLJL/mJlrL6mfrcPIOkM8mktX/6hZlyCQ6OhfLH7YX4GNXfig==}
+  /uuid-class/0.13.0-alpha.1:
+    resolution: {integrity: sha512-uQ2ob9j0ybtr914d6Gh+TgQjtFnn4amJMP5mOJ9y69AbA9KKqK0RANjDOsTuonDffXKW7BlXSMvi+tOytY0WZw==}
     dependencies:
       typed-array-utils: 0.2.2
     dev: false
@@ -1980,6 +2010,13 @@ packages:
     engines: {node: '>= 8'}
     dev: false
 
+  /web-uuid/0.1.0-pre.1:
+    resolution: {integrity: sha512-uvN0C9rJ9rn2T3xu8AxbTpsPe+MVb9klspbzxRCPpkLaiYs8pPPLeUiLbUv1v8AJowk+owBeBpqu4+uAuDvNTQ==}
+    dependencies:
+      base64-encoding: 0.15.0-alpha.0
+      uuid-class: 0.13.0-alpha.1
+    dev: false
+
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=}
     dev: false
@@ -1987,6 +2024,11 @@ packages:
   /webidl-conversions/6.1.0:
     resolution: {integrity: sha512-qBIvFLGiBpLjfwmYAaHPXsn+ho5xZnGvyGvsarywGNc8VyQJUMHJ8OBKGGrPER0okBeMDaan4mNBlgBROxuI8w==}
     engines: {node: '>=10.4'}
+    dev: false
+
+  /webidl-conversions/7.0.0:
+    resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
+    engines: {node: '>=12'}
     dev: false
 
   /websocket-driver/0.7.4:
@@ -2011,6 +2053,14 @@ packages:
     resolution: {integrity: sha512-ocSOY/Qe/Y5rLC3Xnz6gi8+A9niy+dUQSjnox/nRryKkV/NahxyspB/joyhYLBbQp1JAFrTBOVd/RUo0NrZ96g==}
     dependencies:
       tslib: 2.4.0
+    dev: false
+
+  /whatwg-url/11.0.0:
+    resolution: {integrity: sha512-RKT8HExMpoYx4igMiVMY83lN6UeITKJlBQ+vR/8ZJ8OCdSiN3RwCq+9gH0+Xzj0+5IrM6i4j/6LuvzbZIQgEcQ==}
+    engines: {node: '>=12'}
+    dependencies:
+      tr46: 3.0.0
+      webidl-conversions: 7.0.0
     dev: false
 
   /whatwg-url/5.0.0:
