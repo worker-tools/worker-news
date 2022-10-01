@@ -30,18 +30,20 @@ export type AwaitedValuesIn<Type, In extends keyof Type = never> = ExpandRecursi
   [Prop in keyof Type]: Prop extends In ? Awaited<Type[Prop]> : Type[Prop];
 }>
 
+type Rec = Record<string, unknown>;
+
 /**
  * Lifts all direct properties of `obj` that are promises to the parent. 
  * @deprecated Change name
  */
-export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
-  obj: Type, opts: { include?: In[] },
-): Promise<AwaitedValuesIn<Type, In>>;
-export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
-  obj: Type, opts: { exclude?: Ex[] },
-): Promise<AwaitedValuesEx<Type, Ex>>;
-export async function liftAsync<Type, In extends keyof Type = never, Ex extends keyof Type = never>(
-  obj: Type, { include, exclude }: { include?: In[], exclude?: Ex[] } = {}
+export async function liftAsync<T extends Rec, In extends keyof T = never, Ex extends keyof T = never>(
+  obj: T, opts: { include?: In[] },
+): Promise<AwaitedValuesIn<T, In>>;
+export async function liftAsync<T extends Rec, In extends keyof T = never, Ex extends keyof T = never>(
+  obj: T, opts: { exclude?: Ex[] },
+): Promise<AwaitedValuesEx<T, Ex>>;
+export async function liftAsync<T extends Rec, In extends keyof T = never, Ex extends keyof T = never>(
+  obj: T, { include, exclude }: { include?: In[], exclude?: Ex[] } = {}
 ): Promise<any> {
   if (exclude && include) throw TypeError('Can\'t be include and exclude keys at the same time');
   if (exclude) {

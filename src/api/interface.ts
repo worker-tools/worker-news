@@ -1,5 +1,5 @@
 import { Awaitable } from "@worker-tools/router";
-import { ForOfAwaitable } from "whatwg-stream-to-async-iter";
+import { ForAwaitable } from "whatwg-stream-to-async-iter";
 
 export enum Stories {
   TOP = 'news',
@@ -17,13 +17,13 @@ export enum Stories {
 
 export type StoriesParams = { p?: number, n?: number, next?: number, id?: string, site?: string };
 export type StoriesData = { 
-  items: ForOfAwaitable<APost>, 
+  items: ForAwaitable<APost>, 
   moreLink: Awaitable<string> 
   fromCache?: boolean,
   fromCacheDate?: Date,
 }
 export type ThreadsData = { 
-  items: ForOfAwaitable<AComment>, 
+  items: ForAwaitable<AComment>, 
   moreLink: Awaitable<string> 
   fromCacheDate?: Date,
 }
@@ -47,8 +47,8 @@ export interface AThing {
   id: number,
   by: string,
   time?: number | string | Date,
-  kids?: ForOfAwaitable<AComment>,
-  parts?: ForOfAwaitable<APollOpt>,
+  kids?: ForAwaitable<AComment>,
+  parts?: ForAwaitable<APollOpt>,
   dead?: boolean,
   deleted?: boolean,
 }

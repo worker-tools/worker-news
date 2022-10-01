@@ -4,7 +4,7 @@ import { notFound, ok } from "@worker-tools/response-creators";
 import { JSONStreamResponse, jsonStringifyGenerator } from '@worker-tools/json-stream';
 import { renderIconSVG } from "@qwtel/blockies";
 import { formatDistanceToNowStrict } from 'date-fns';
-import { asyncIterableToStream, ForOfAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
+import { asyncIterableToStream, ForAwaitable } from "whatwg-stream-to-async-iter"; // FIXME
 import { StreamResponse } from "@worker-tools/stream-response";
 
 import { mw, RouteArgs, router } from "../router.ts";
@@ -80,7 +80,7 @@ export const commentEl = (comment: AComment, commOpts: CommOpts = {}) => {
 
 const timeout = (n?: number) => new Promise(res => setTimeout(res, n))
 
-export async function* commentTree(kids: ForOfAwaitable<AComment>, parent: { dead: boolean }): AsyncGenerator<HTMLContent> {
+export async function* commentTree(kids: ForAwaitable<AComment>, parent: { dead: boolean }): AsyncGenerator<HTMLContent> {
   for await (const item of kids) {
     yield commentEl(item, { showReply: !parent.dead });
     if (item.kids) yield* commentTree(item.kids, parent);
@@ -97,7 +97,7 @@ export const pollOptEl = (opt: APollOpt) => {
     <tr style="height:7px"></tr>`;
 }
 
-async function* pollOptList(parts: ForOfAwaitable<APollOpt>): AsyncIterable<HTMLContent> {
+async function* pollOptList(parts: ForAwaitable<APollOpt>): AsyncIterable<HTMLContent> {
   yield html`<tr style="height:10px"></tr>
     <tr>
       <td colspan="2"></td>
