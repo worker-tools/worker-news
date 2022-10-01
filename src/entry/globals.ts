@@ -20,6 +20,10 @@ declare global {
     ): Promise<Response | undefined>;
   }
 
+  interface CacheQueryOptions {
+    cacheControl: string
+  }
+
   interface Cache {
     keys(): Promise<string[]>
   }

@@ -16,7 +16,7 @@ router.get('/', mw, (req, x) => news(x))
 if (!SW) router.get('/app.webmanifest', manifestHandler)
 
 router.get('*', caching({ 
-  cacheControl: 'public', 
+  public: true,
   maxAge: 60 * 60 * 24 * 30 * 12 
 }), assets.handler)
 
