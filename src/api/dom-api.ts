@@ -55,21 +55,21 @@ function storiesGenerator(response: Response): Promise<StoriesData> {
         post = { id, title: '', score: 0, by: '', descendants: 0, story: post?.story };
       }
     })
-    .on('.athing[id] > .title > a.titlelink', {
+    .on('.athing[id] .titleline > a', {
       element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
       text({ text }) { post.title += text },
     })
     // // FIXME: concatenate text before parseInt jtbs..
-    .on('.subtext > .score', {
+    .on('.subtext .subline .score', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.score = parseInt(text, 10) }
     })
-    .on('.subtext > .hnuser', {
+    .on('.subtext .subline .hnuser', {
       text({ text }) { post.by += text }
     })
-    .on('.subtext > .age[title]', {
+    .on('.subtext .subline .age[title]', {
       element(el) { post.time = elToDate(el) }
     })
-    .on('.subtext > a[href^=item]', {
+    .on('.subtext .subline a[href^=item]', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
     .on('.morelink[href]', {
@@ -178,21 +178,21 @@ async function commentsGenerator(response: Response) {
     .on('.fatitem > .athing[id]', {
       element(el) { post.id = Number(el.getAttribute('id')) },
     })
-    .on('.fatitem > .athing[id] > .title > a.titlelink', {
+    .on('.fatitem > .athing[id] .title .titleline > a', {
       element(link) { post.url = unescape(link.getAttribute('href') ?? '') },
       text({ text }) { post.title += text }
     })
     // FIXME: concatenate text before parseInt jtbs..
-    .on('.fatitem .subtext > .score', {
+    .on('.fatitem .subtext .score', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.score = parseInt(text, 10) }
     })
-    .on('.fatitem .subtext > .hnuser', {
+    .on('.fatitem .subline .hnuser', {
       text({ text }) { post.by += text }
     })
-    .on('.fatitem .subtext > .age[title]', {
+    .on('.fatitem .subline .age[title]', {
       element(el) { post.time = elToDate(el) }
     })
-    .on('.fatitem .subtext > a[href^=item]', {
+    .on('.fatitem .subline > a[href^=item]', {
       text({ text }) { if (text?.trimStart().match(/^\d/)) post.descendants = parseInt(text, 10) }
     })
     .on('.fatitem > tr:nth-child(4) > td:nth-child(2)', {
