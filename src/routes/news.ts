@@ -13,7 +13,7 @@ import { cachedWarning, del, favicon, identicon, pageLayout } from './components
 import { api, APost, Stories, StoriesParams, StoriesData } from '../api/index.ts'
 import { StreamResponse } from "@worker-tools/stream-response";
 
-// For some sites (which?) HN shows the subdomain. Here's are some that I've discovered...
+// For some sites (which?) HN shows the subdomain. Here are some that I've discovered...
 const SUB_SITES = [
   'github.io', 
   'gitlab.io', 
@@ -34,16 +34,15 @@ const SUB_SITES = [
   'blogspot.com', 
   'posthaven.com',
   'twitter.com',
-]
+] as const;
 
 // Sites that are like GitHub, where HN shows the first path segment after the domain, e.g. github.com/qwtel
-const GIT_SITES = ['github.com', 'gitlab.com', 'twitter.com', 'vercel.app', 'bitbucket.org'];
+const GIT_SITES = ['github.com', 'gitlab.com', 'twitter.com', 'vercel.app', 'bitbucket.org'] as const;
 
 // Sites that are like Forbes, where HN shows two path segment after the domain
-const FORBES_SITES = ['www.forbes.com']
+const FORBES_SITES = ['www.forbes.com'] as const
 
-// const at = <T>(xs: T[], i: number) => i >= 0 ? xs[i] : xs[xs.length + i]
-
+// HACK: Sends a whitespace character immediately to let the frontend know that the backend has responded.
 export async function* fastTTFB(iter: AsyncIterable<string>) {
   yield ' '
   yield* iter;
@@ -59,9 +58,9 @@ const tryURL = (href: string): (URL & { sitebit?: string }) | null => {
         ? subDomains.slice(subDomains.length - 1).concat('').join('.')
         : ''
 
-      const allowedPathname = GIT_SITES.includes(url.hostname)
+      const allowedPathname = GIT_SITES.includes(url.hostname as any)
         ? url.pathname.split(/\/+/).slice(0, 2).join('/').toLowerCase()
-        : FORBES_SITES.includes(url.hostname) 
+        : FORBES_SITES.includes(url.hostname as any) 
           ? url.pathname.split(/\/+/).slice(0, 3).join('/').toLowerCase()
           : '';
 

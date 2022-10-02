@@ -7,6 +7,10 @@ import { Awaitable } from "../vendor/common-types.ts";
 
 type APIFn = <T>(path: string) => Promise<T>;
 
+type RESTPost = Omit<APost, 'kids'> & { kids?: number[], time: number }
+type RESTComment = Omit<AComment, 'kids'> & { kids?: number[], time: number, priority: number }
+type RESTUser = AUser;
+
 const CONCURRENCY = 32;
 
 const PAGE = 30;
@@ -23,13 +27,16 @@ const storiesToPaths = {
   [Stories.CLASSIC]: '',
   [Stories.FROM]: '',
   [Stories.OFFLINE]: '',
-};
+} as const;
 
 export function stories(api: APIFn, params: StoriesParams, type = Stories.TOP): Awaitable<StoriesData> {
   const { p } = params;
   const page = Math.max(1, p || 1);
   const href = storiesToPaths[type];
-  if (href === '') return domAPI.stories(params, type)
+
+  // If empty string, page doesn't have a REST/Firebase API, scaping HN web instead...
+  if (href === '') 
+    return domAPI.stories(params, type)
 
   return {
     items: storiesGenerator(api, href, page),
@@ -52,10 +59,6 @@ export async function* storiesGenerator(api: APIFn, href: string, page: number) 
   }
 }
 
-type RESTPost = Omit<APost, 'kids'> & { kids?: number[], time: number }
-type RESTComment = Omit<AComment, 'kids'> & { kids?: number[], time: number, priority: number }
-type RESTUser = AUser;
-
 async function commentTask(
   api: APIFn, 
   id: number,
@@ -72,7 +75,7 @@ async function commentTask(
   for (const [i, kidId] of kids.entries()) {
     results.set(kidId, new ResolvablePromise());
     // HACK: Calculating a priority so that replies to top comments get moved to the front of the queue.
-    //       Further, top relies to top relies get higher priority than then the second rely to the top reply, etc.
+    //       Further, top relies to top relies get higher priority than then the second reply to the top reply, etc.
     //       If you're familiar with HN-style comment trees, this should make sense. Otherwise probably not.
     //       It works by partitioning the real number line and increasingly "zooming in".
     //       I have no proof that this does the correct thing (it probably doesn't), but it's close enough...
@@ -91,7 +94,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
       yield {
         ...rest,
         level,
-        quality: item.deleted ? Quality.default: item.dead ? Quality.cdd : Quality.c00, // REST API doesn't support quality..
+        quality: item.deleted ? Quality.default: item.dead ? Quality.F : Quality.AAA, // REST API doesn't support quality..
         text: text && await blockquotify('<p>' + text),
         time: new Date(item.time * 1000),
       }
@@ -100,6 +103,7 @@ async function* crawlCommentTree(kids: number[], dict: Map<number, ResolvablePro
   }
 }
 
+/** Takes an iterable and returns an iterator that does not stop the iteration at the end of a for-of loop. */
 function unclosed<T>(iterable: AsyncIterable<T>): AsyncIterableIterator<T> {
   const iterator = iterable[Symbol.asyncIterator]();
   return { 
@@ -115,11 +119,13 @@ class Paginator {
   #total;
   #page;
   #more = new ResolvablePromise<IteratorResult<AComment>>();
+
   constructor(iterable: AsyncIterableIterator<AComment>, total: number, page = 1) {
     this.#iterable = iterable;
     this.#total = total;
     this.#page = page;
   }
+
   async *[Symbol.asyncIterator]() {
     const iterable = this.#iterable;
     const total = this.#total;
@@ -201,7 +207,7 @@ export async function comments(api: APIFn, id: number, p = 1): Promise<APost> {
     by: post.by ?? '',
     descendants: post.descendants ?? NaN,
     text,
-    quality: post.deleted ? Quality.default : post.dead ? Quality.cdd : Quality.c00,
+    quality: post.deleted ? Quality.default : post.dead ? Quality.F : Quality.AAA,
     deleted: post.deleted ?? false,
     dead: post.dead ?? false,
     id: post.id ?? null,
@@ -216,13 +222,13 @@ export async function comments(api: APIFn, id: number, p = 1): Promise<APost> {
 
 export async function user(api: APIFn, id: string): Promise<AUser> {
   const { about, ...user }: RESTUser = await api(`/v0/user/${id}`);
-  // console.log(about, user)
   return {
     ...user,
     ...about ? { about: await blockquotify('<p>' + about) } : {},
   };
 }
 
-export function threads(api: APIFn, id: string, next?: number): Promise<ThreadsData> {
+export function threads(_api: APIFn, id: string, next?: number): Promise<ThreadsData> {
+  // Has no REST/Firebase equivalent, scraping web page instead...
   return domAPI.threads(id, next);
 }

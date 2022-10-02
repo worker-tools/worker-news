@@ -1,17 +1,16 @@
 import type { Awaitable } from './common-types.ts'
 
 /** Force intellisense to expand the typing to hide merging typings */
-type ExpandRecursively<T> = T extends Record<PropertyKey, unknown>
+export type ExpandRecursively<T> = T extends Record<PropertyKey, unknown>
   ? T extends infer O ? { [K in keyof O]: ExpandRecursively<O[K]> } : never
   : T;
 
 /**
  * Takes a record `T` and for all its keys `K` turns the corresponding values into `Promise<T[K]>`.
-//  * @deprecated Change name
  */
 // FIXME: better way to retain readonly and optional modifiers!???
-export type PromisedIn<Type, In extends keyof Type = never> = ExpandRecursively<{
-  [Property in keyof Type]: Property extends In ? Awaitable<Type[Property]> : Type[Property]
+export type PromisedIn<T, In extends keyof T = never> = ExpandRecursively<{
+  [Property in keyof T]: Property extends In ? Awaitable<T[Property]> : T[Property]
 }>
 
 export type PromisedEx<Type, Ex extends keyof Type = never> = ExpandRecursively<{
@@ -20,11 +19,10 @@ export type PromisedEx<Type, Ex extends keyof Type = never> = ExpandRecursively<
 
 /**
  * Inverse of `PromisedValues`. Takes a record `T` and for its keys `K` turns the corresponding values into `Awaited<T[K]>`
-//  * @deprecated Change name
  */
 // FIXME: better way to retain readonly and optional modifiers!???
-export type AwaitedValuesEx<Type, Ex extends keyof Type = never> = ExpandRecursively<{
-  [Prop in keyof Type]: Prop extends Ex ? Type[Prop] : Awaited<Type[Prop]>
+export type AwaitedValuesEx<T, Ex extends keyof T = never> = ExpandRecursively<{
+  [Prop in keyof T]: Prop extends Ex ? T[Prop] : Awaited<T[Prop]>
 }>
 export type AwaitedValuesIn<Type, In extends keyof Type = never> = ExpandRecursively<{
   [Prop in keyof Type]: Prop extends In ? Awaited<Type[Prop]> : Type[Prop];
@@ -34,6 +32,10 @@ type Rec = Record<string, unknown>;
 
 /**
  * Lifts all direct properties of `obj` that are promises to the parent. 
+ * E.g. 
+ * ```
+ * { foo: Promise<"bar"> } => Promise<{ foo: "bar" }>
+ * ```
  * @deprecated Change name
  */
 export async function liftAsync<T extends Rec, In extends keyof T = never, Ex extends keyof T = never>(

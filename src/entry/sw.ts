@@ -1,9 +1,6 @@
 import './globals.ts'
 import 'urlpattern-polyfill'
 
-// import './streams-polyfill'
-// import './html-rewriter-polyfill'
-
 import './sw-def.ts'
 
 import { router } from '../routes/index.ts';

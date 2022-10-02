@@ -29,18 +29,18 @@ export type ThreadsData = {
 }
 
 export enum Quality {
-  c00 = 'c00',
-  c5a = 'c5a',
-  c73 = 'c73',
-  c82 = 'c82',
-  c88 = 'c88',
-  c9c = 'c9c',
-  cae = 'cae',
-  cbe = 'cbe',
-  cce = 'cce',
-  cdd = 'cdd',
+  AAA = 'c00',
+  AA = 'c5a',
+  A = 'c73',
+  BBB = 'c82',
+  BB = 'c88',
+  B = 'c9c',
+  C = 'cae',
+  D = 'cbe',
+  E = 'cce',
+  F = 'cdd',
   default = '',
-}
+};
 
 export interface AThing {
   type: Type,

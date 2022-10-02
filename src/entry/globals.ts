@@ -26,6 +26,7 @@ declare global {
 
   interface Cache {
     keys(): Promise<string[]>
+    addAll(requests: (string|Request)[]): Promise<void>
   }
 }
 
