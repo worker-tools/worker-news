@@ -17,7 +17,9 @@ if (!SW) router.get('/app.webmanifest', manifestHandler)
 
 router.get('/paste', mw, (req, x) => {
   const u = new URL(x.searchParams.get('q') || "", location.origin);
-  return seeOther(u.pathname + u.search);
+  u.protocol = location.protocol;
+  u.host = location.host;
+  return permanentRedirect(u.href);
 });
 
 router.get('*', caching({ 

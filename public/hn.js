@@ -165,5 +165,6 @@ function popitup(el, ev, width, height) {
 
 function submitit(el, ev) {
   var q = ev.clipboardData.getData("text/plain");
-  location.assign('paste?q='+q);
+  el.value = q;
+  el.form.submit();
 }

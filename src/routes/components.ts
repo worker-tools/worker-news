@@ -79,8 +79,8 @@ export const headerEl = ({ op, id, p = 1 }: {
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
-                <form style="display:inline" method="get" action="/paste">
-                  <input onpaste="submitit(this,event)" placeholder="Open HN Link" type="url" name="q" size="17" 
+                <form style="display:inline" method="get" action="paste">
+                  <input onpaste="submitit(this,event)" placeholder="Open HN Link" type="url" name="q" size="15" 
                     autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="off">
                 </form>
                 <script></script>
@@ -174,7 +174,7 @@ export const pageLayout = ({ title, op, id, p, headers }: {
         </tbody>
       </table>
     </center>
-    <script type="text/javascript" src="hn.js?v=23"></script>
+    <script type="text/javascript" src="hn.js?v=25"></script>
     ${location.hostname === 'news.workers.tools' 
       ? html`<script defer data-domain="news.workers.tools" src="https://plausible.io/js/plausible.js"></script>` 
       : ''}
