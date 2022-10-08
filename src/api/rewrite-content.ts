@@ -4,6 +4,8 @@ import { location } from '../location.ts'
 const TEXT_NODE = 3;
 const SHOW_TEXT = 4;
 
+const HN_LINK = /https?:\/\/news.ycombinator.com/;
+
 type TreeWalker = any;
 type Node = any;
 
@@ -14,14 +16,11 @@ export function* treeWalkerToIter(walker: TreeWalker): IterableIterator<Node> {
 // Primitive support for 
 // Problem: item?id=26520957, item?id=30283264
 export function blockquotify(text: string) {
-  const { protocol, host } = location;
-
   const doc = new DOMParser().parseFromString(text, 'text/html')
   let match;
   for (const p of doc.querySelectorAll('p')) {
     for (const a of p.querySelectorAll('a[href^="http://news.ycombinator.com"], a[href^="https://news.ycombinator.com"]')) {
-      const href = a.getAttribute('href')!
-        .replace(/https?:\/\/news.ycombinator.com/g, `${protocol}//${host}`);
+      const href = a.getAttribute('href')!.replace(HN_LINK, `${location.protocol}//${location.host}`);
       a.setAttribute('href', href)
     }
 

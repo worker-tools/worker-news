@@ -162,3 +162,8 @@ function popitup(el, ev, width, height) {
     return false;
   }
 }
+
+function submitit(el, ev) {
+  var q = ev.clipboardData.getData("text/plain");
+  location.assign('paste?q='+q);
+}

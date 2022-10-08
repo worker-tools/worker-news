@@ -79,6 +79,11 @@ export const headerEl = ({ op, id, p = 1 }: {
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
+                <form style="display:inline" method="get" action="/paste">
+                  <input onpaste="submitit(this,event)" placeholder="Open HN Link" type="url" name="q" size="17" 
+                    autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="off">
+                </form>
+                <script></script>
                 ${/*session?.user 
                   ? html`<a id="me" href="user?id=${session.user}">${session.user}</a> 
                       ${apiUser(session.user).then(x => `(${x.karma})`)}
@@ -116,7 +121,7 @@ export const footerEl = () => html`
           | <a href="mailto:hn@ycombinator.com">Contact YC</a></span><br/><br/>
         <form method="get" action="//hn.algolia.com/">Search:
           <input type="text" name="q" value="" size="17" autocorrect="off" spellcheck="false" autocapitalize="off"
-            autocomplete="false">
+            autocomplete="off">
         </form>
       </center>
     </td>
