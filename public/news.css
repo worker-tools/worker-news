@@ -37,8 +37,7 @@
   --cce: #cecece;
   --cdd: #dddddd;
 
-  --color-from: var(--orange);
-  --color-to: var(--yellow);
+  --titlebar-color: #ee9b33;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -62,8 +61,7 @@
     --cce: hsl(var(--blue-h), var(--blue-s), 26%);
     --cdd: hsl(var(--blue-h), var(--blue-s), 21%);
 
-    --color-from: var(--accent);
-    --color-to: var(--accent);
+    --titlebar-color: var(--accent);
   }
 
   :root input[type="text"],
@@ -91,8 +89,8 @@ a:link    { color:var(--text-strong); text-decoration:none; }
 a:visited { color:var(--text); text-decoration:none; }
 
 #hnmain  { background-color: var(--background); width:85% }
-#header  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
-#border  { background: linear-gradient(to right, var(--color-from), var(--color-to)); }
+#header  { background: var(--titlebar-color); }
+#border  { background: var(--titlebar-color); }
 
 .default { font-family:var(--font); font-size: 10pt; color:var(--text); }
 .admin   { font-family:var(--font); font-size:8.5pt; color:var(--text-strong); }
@@ -273,8 +271,23 @@ and (max-width : 750px) {
 .about { overflow:hidden; }
 .about > p:first-child { margin-top: 0 }
 
-@media only screen and (display-mode: minimal-ui) {
+@media (display-mode: standalone), (display-mode: window-controls-overlay) {
+  #back, #reload { display: inline!important; }
   body { padding: 0; margin: 0; }
   #hnmain { width:100% }
   #header { position: sticky; top: 0; z-index: 2; padding: 0 5px }
+}
+
+@media (display-mode: window-controls-overlay) {
+  #header {
+    height: env(titlebar-area-height); 
+    padding-left: env(titlebar-area-x);
+    padding-right: calc(100vw - env(titlebar-area-width) - env(titlebar-area-x) - 9px);
+    -webkit-app-region: drag;
+    app-region: drag;
+  }
+  .pagetop, a[href$="workers.tools"] {
+    -webkit-app-region: no-drag;
+    app-region: no-drag;
+  }
 }

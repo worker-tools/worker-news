@@ -19,7 +19,7 @@ self.addEventListener('install', async (event: any) => {
     '/grayarrow2x.gif',
     '/hn.js?v=25',
     '/new.png',
-    '/news.css?v=23',
+    '/news.css?v=25',
     '/s.gif',
     '/y18.png',
     '/y18.gif',

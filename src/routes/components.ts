@@ -42,10 +42,6 @@ export const headerEl = ({ op, id, p = 1 }: {
       <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding:2px">
         <tbody>
           <tr>
-            ${false ? html`<td style="width:80px;padding-right:10px"><span class="pagetop btns">
-              <button onclick="window.history.back();this.disabled=true">←</button>
-              <button onclick="window.history.forward();this.disabled=true">→</button>
-            </span></td>` : null}
             <td style="width:18px;padding-right:4px"><a href="https://workers.tools"><picture style="display:block;height:20px"><source 
                   srcset="darky18.png" media="(prefers-color-scheme: dark)"><img
                   src="y18.png" width="18" height="18"
@@ -79,16 +75,17 @@ export const headerEl = ({ op, id, p = 1 }: {
                     : ''}
               </span></td>
             <td style="text-align:right;padding-right:4px;"><span class="pagetop">
-                <form style="display:inline" method="get" action="paste">
-                  <input onpaste="submitit(this,event)" placeholder="Open HN Link" type="url" name="q" size="15" 
-                    autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="off">
-                </form>
-                <script></script>
-                ${/*session?.user 
-                  ? html`<a id="me" href="user?id=${session.user}">${session.user}</a> 
-                      ${apiUser(session.user).then(x => `(${x.karma})`)}
-                      | <a id="logout" href="logout?goto=news">logout</a>`
-                  : html`<a id="login" href="login">login</a>`*/null}
+              <button id="back" title="Back" onclick="history.back()" style="display:none">←</button>
+              <button id="reload" title="Reload" onclick="location.reload()" style="display:none">↻</button>
+              <form style="display:inline" method="get" action="paste">
+                <input onpaste="submitit(this,event)" placeholder="Paste HN Link" type="url" name="q" size="15" 
+                  autocorrect="off" spellcheck="false" autocapitalize="off" autocomplete="off">
+              </form>
+              ${/*session?.user 
+                ? html`<a id="me" href="user?id=${session.user}">${session.user}</a> 
+                    ${apiUser(session.user).then(x => `(${x.karma})`)}
+                    | <a id="logout" href="logout?goto=news">logout</a>`
+                : html`<a id="login" href="login">login</a>`*/null}
             </span></td>
           </tr>
         </tbody>
@@ -127,6 +124,11 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
+const tcLight = '#fff'
+const tcDark = '#101114';
+const appLight = '#ee9b33'
+const appDark = '#373a43';
+
 export const pageLayout = ({ title, op, id, p, headers }: { 
   title?: string, 
   op: Stories | 'item' | 'user' | 'threads', 
@@ -140,27 +142,30 @@ export const pageLayout = ({ title, op, id, p, headers }: {
     <meta charset="UTF-8">
     <meta name="referrer" content="origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="${headers?.get('Sec-CH-Prefers-Color-Scheme') === 'dark' ? '#101114' : '#fff'}">
+    <meta name="theme-color" content="${headers?.get('Sec-CH-Prefers-Color-Scheme') === 'dark' ? tcDark : tcLight}">
     <script>
       var meta = document.head.querySelector('meta[name=theme-color]');
-      var media = window.matchMedia('(prefers-color-scheme:dark)');
-      meta.content = media.matches ? '#101114' : '#fff';
-      media.onchange = function(e) { meta.content = e.matches ? '#101114' : '#fff'; }
+      var mDark = window.matchMedia('(prefers-color-scheme:dark)');
+      var mApp = window.matchMedia('(display-mode:window-controls-overlay)');
+      function getTc() { return mDark.matches ? mApp.matches ? '${appDark}' : '${tcDark}' : mApp.matches ? '${appLight}' : '${tcLight}' }
+      meta.content = getTc()
+      mDark.onchange = function(e) { mDark = e; meta.content = getTc(); }
+      mApp.onchange = function(e) { mApp = e; meta.content = getTc(); }
     </script>
-    <link rel="stylesheet" type="text/css" href="news.css?v=23">
+    <link rel="stylesheet" type="text/css" href="news.css?v=25">
     <link rel="shortcut icon" href="favicon.ico">
     <link rel="manifest" href="app.webmanifest">
     <link rel="alternate" type="application/rss+xml" title="RSS" href="rss">
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {
       if ('serviceWorker' in navigator) {
-        try {
+        /*try {
           const regis = await navigator.serviceWorker.register('/sw.js')
           regis.addEventListener('updatefound', () => { console.log('update found')})
         } catch (err) {
           console.error(err)
-        }
-        // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+        }*/
+        for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
       }
     })()</script>
   </head>

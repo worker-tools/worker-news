@@ -2,7 +2,8 @@
   "name": "Worker News",
   "short_name": "Worker News",
   "start_url": ".",
-  "display": "minimal-ui",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "display": "standalone",
   "description": "A drop-in replacement for Hacker News",
   "background_color": "#fff",
   "color_scheme_dark": {
