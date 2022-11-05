@@ -163,13 +163,13 @@ export const pageLayout = ({ title, op, id, p, headers }: {
     <title>${title ? `${title} | Worker News` : 'Worker News'}</title>
     <script type="module">(async () => {
       if ('serviceWorker' in navigator) {
-        /*try {
+        try {
           const regis = await navigator.serviceWorker.register('/sw.js')
           regis.addEventListener('updatefound', () => { console.log('update found')})
         } catch (err) {
           console.error(err)
-        }*/
-        for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
+        }
+        // for (const reg of await navigator.serviceWorker.getRegistrations()) reg.unregister()
       }
     })()</script>
   </head>
