@@ -124,9 +124,11 @@ export const footerEl = () => html`
     </td>
   </tr>`;
 
-const tcLight = '#fff'
-const tcDark = '#101114';
-const appLight = '#ee9b33'
+const tcLight = '#fff';
+const tcDark = '#101114'; // --blue
+const saLight = '#f6f6ef' // --beige
+const saDark = '#1c1d22'; // --darkest-blue
+const appLight = '#ee9b33';
 const appDark = '#373a43';
 
 export const pageLayout = ({ title, op, id, p, headers }: { 
@@ -147,10 +149,12 @@ export const pageLayout = ({ title, op, id, p, headers }: {
       var meta = document.head.querySelector('meta[name=theme-color]');
       var mDark = window.matchMedia('(prefers-color-scheme:dark)');
       var mApp = window.matchMedia('(display-mode:window-controls-overlay)');
-      function getTc() { return mDark.matches ? mApp.matches ? '${appDark}' : '${tcDark}' : mApp.matches ? '${appLight}' : '${tcLight}' }
-      meta.content = getTc()
-      mDark.onchange = function(e) { mDark = e; meta.content = getTc(); }
-      mApp.onchange = function(e) { mApp = e; meta.content = getTc(); }
+      var mSA = window.matchMedia('(display-mode:standalone)');
+      function getTc() { return mDark.matches ? mApp.matches ? '${appDark}' : mSA.matches ? '${saDark}' : '${tcDark}' : mApp.matches ? '${appLight}' : mSA.matches ? '${saLight}' : '${tcLight}' }
+      meta.content = getTc();
+      mDark.onchange = function(e) { mDark = e; meta.content = getTc() };
+      mApp.onchange = function(e) { mApp = e; meta.content = getTc() };
+      mSA.onchange = function(e) { mSA = e; meta.content = getTc() };
     </script>
     <link rel="stylesheet" type="text/css" href="news.css?v=25">
     <link rel="shortcut icon" href="favicon.ico">
